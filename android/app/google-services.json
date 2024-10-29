@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "704246927124",
+    "project_id": "smart-clothing-app-34e1f",
+    "storage_bucket": "smart-clothing-app-34e1f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:704246927124:android:e6e44a21961362f2e2bc01",
+        "android_client_info": {
+          "package_name": "com.ladysstore.smartclothing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoip1wZFpsl1-P6BXirgPTj418KAleepQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
