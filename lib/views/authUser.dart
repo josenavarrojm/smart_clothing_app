@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:ladys_app/functions/LastPage.dart';
+import 'package:ladys_app/views/loggedUserPage.dart';
 import '../models/user_model.dart';
 
 
@@ -80,6 +82,7 @@ void saveUserToFirestore(BuildContext context) async {
 }
 
 
+
 // Lectura para la verificación de la existencia de usuarios en la base de datos e inicio de sesión
 Future<void> loginUser(BuildContext context, String email, String password) async {
   // Buscar el usuario en Firestore
@@ -102,7 +105,7 @@ Future<void> loginUser(BuildContext context, String email, String password) asyn
           duration: Duration(seconds: 2),
         ),
       );
-      Navigator.pop(context);
+      LoggedUser(context);
 
       // Aquí puedes realizar la navegación o cualquier otra acción después del inicio de sesión
 
@@ -145,6 +148,15 @@ void loginPage(context){
   email = '';
   password = '';
   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginForm())); // Muestra el formulario de inicio de sesión
+}
+
+void LoggedUser(context){
+  saveLastPage('userLoggedHome');
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => const LoggedUserPage()),
+        (Route<dynamic> route) => false, // Aquí false indica que todas las vistas anteriores deben eliminarse
+  );
 }
 
 
