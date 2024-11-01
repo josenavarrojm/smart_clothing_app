@@ -1,10 +1,11 @@
+import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:ladys_app/functions/LastPage.dart';
 import 'package:ladys_app/views/loggedUserPage.dart';
 import '../models/user_model.dart';
+import 'package:flutter/services.dart';
 
 
 String email = '';
@@ -21,12 +22,12 @@ String? selectedUserType;
 String? selectedGender;
 DateTime? selectedDate;
 final TextEditingController _dateController = TextEditingController();
-bool obsTextConfirm = true;
+bool obsTextConfirm = false;
 final _formKey = GlobalKey<FormState>();
 final _formKey2 = GlobalKey<FormState>();
 
-const radiusNormal = 15.0;
-const radiusFocus = 25.0;
+const radiusNormal = 25.0;
+const radiusFocus = 15.0;
 const radiusBtn = 15.0;
 
 FirebaseFirestore db = FirebaseFirestore.instance;
@@ -42,10 +43,17 @@ Future<bool> isEmailInUse(String email) async {
 
 // Creación y registro de usuarios en la base de datos
 void saveUserToFirestore(BuildContext context) async {
+
+  String hashPassword(String password){
+    final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+    return hashedPassword;
+  }
+
+
   // Crear instancia de UserModel a partir de los datos del formulario
   UserModel newUser = UserModel(
     email: email,
-    password: password,
+    hashpwd: hashPassword(password),
     name: name,
     surname: surname,
     age: age,
@@ -85,6 +93,11 @@ void saveUserToFirestore(BuildContext context) async {
 
 // Lectura para la verificación de la existencia de usuarios en la base de datos e inicio de sesión
 Future<void> loginUser(BuildContext context, String email, String password) async {
+
+  bool verifyPassword(String password, String hashedPassword){
+   return BCrypt.checkpw(password, hashedPassword);
+  }
+
   // Buscar el usuario en Firestore
   final QuerySnapshot result = await db
       .collection("users")
@@ -96,9 +109,11 @@ Future<void> loginUser(BuildContext context, String email, String password) asyn
     // Usuario encontrado, comprobar la contraseña
     final userData = result.docs.first.data() as Map<String, dynamic>;
 
+
     // Comprobar si la contraseña coincide
-    if (userData["Password"] == password) {
+    if (verifyPassword(password,userData["Hashpwd"])) {
       // Mostrar SnackBar de éxito
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Inicio de sesión exitoso."),
@@ -151,6 +166,10 @@ void loginPage(context){
 }
 
 void LoggedUser(context){
+  email = '';
+  password = '';
+  loginBtn = false;
+  validEmail = false;
   saveLastPage('userLoggedHome');
   Navigator.pushAndRemoveUntil(
     context,
@@ -176,18 +195,24 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+      ));
+    });
+
+
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              const Color.fromRGBO(0, 0, 255, 1.0),   // Color inicial del gradiente
-              Theme.of(context).scaffoldBackgroundColor,   // Color final del gradiente
+              const Color.fromRGBO(80, 80, 220, 0.40),   // Color inicial del gradiente
+              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),   // Color final del gradiente
             ],
-            stops: const [0.0,0.5],
-            begin: Alignment.bottomCenter, // Comienza en la esquina superior izquierda
-            end: Alignment.topCenter, // Termina en la esquina inferior derecha
+            begin: Alignment.topLeft, // Comienza en la esquina superior izquierda
+            end: Alignment.bottomRight, // Termina en la esquina inferior derecha
           ),
         ),
             child: Column(
@@ -348,6 +373,7 @@ class _LoginForm extends State<LoginForm> {
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   obsTextConfirm ? Icons.visibility : Icons.visibility_off,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -474,7 +500,7 @@ class _RegisterForm extends State<RegisterForm> {
   Widget build(BuildContext context) {
 
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    //double screenHeight = MediaQuery.of(context).size.height;
 
 
     return Scaffold(
@@ -799,7 +825,7 @@ class _RegisterForm extends State<RegisterForm> {
                             ),
                             value: selectedUserType,
                             style: TextStyle(color:Theme.of(context).primaryColor),
-                            items: <String>['Administrador', 'Médico', 'Paciente']
+                            items: <String>['Empleador', 'SGSST', 'Trabajador']
                                 .map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
@@ -815,7 +841,7 @@ class _RegisterForm extends State<RegisterForm> {
                             value == null ? 'Por favor selecciona una opción' : null,
                           ),
                         ),
-                        if (selectedUserType == 'Médico') UserMedic(),
+                        if (selectedUserType == 'SGSST') UserMedic(),
                         Container(
                           padding: EdgeInsets.symmetric(vertical: 15),
                           child: ElevatedButton(
@@ -884,9 +910,10 @@ class UserMedic extends StatelessWidget {
             borderSide: BorderSide(color: Colors.blue, width: 1.5),
             borderRadius: BorderRadius.circular(radiusFocus),
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(radiusNormal),
-          ),
+            enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).primaryColor , width: 0.75),
+                borderRadius: BorderRadius.circular(radiusNormal)
+            )
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {

@@ -1,7 +1,7 @@
 class UserModel {
   final String? id;
   final String email;
-  final String? password;
+  final String? hashpwd;
   final String name;
   final String surname;
   final int age;
@@ -11,7 +11,7 @@ class UserModel {
   const UserModel({
     this.id,
     required this.email,
-    this.password,
+    this.hashpwd,
     required this.name,
     required this.surname,
     required this.age,
@@ -22,7 +22,7 @@ class UserModel {
   Map<String, dynamic> toJson() {
     return {
       "Email": email,
-      "Password": password,
+      "Hashpwd": hashpwd,
       "Name": name,
       "Surname": surname,
       "Age": age,
@@ -35,7 +35,7 @@ class UserModel {
     return UserModel(
       id: json['id'],
       email: json['Email'],
-      password: json['Password'],
+      hashpwd: json['Hashpwd'],
       name: json['Name'],
       surname: json['Surname'],
       age: json['Age'],
