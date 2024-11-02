@@ -1,10 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:ladys_app/views/auth_user.dart';
+import 'package:ladys_app/views/bluetooth_ui.dart';
 
 import '../functions/LastPage.dart';
 import 'home_user_patient.dart';
-
 
 class LoggedUserPage extends StatefulWidget {
   const LoggedUserPage({super.key});
@@ -14,8 +14,6 @@ class LoggedUserPage extends StatefulWidget {
 }
 
 class _LoggedUserPageState extends State<LoggedUserPage> {
-
-
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
 
@@ -28,7 +26,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    // double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -37,29 +35,35 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
       ));
     });
 
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,//Theme.of(context).scaffoldBackgroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(0.0),
-          )
-        ),
+        backgroundColor: Theme.of(context)
+            .scaffoldBackgroundColor, //Theme.of(context).scaffoldBackgroundColor,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(0.0),
+        )),
         elevation: 0.5,
         shadowColor: Colors.grey,
-        title: Text("Smart Clothing", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30, fontWeight: FontWeight.w700),),
+        title: Text(
+          "Smart Clothing",
+          style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontSize: 30,
+              fontWeight: FontWeight.w700),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             color: Colors.blueAccent,
             onPressed: () {
               saveLastPage('Home');
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const AuthSwitcher()),
-                    (Route<dynamic> route) => false, // Aquí false indica que todas las vistas anteriores deben eliminarse
+                (Route<dynamic> route) =>
+                    false, // Aquí false indica que todas las vistas anteriores deben eliminarse
               );
             },
           ),
@@ -75,16 +79,21 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           });
         },
         children: [
-          HomeUserPatient(),
-          Center(child: Text('Página 2: Perfil', style: TextStyle(color: Theme.of(context).primaryColor))),
-          Center(child: Text('Página 3: Detalles', style: TextStyle(color: Theme.of(context).primaryColor))),
-          Center(child: Text('Página 4: Ajustes', style: TextStyle(color: Theme.of(context).primaryColor))),
+          const BlueetoothUI(),
+          const HomeUserPatient(),
+          Center(
+              child: Text('Página 3: Detalles',
+                  style: TextStyle(color: Theme.of(context).primaryColor))),
+          Center(
+              child: Text('Página 4: Ajustes',
+                  style: TextStyle(color: Theme.of(context).primaryColor))),
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Color.fromRGBO(1, 1, 80, 1.0), width: 1))
-        ),
+        decoration: const BoxDecoration(
+            border: Border(
+                top: BorderSide(
+                    color: Color.fromRGBO(1, 1, 80, 1.0), width: 1))),
         height: screenHeight * 0.1,
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
@@ -92,31 +101,36 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor, fontSize: 14),
-          unselectedLabelStyle: TextStyle(foreground: Paint()
-            ..color = Theme.of(context).primaryColor, fontWeight: FontWeight.w400, fontSize: 14),
+          selectedLabelStyle: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).primaryColor,
+              fontSize: 14),
+          unselectedLabelStyle: TextStyle(
+              foreground: Paint()..color = Theme.of(context).primaryColor,
+              fontWeight: FontWeight.w400,
+              fontSize: 14),
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: AnimatedIconContainer(
-                  isSelected: _selectedIndex == 0,
-                  icon: Icons.home,
-                  gradientColors: const [
-                    Color.fromRGBO(100, 120, 120, 0.85),
-                    Color.fromRGBO(150, 170, 170, 0.85),
-                  ],
-                ),
-              label: 'Inicio',
-            ),
-            BottomNavigationBarItem(
-              icon: AnimatedIconContainer(
-                isSelected: _selectedIndex ==  1,
-                icon: Icons.graphic_eq,
+                isSelected: _selectedIndex == 0,
+                icon: Icons.bluetooth,
                 gradientColors: const [
                   Color.fromRGBO(100, 120, 120, 0.85),
                   Color.fromRGBO(150, 170, 170, 0.85),
                 ],
               ),
-              label: 'Detalles',
+              label: 'Bluetooth',
+            ),
+            BottomNavigationBarItem(
+              icon: AnimatedIconContainer(
+                isSelected: _selectedIndex == 1,
+                icon: Icons.home,
+                gradientColors: const [
+                  Color.fromRGBO(100, 120, 120, 0.85),
+                  Color.fromRGBO(150, 170, 170, 0.85),
+                ],
+              ),
+              label: 'Inicio',
             ),
             BottomNavigationBarItem(
               icon: AnimatedIconContainer(
@@ -155,7 +169,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   }
 }
 
-
 class AnimatedIconContainer extends StatelessWidget {
   final bool isSelected;
   final IconData icon;
@@ -164,34 +177,36 @@ class AnimatedIconContainer extends StatelessWidget {
   final EdgeInsets padding;
 
   const AnimatedIconContainer({
-    Key? key,
+    super.key,
     required this.isSelected,
     required this.icon,
     this.duration = const Duration(milliseconds: 200),
     this.gradientColors = const [Colors.transparent, Colors.transparent],
     this.padding = const EdgeInsets.symmetric(horizontal: 0.0, vertical: 3.0),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: duration,
       padding: isSelected
-          ? EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0)
+          ? const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0)
           : padding,
       decoration: BoxDecoration(
-        borderRadius: isSelected ? BorderRadius.circular(15.0) : BorderRadius.circular(0.0),
+        borderRadius: isSelected
+            ? BorderRadius.circular(15.0)
+            : BorderRadius.circular(0.0),
         gradient: isSelected
             ? LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        )
+                colors: gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
             : null,
       ),
       child: Icon(
         icon,
-        color: isSelected ? Colors.white: Theme.of(context).primaryColor,
+        color: isSelected ? Colors.white : Theme.of(context).primaryColor,
       ),
     );
   }

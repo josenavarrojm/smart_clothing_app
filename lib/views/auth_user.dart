@@ -7,7 +7,6 @@ import 'package:ladys_app/views/loggedUserPage.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
 
-
 String email = '';
 String password = '';
 String confirmPassword = '';
@@ -33,22 +32,18 @@ const radiusBtn = 15.0;
 FirebaseFirestore db = FirebaseFirestore.instance;
 
 Future<bool> isEmailInUse(String email) async {
-  final querySnapshot = await db
-      .collection('users')
-      .where('Email', isEqualTo: email)
-      .get();
+  final querySnapshot =
+      await db.collection('users').where('Email', isEqualTo: email).get();
 
   return querySnapshot.docs.isNotEmpty;
 }
 
 // Creación y registro de usuarios en la base de datos
 void saveUserToFirestore(BuildContext context) async {
-
-  String hashPassword(String password){
+  String hashPassword(String password) {
     final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
     return hashedPassword;
   }
-
 
   // Crear instancia de UserModel a partir de los datos del formulario
   UserModel newUser = UserModel(
@@ -71,7 +66,7 @@ void saveUserToFirestore(BuildContext context) async {
       ),
     );
     return; // Terminar la función si el correo ya está en uso
-  }else{
+  } else {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Ya puede iniciar sesión"),
@@ -86,32 +81,28 @@ void saveUserToFirestore(BuildContext context) async {
       .add(newUser.toJson())
       .then((value) => print("Usuario agregado con ID: ${value.id}"))
       .catchError((error) => print("Error al agregar usuario: $error"));
-  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginForm()));
+  Navigator.pushReplacement(
+      context, MaterialPageRoute(builder: (context) => const LoginForm()));
 }
 
-
-
 // Lectura para la verificación de la existencia de usuarios en la base de datos e inicio de sesión
-Future<void> loginUser(BuildContext context, String email, String password) async {
-
-  bool verifyPassword(String password, String hashedPassword){
-   return BCrypt.checkpw(password, hashedPassword);
+Future<void> loginUser(
+    BuildContext context, String email, String password) async {
+  bool verifyPassword(String password, String hashedPassword) {
+    return BCrypt.checkpw(password, hashedPassword);
   }
 
   // Buscar el usuario en Firestore
-  final QuerySnapshot result = await db
-      .collection("users")
-      .where("Email", isEqualTo: email)
-      .get();
+  final QuerySnapshot result =
+      await db.collection("users").where("Email", isEqualTo: email).get();
 
   // Verificar si se encontró algún usuario
   if (result.docs.isNotEmpty) {
     // Usuario encontrado, comprobar la contraseña
     final userData = result.docs.first.data() as Map<String, dynamic>;
 
-
     // Comprobar si la contraseña coincide
-    if (verifyPassword(password,userData["Hashpwd"])) {
+    if (verifyPassword(password, userData["Hashpwd"])) {
       // Mostrar SnackBar de éxito
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -123,11 +114,10 @@ Future<void> loginUser(BuildContext context, String email, String password) asyn
       LoggedUser(context);
 
       // Aquí puedes realizar la navegación o cualquier otra acción después del inicio de sesión
-
     } else {
       // Contraseña incorrecta
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Contraseña incorrecta."),
           duration: Duration(seconds: 2),
         ),
@@ -136,7 +126,7 @@ Future<void> loginUser(BuildContext context, String email, String password) asyn
   } else {
     // No se encontró ningún usuario
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text("No existe un usuario con ese correo."),
         duration: Duration(seconds: 2),
       ),
@@ -144,10 +134,7 @@ Future<void> loginUser(BuildContext context, String email, String password) asyn
   }
 }
 
-
-
-
-void registerPage(context){
+void registerPage(context) {
   registerBtn = false;
   email = '';
   _dateController.clear();
@@ -157,15 +144,24 @@ void registerPage(context){
   password = '';
   confirmPassword = '';
   samePsw = false;
-  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const RegisterForm())); // Muestra el formulario de registro
-}
-void loginPage(context){
-  email = '';
-  password = '';
-  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginForm())); // Muestra el formulario de inicio de sesión
+  Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              const RegisterForm())); // Muestra el formulario de registro
 }
 
-void LoggedUser(context){
+void loginPage(context) {
+  email = '';
+  password = '';
+  Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              const LoginForm())); // Muestra el formulario de inicio de sesión
+}
+
+void LoggedUser(context) {
   email = '';
   password = '';
   loginBtn = false;
@@ -174,10 +170,10 @@ void LoggedUser(context){
   Navigator.pushAndRemoveUntil(
     context,
     MaterialPageRoute(builder: (context) => const LoggedUserPage()),
-        (Route<dynamic> route) => false, // Aquí false indica que todas las vistas anteriores deben eliminarse
+    (Route<dynamic> route) =>
+        false, // Aquí false indica que todas las vistas anteriores deben eliminarse
   );
 }
-
 
 class AuthSwitcher extends StatefulWidget {
   const AuthSwitcher({super.key});
@@ -191,7 +187,6 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
 
   @override
   Widget build(BuildContext context) {
-
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -201,81 +196,103 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
       ));
     });
 
-
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              const Color.fromRGBO(80, 80, 220, 0.40),   // Color inicial del gradiente
-              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),   // Color final del gradiente
+              const Color.fromRGBO(
+                  80, 80, 220, 0.40), // Color inicial del gradiente
+              Theme.of(context)
+                  .scaffoldBackgroundColor
+                  .withOpacity(0.5), // Color final del gradiente
             ],
-            begin: Alignment.topLeft, // Comienza en la esquina superior izquierda
-            end: Alignment.bottomRight, // Termina en la esquina inferior derecha
+            begin:
+                Alignment.topLeft, // Comienza en la esquina superior izquierda
+            end:
+                Alignment.bottomRight, // Termina en la esquina inferior derecha
           ),
         ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Column(
               children: [
-                Column(
-                      children: [
-                       Image.asset('assets/images/ladys_logo.png', width: 200,),
-                        Text('Smarth Clothing', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor, fontSize: 30, letterSpacing: 2))
-                     ],
+                Image.asset(
+                  'assets/images/ladys_logo.png',
+                  width: 200,
                 ),
-                Column(
-                    children: [
-                      Container(
-                        width: screenWidth * 0.85,
-                        height: screenHeight * 0.07,
-                        margin: const EdgeInsets.only(bottom: 10),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            email = '';
-                            password = '';
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginForm()));   // Muestra el formulario de inicio de sesión
-                          },
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(radiusBtn)
-                              )
-                          ),
-                          child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 20),),
-                        ),
-                      ),
-                      Container(
-                        width: screenWidth * 0.85,
-                        height: screenHeight * 0.07,
-                        margin: EdgeInsets.only(top: 10),
-                        child: ElevatedButton(
-                          onPressed:() {
-                            registerBtn = false;
-                            email = '';
-                            _dateController.clear();
-                            selectedDate = null;
-                            selectedUserType = null;
-                            selectedGender = null;
-                            password = '';
-                            confirmPassword = '';
-                            samePsw = false;
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterForm()));   // Muestra el formulario de registro
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(radiusBtn)
-                              )
-                          ),
-                          child: Text('Registrarse', style: TextStyle(fontSize: 20, color: Colors.white),),
-                        ),
-                      )
-                    ],
-                  ),
+                Text('Smarth Clothing',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 30,
+                        letterSpacing: 2))
               ],
             ),
-          ),
+            Column(
+              children: [
+                Container(
+                  width: screenWidth * 0.85,
+                  height: screenHeight * 0.07,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      email = '';
+                      password = '';
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const LoginForm())); // Muestra el formulario de inicio de sesión
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(radiusBtn))),
+                    child: const Text(
+                      'Iniciar Sesión',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: screenWidth * 0.85,
+                  height: screenHeight * 0.07,
+                  margin: const EdgeInsets.only(top: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      registerBtn = false;
+                      email = '';
+                      _dateController.clear();
+                      selectedDate = null;
+                      selectedUserType = null;
+                      selectedGender = null;
+                      password = '';
+                      confirmPassword = '';
+                      samePsw = false;
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const RegisterForm())); // Muestra el formulario de registro
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(radiusBtn))),
+                    child: const Text(
+                      'Registrarse',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -288,10 +305,8 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginForm extends State<LoginForm> {
-
   @override
   Widget build(BuildContext context) {
-
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -304,11 +319,12 @@ class _LoginForm extends State<LoginForm> {
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 5),
-            child: Container( // registro de usuario
+            child: Container(
+              // registro de usuario
               width: screenWidth,
               height: screenHeight * 0.88,
               alignment: Alignment.topCenter,
-              padding: const EdgeInsets.fromLTRB(20, 0, 20,0),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
@@ -317,7 +333,14 @@ class _LoginForm extends State<LoginForm> {
                 children: [
                   Container(
                     margin: const EdgeInsets.symmetric(vertical: 15),
-                    child:Text('Inicio de sesión', textAlign: TextAlign.center,style: TextStyle(fontSize: 35, fontWeight: FontWeight.w800,color: Theme.of(context).primaryColor),),
+                    child: Text(
+                      'Inicio de sesión',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 35,
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(context).primaryColor),
+                    ),
                   ),
                   Form(
                     key: _formKey,
@@ -325,23 +348,31 @@ class _LoginForm extends State<LoginForm> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
-                          child:
-                          TextFormField(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
+                          child: TextFormField(
                             decoration: InputDecoration(
                               labelText: 'Correo electrónico',
-                              labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
+                              labelStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
+                              suffixStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
                               focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                  borderRadius: BorderRadius.circular(radiusFocus)
-                              ),
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: (loginBtn && email == '') ? Colors.red : Theme.of(context).primaryColor , width: 0.75),
-                                    borderRadius: BorderRadius.circular(radiusNormal)
-                                ),
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 1.5),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusFocus)),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: (loginBtn && email == '')
+                                          ? Colors.red
+                                          : Theme.of(context).primaryColor,
+                                      width: 0.75),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusNormal)),
                             ),
-                            style: TextStyle(color: Theme.of(context).primaryColor),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Por favor ingresa tu correo electrónico';
@@ -356,23 +387,33 @@ class _LoginForm extends State<LoginForm> {
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
                               labelText: 'Contraseña',
-                              labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
+                              labelStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
+                              suffixStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
                               focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                  borderRadius: BorderRadius.circular(radiusFocus)
-                              ),
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 1.5),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusFocus)),
                               enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: (loginBtn && email == '') ? Colors.red : Theme.of(context).primaryColor , width: 0.75),
-                                  borderRadius: BorderRadius.circular(radiusNormal)
-                              ),
+                                  borderSide: BorderSide(
+                                      color: (loginBtn && email == '')
+                                          ? Colors.red
+                                          : Theme.of(context).primaryColor,
+                                      width: 0.75),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusNormal)),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obsTextConfirm ? Icons.visibility : Icons.visibility_off,
+                                  obsTextConfirm
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                   color: Theme.of(context).primaryColor,
                                 ),
                                 onPressed: () {
@@ -382,7 +423,8 @@ class _LoginForm extends State<LoginForm> {
                                 },
                               ),
                             ),
-                            style: TextStyle(color: Theme.of(context).primaryColor),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                             obscureText: !obsTextConfirm,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -392,7 +434,9 @@ class _LoginForm extends State<LoginForm> {
                             },
                             onChanged: (value) {
                               password = value;
-                              if (confirmPassword == password && confirmPassword.isNotEmpty && password.isNotEmpty) {
+                              if (confirmPassword == password &&
+                                  confirmPassword.isNotEmpty &&
+                                  password.isNotEmpty) {
                                 samePsw = true;
                               } else {
                                 samePsw = false;
@@ -407,19 +451,27 @@ class _LoginForm extends State<LoginForm> {
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 30.0),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 2.0, horizontal: 30.0),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(radiusBtn))),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusBtn))),
                             onPressed: () {
                               loginBtn = true;
-                              if(loginBtn){
-                                if(email != '' && validEmail && password != ''){
-                                  loginUser(context,email,password);
+                              if (loginBtn) {
+                                if (email != '' &&
+                                    validEmail &&
+                                    password != '') {
+                                  loginUser(context, email, password);
                                 }
                               }
-                              setState((){});
+                              setState(() {});
                             },
-                            child: const Text('Iniciar Sesión', style: TextStyle(color: Colors.white, fontSize: 20),),
+                            child: const Text(
+                              'Iniciar Sesión',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
                           ),
                         ),
                         Row(
@@ -427,16 +479,19 @@ class _LoginForm extends State<LoginForm> {
                           children: [
                             Text(
                               '¿No tienes una cuenta?',
-                              style: TextStyle(fontSize: 18,color: Theme.of(context).primaryColor, fontWeight: FontWeight.w400),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.w400),
                             ),
                             TextButton(
                               onPressed: () {
-                                  registerPage(context);
+                                registerPage(context);
                               },
                               child: const Text(
                                 'Registrarse',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                    fontSize: 18,
                                     color: Colors.lightBlue,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 0.5),
@@ -451,8 +506,7 @@ class _LoginForm extends State<LoginForm> {
               ),
             ),
           ),
-        )
-    );
+        ));
   }
 }
 
@@ -463,13 +517,12 @@ class RegisterForm extends StatefulWidget {
   _RegisterForm createState() => _RegisterForm();
 }
 
-
 class _RegisterForm extends State<RegisterForm> {
-
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 18 * 365)),//.now(),
+      initialDate:
+          DateTime.now().subtract(const Duration(days: 18 * 365)), //.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now().subtract(const Duration(days: 18 * 365)),
     );
@@ -485,7 +538,8 @@ class _RegisterForm extends State<RegisterForm> {
 
         // Ajusta la edad si el cumpleaños de este año aún no ha pasado
         if (currentDate.month < picked.month ||
-            (currentDate.month == picked.month && currentDate.day < picked.day)) {
+            (currentDate.month == picked.month &&
+                currentDate.day < picked.day)) {
           age--;
         }
 
@@ -494,28 +548,25 @@ class _RegisterForm extends State<RegisterForm> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-
     double screenWidth = MediaQuery.of(context).size.width;
     //double screenHeight = MediaQuery.of(context).size.height;
 
-
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Theme.of(context).primaryColor,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          foregroundColor: Theme.of(context).primaryColor,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
             padding: const EdgeInsets.only(bottom: 5),
-            child: Container( // registro de usuario
+            child: Container(
+              // registro de usuario
               width: screenWidth,
               alignment: Alignment.center,
-              padding: const EdgeInsets.fromLTRB(20, 0, 20,0),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
@@ -524,8 +575,15 @@ class _RegisterForm extends State<RegisterForm> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(top: 2,bottom: 20),
-                    child:Text('Registro de Usuario', textAlign: TextAlign.center,style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800,color: Theme.of(context).primaryColor),),
+                    margin: const EdgeInsets.only(top: 2, bottom: 20),
+                    child: Text(
+                      'Registro de Usuario',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(context).primaryColor),
+                    ),
                   ),
                   Form(
                     key: _formKey2,
@@ -533,23 +591,33 @@ class _RegisterForm extends State<RegisterForm> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Container(
-                            margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 5),
                             child: TextFormField(
                               decoration: InputDecoration(
-                                counterStyle: TextStyle(color: Theme.of(context).primaryColorDark),
-                                labelText: 'Nombres',
-                                labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                                suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                    borderRadius: BorderRadius.circular(radiusFocus)
-                                ),
+                                  counterStyle: TextStyle(
+                                      color:
+                                          Theme.of(context).primaryColorDark),
+                                  labelText: 'Nombres',
+                                  labelStyle: TextStyle(
+                                      color: Theme.of(context).primaryColor),
+                                  suffixStyle: TextStyle(
+                                      color: Theme.of(context).primaryColor),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: const BorderSide(
+                                          color: Colors.blue, width: 1.5),
+                                      borderRadius:
+                                          BorderRadius.circular(radiusFocus)),
                                   enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: (registerBtn && name == '') ? Colors.red : Theme.of(context).primaryColor, width: 0.75),
-                                      borderRadius: BorderRadius.circular(radiusNormal)
-                                  )
-                              ),
-                              style: TextStyle(color: Theme.of(context).primaryColor),
+                                      borderSide: BorderSide(
+                                          color: (registerBtn && name == '')
+                                              ? Colors.red
+                                              : Theme.of(context).primaryColor,
+                                          width: 0.75),
+                                      borderRadius:
+                                          BorderRadius.circular(radiusNormal))),
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Por favor ingresa tu nombre';
@@ -560,26 +628,32 @@ class _RegisterForm extends State<RegisterForm> {
                                 name = value;
                                 setState(() {});
                               },
-                            )
-                        ),
+                            )),
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
-                          child:
-                          TextFormField(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
+                          child: TextFormField(
                             decoration: InputDecoration(
-                              labelText: 'Apellidos',
-                              labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                  borderRadius: BorderRadius.circular(radiusFocus)
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: (registerBtn && surname == '') ? Colors.red : Theme.of(context).primaryColor, width: 0.75),
-                                  borderRadius: BorderRadius.circular(radiusNormal)
-                              )
-                            ),
-                            style: TextStyle(color: Theme.of(context).primaryColor),
+                                labelText: 'Apellidos',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                suffixStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.blue, width: 1.5),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusFocus)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: (registerBtn && surname == '')
+                                            ? Colors.red
+                                            : Theme.of(context).primaryColor,
+                                        width: 0.75),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal))),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Por favor ingresa tus apellidos';
@@ -593,31 +667,39 @@ class _RegisterForm extends State<RegisterForm> {
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
-                          child:
-                          TextFormField(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
+                          child: TextFormField(
                             decoration: InputDecoration(
-                              labelText: 'Correo electrónico',
-                              labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                  borderRadius: BorderRadius.circular(radiusFocus)
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: (registerBtn && email == '') || !validEmail ? Colors.red : Theme.of(context).primaryColor , width: 0.75),
-                                  borderRadius: BorderRadius.circular(radiusNormal)
-                              )
-                            ),
-                            style: TextStyle(color: Theme.of(context).primaryColor),
+                                labelText: 'Correo electrónico',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                suffixStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.blue, width: 1.5),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusFocus)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: (registerBtn && email == '') ||
+                                                !validEmail
+                                            ? Colors.red
+                                            : Theme.of(context).primaryColor,
+                                        width: 0.75),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal))),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Por favor ingresa tu correo electrónico';
                               }
                               if (!EmailValidator.validate(value)) {
                                 return 'Por favor ingresa un correo electrónico válido';
-                              }else{
-                                 true;
+                              } else {
+                                true;
                               }
                               return null;
                             },
@@ -629,30 +711,39 @@ class _RegisterForm extends State<RegisterForm> {
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
                               labelText: 'Contraseña',
-                              labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
+                              labelStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
+                              suffixStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
                               focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.blue, width: 1.5),
-                                  borderRadius: BorderRadius.circular(radiusFocus)
-                              ),
-
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 1.5),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusFocus)),
                               enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radiusNormal),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusNormal),
                                   borderSide: BorderSide(
-                                    color: (registerBtn && password == '') ? Colors.red : confirmPassword.isNotEmpty && password.isNotEmpty ? samePsw ?
-                                                    Colors.green :
-                                                  Colors.red :
-                                            Theme.of(context).primaryColor,
+                                    color: (registerBtn && password == '')
+                                        ? Colors.red
+                                        : confirmPassword.isNotEmpty &&
+                                                password.isNotEmpty
+                                            ? samePsw
+                                                ? Colors.green
+                                                : Colors.red
+                                            : Theme.of(context).primaryColor,
                                     width: 0.75,
-                                  )
-                              ),
+                                  )),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obsTextConfirm ? Icons.visibility : Icons.visibility_off,
+                                  obsTextConfirm
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -661,7 +752,8 @@ class _RegisterForm extends State<RegisterForm> {
                                 },
                               ),
                             ),
-                            style: TextStyle(color: Theme.of(context).primaryColor),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                             obscureText: !obsTextConfirm,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -671,7 +763,9 @@ class _RegisterForm extends State<RegisterForm> {
                             },
                             onChanged: (value) {
                               password = value;
-                              if (confirmPassword == password && confirmPassword.isNotEmpty && password.isNotEmpty) {
+                              if (confirmPassword == password &&
+                                  confirmPassword.isNotEmpty &&
+                                  password.isNotEmpty) {
                                 samePsw = true;
                               } else {
                                 samePsw = false;
@@ -681,39 +775,50 @@ class _RegisterForm extends State<RegisterForm> {
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
                               labelText: 'Confirme su contraseña',
-                              labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
+                              labelStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
+                              suffixStyle: TextStyle(
+                                  color: Theme.of(context).primaryColor),
                               focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                  borderRadius: BorderRadius.circular(radiusFocus)
-                              ),
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 1.5),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusFocus)),
                               enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radiusNormal),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusNormal),
                                   borderSide: BorderSide(
-                                    color: (registerBtn && confirmPassword == '') ? Colors.red : confirmPassword.isNotEmpty && password.isNotEmpty ? samePsw ?
-                                    Colors.green :
-                                    Colors.red :
-                                    Theme.of(context).primaryColor,
+                                    color: (registerBtn &&
+                                            confirmPassword == '')
+                                        ? Colors.red
+                                        : confirmPassword.isNotEmpty &&
+                                                password.isNotEmpty
+                                            ? samePsw
+                                                ? Colors.green
+                                                : Colors.red
+                                            : Theme.of(context).primaryColor,
                                     width: 0.75,
-                                  )
-                              ),
+                                  )),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obsTextConfirm ? Icons.visibility : Icons.visibility_off,
+                                  obsTextConfirm
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                 ),
                                 onPressed: () {
                                   setState(() {
                                     obsTextConfirm = !obsTextConfirm;
-                                  }
-                                  );
+                                  });
                                 },
                               ),
                             ),
-                            style: TextStyle(color: Theme.of(context).primaryColor),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                             obscureText: !obsTextConfirm,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -723,7 +828,9 @@ class _RegisterForm extends State<RegisterForm> {
                             },
                             onChanged: (value) {
                               confirmPassword = value;
-                              if (confirmPassword == password && confirmPassword.isNotEmpty && password.isNotEmpty) {
+                              if (confirmPassword == password &&
+                                  confirmPassword.isNotEmpty &&
+                                  password.isNotEmpty) {
                                 samePsw = true;
                               } else {
                                 samePsw = false;
@@ -733,37 +840,60 @@ class _RegisterForm extends State<RegisterForm> {
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal:2, vertical: 5),
-                          child:
-                          Row(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Flexible(
                                 child: DropdownButtonFormField<String>(
-                                  dropdownColor: Theme.of(context).scaffoldBackgroundColor,
-                                  style: TextStyle(color: Theme.of(context).primaryColor),
+                                  dropdownColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor),
                                   borderRadius: BorderRadius.circular(40),
                                   decoration: InputDecoration(
-                                    labelText: 'Género',
-                                    labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                      borderRadius: BorderRadius.circular(radiusFocus),
-                                    ),
+                                      labelText: 'Género',
+                                      labelStyle: TextStyle(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Colors.blue, width: 1.5),
+                                        borderRadius:
+                                            BorderRadius.circular(radiusFocus),
+                                      ),
                                       enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: (registerBtn && !['Masculino', 'Femenino', '29 tipos de gays'].contains(selectedGender)) ? Colors.red : Theme.of(context).primaryColor , width: 0.75),
-                                          borderRadius: BorderRadius.circular(radiusNormal)
-                                      )
-                                  ),
+                                          borderSide: BorderSide(
+                                              color: (registerBtn &&
+                                                      ![
+                                                        'Masculino',
+                                                        'Femenino',
+                                                        '29 tipos de gays'
+                                                      ].contains(
+                                                          selectedGender))
+                                                  ? Colors.red
+                                                  : Theme.of(context)
+                                                      .primaryColor,
+                                              width: 0.75),
+                                          borderRadius: BorderRadius.circular(
+                                              radiusNormal))),
                                   value: selectedGender,
-                                  items: <String>['Masculino', 'Femenino', '29 tipos de gays']
-                                      .map((String value) {
+                                  items: <String>[
+                                    'Masculino',
+                                    'Femenino',
+                                    '29 tipos de gays'
+                                  ].map((String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(
                                         value,
-                                        style: TextStyle(fontSize: 14, color: Theme.of(context).primaryColor),
-                                        overflow: TextOverflow.ellipsis, // Agrega puntos suspensivos si es muy largo
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                        overflow: TextOverflow
+                                            .ellipsis, // Agrega puntos suspensivos si es muy largo
                                       ),
                                     );
                                   }).toList(),
@@ -772,8 +902,9 @@ class _RegisterForm extends State<RegisterForm> {
                                       selectedGender = newValue!;
                                     });
                                   },
-                                  validator: (value) =>
-                                  value == null ? 'Por favor selecciona una opción' : null,
+                                  validator: (value) => value == null
+                                      ? 'Por favor selecciona una opción'
+                                      : null,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -781,20 +912,30 @@ class _RegisterForm extends State<RegisterForm> {
                                 child: TextFormField(
                                   controller: _dateController,
                                   decoration: InputDecoration(
-                                    labelText: 'Fecha de Nacimiento',
-                                    labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.blue, width: 1.5),
-                                      borderRadius: BorderRadius.circular(radiusFocus),
-                                    ),
+                                      labelText: 'Fecha de Nacimiento',
+                                      labelStyle: TextStyle(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Colors.blue, width: 1.5),
+                                        borderRadius:
+                                            BorderRadius.circular(radiusFocus),
+                                      ),
                                       enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: (registerBtn && selectedDate == null) ? Colors.red : Theme.of(context).primaryColor , width: 0.75),
-                                          borderRadius: BorderRadius.circular(radiusNormal)
-                                      )
-                                  ),
+                                          borderSide: BorderSide(
+                                              color: (registerBtn &&
+                                                      selectedDate == null)
+                                                  ? Colors.red
+                                                  : Theme.of(context)
+                                                      .primaryColor,
+                                              width: 0.75),
+                                          borderRadius: BorderRadius.circular(
+                                              radiusNormal))),
                                   readOnly: true,
                                   onTap: () => _selectDate(context),
-                                  style: TextStyle(color: Theme.of(context).primaryColor),
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'Por favor selecciona tu fecha de nacimiento';
@@ -807,29 +948,46 @@ class _RegisterForm extends State<RegisterForm> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.symmetric(horizontal:2, vertical: 5),
-                          child:
-                          DropdownButtonFormField<String>(
-                            dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
+                          child: DropdownButtonFormField<String>(
+                            dropdownColor:
+                                Theme.of(context).scaffoldBackgroundColor,
                             decoration: InputDecoration(
-                              labelText: 'Selecciona un tipo de usuario',
-                              labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-                                borderRadius: BorderRadius.circular(radiusFocus),
-                              ),
+                                labelText: 'Selecciona un tipo de usuario',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 1.5),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusFocus),
+                                ),
                                 enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: (registerBtn && !['Administrador', 'Médico', 'Paciente'].contains(selectedUserType)) ? Colors.red : Theme.of(context).primaryColor , width: 0.75),
-                                    borderRadius: BorderRadius.circular(radiusNormal)
-                                )
-                            ),
+                                    borderSide: BorderSide(
+                                        color: (registerBtn &&
+                                                ![
+                                                  'Administrador',
+                                                  'Médico',
+                                                  'Paciente'
+                                                ].contains(selectedUserType))
+                                            ? Colors.red
+                                            : Theme.of(context).primaryColor,
+                                        width: 0.75),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal))),
                             value: selectedUserType,
-                            style: TextStyle(color:Theme.of(context).primaryColor),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                             items: <String>['Empleador', 'SGSST', 'Trabajador']
                                 .map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value, style: TextStyle(color: Theme.of(context).primaryColor),),
+                                child: Text(
+                                  value,
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor),
+                                ),
                               );
                             }).toList(),
                             onChanged: (newValue) {
@@ -837,30 +995,44 @@ class _RegisterForm extends State<RegisterForm> {
                               setState(() {});
                             },
                             iconEnabledColor: Theme.of(context).primaryColor,
-                            validator: (value) =>
-                            value == null ? 'Por favor selecciona una opción' : null,
+                            validator: (value) => value == null
+                                ? 'Por favor selecciona una opción'
+                                : null,
                           ),
                         ),
                         if (selectedUserType == 'SGSST') UserMedic(),
                         Container(
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 40.0),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 2.0, horizontal: 40.0),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(radiusBtn))),
-                            onPressed: (){
+                                    borderRadius:
+                                        BorderRadius.circular(radiusBtn))),
+                            onPressed: () {
                               registerBtn = true;
-                              if(registerBtn){
-                                if(samePsw && name != '' && surname != '' && email != '' && validEmail && selectedUserType != '' && selectedGender != '' && age >= 18){
+                              if (registerBtn) {
+                                if (samePsw &&
+                                    name != '' &&
+                                    surname != '' &&
+                                    email != '' &&
+                                    validEmail &&
+                                    selectedUserType != '' &&
+                                    selectedGender != '' &&
+                                    age >= 18) {
                                   saveUserToFirestore(context);
                                 }
                               }
                               setState(() {});
                             },
-                            child: const Text('Registrarse', style: TextStyle(color: Colors.white, fontSize: 20),),
+                            child: const Text(
+                              'Registrarse',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
                           ),
                         ),
                         Row(
@@ -868,11 +1040,15 @@ class _RegisterForm extends State<RegisterForm> {
                           children: [
                             Text(
                               '¿Ya tienes una cuenta?',
-                              style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w400, fontSize: 15),
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 15),
                             ),
                             TextButton(
                               onPressed: () {
-                                loginPage(context); // Muestra el formulario de inicio de sesión
+                                loginPage(
+                                    context); // Muestra el formulario de inicio de sesión
                               },
                               child: const Text(
                                 'Iniciar Sesión',
@@ -891,30 +1067,30 @@ class _RegisterForm extends State<RegisterForm> {
                 ],
               ),
             ),
-        ),
-      )
-    );
+          ),
+        ));
   }
 }
 
 class UserMedic extends StatelessWidget {
+  const UserMedic({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 2, vertical: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
       child: TextFormField(
         decoration: InputDecoration(
-          labelText: '0000-0000-0000',
-          labelStyle: TextStyle(color: Theme.of(context).primaryColor),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue, width: 1.5),
-            borderRadius: BorderRadius.circular(radiusFocus),
-          ),
+            labelText: '0000-0000-0000',
+            labelStyle: TextStyle(color: Theme.of(context).primaryColor),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+              borderRadius: BorderRadius.circular(radiusFocus),
+            ),
             enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).primaryColor , width: 0.75),
-                borderRadius: BorderRadius.circular(radiusNormal)
-            )
-        ),
+                borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor, width: 0.75),
+                borderRadius: BorderRadius.circular(radiusNormal))),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Ingreso tu código de registro médico';

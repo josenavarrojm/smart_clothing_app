@@ -8,7 +8,12 @@ class MqttService {
   MqttClientConnectionStatus? connectionState;
 
   // Broker mqtt connection
-  Future<void> connect(final String broker, final int port, final String clientId, final String username, final String password) async {
+  Future<void> connect(
+      final String broker,
+      final int port,
+      final String clientId,
+      final String username,
+      final String password) async {
     client = MqttServerClient(broker, clientId);
     client!.port = port;
     client!.logging(on: true);
@@ -39,10 +44,10 @@ class MqttService {
     }
   }
 
-
   void onConnected() {
     print('Conexión exitosa');
-    subscribe('mqttservices/test'); // Suscribirse a un topic después de conectar
+    subscribe(
+        'mqttservices/test'); // Suscribirse a un topic después de conectar
   }
 
   void onDisconnected() {
@@ -60,7 +65,8 @@ class MqttService {
       print('Suscrito al topic $topic');
       client!.subscribe(topic, MqttQos.atMostOnce);
     } else {
-      print('No se puede suscribir. Estado de conexión: ${connectionState?.state}');
+      print(
+          'No se puede suscribir. Estado de conexión: ${connectionState?.state}');
     }
   }
 
@@ -76,7 +82,8 @@ class MqttService {
   void listenToMessages() {
     client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
       final recMessage = messages[0].payload as MqttPublishMessage;
-      final payload = MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
+      final payload =
+          MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
 
       print('Mensaje recibido: $payload en el topic: ${messages[0].topic}');
 
