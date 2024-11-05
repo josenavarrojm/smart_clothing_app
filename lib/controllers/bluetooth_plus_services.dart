@@ -39,7 +39,7 @@ class BluetoothPlusController extends GetxController {
                 "Notificaciones activadas para la característica: $characteristicUuid");
 
             // Suscribirse a los datos recibidos
-            characteristic.value.listen((value) {
+            characteristic.lastValueStream.listen((value) {
               String receivedData = utf8.decode(value);
               Map<String, dynamic> jsonData = json.decode(receivedData);
               print("Datos recibidos: $jsonData");
@@ -147,7 +147,7 @@ class BluetoothPlusController extends GetxController {
       } catch (e) {
         print('Error al conectar, reintentando...');
         await device.disconnect();
-        await Future.delayed(Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 1));
         await device.connect();
       }
 

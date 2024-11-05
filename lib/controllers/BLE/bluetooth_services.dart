@@ -27,43 +27,69 @@ class BluetoothController {
   BleScanner get bleScanner => _bleScanner;
 
   Future<void> requestBluetoothActivation() async {
-    // Verifica si Bluetooth está habilitado
     var bluetoothState = await FlutterBluePlus.adapterState.first;
 
     if (bluetoothState == BluetoothAdapterState.off) {
-      // Si Bluetooth está apagado, puedes mostrar un diálogo o una notificación
       FlutterBluePlus.turnOn();
     } else {
-      print(
-          "Bluetooth is enabled, starting discovery."); // Llama a tu función para iniciar el escaneo
+      print("Bluetooth is enabled, starting discovery.");
     }
   }
 
-  // Método para iniciar el escaneo
   void startScanning(List<Uuid> serviceIds) {
     _bleScanner.startScan(serviceIds);
   }
 
-  // Método para detener el escaneo
   Future<void> stopScanning() async {
     await _bleScanner.stopScan();
   }
 
-  // Método para conectar a un dispositivo BLE
   Future<void> connectToDevice(String deviceId) async {
     await _deviceConnector.connect(deviceId);
   }
 
-  // Método para desconectar de un dispositivo BLE
   Future<void> disconnectFromDevice(String deviceId) async {
     await _deviceConnector.disconnect(deviceId);
   }
 
-  // Método para liberar recursos
+  // Método de suscripción a una característica
+  Stream<List<int>> subscribeToCharacteristic({
+    required String deviceId,
+    required Uuid serviceId,
+    required Uuid characteristicId,
+  }) {
+    final characteristic = QualifiedCharacteristic(
+      serviceId: serviceId,
+      characteristicId: characteristicId,
+      deviceId: deviceId,
+    );
+
+    return flutterReactiveBle.subscribeToCharacteristic(characteristic);
+  }
+
+  // Método para enviar datos a una característica
+  Future<void> writeCharacteristic({
+    required String deviceId,
+    required Uuid serviceId,
+    required Uuid characteristicId,
+    required List<int> value,
+  }) async {
+    final characteristic = QualifiedCharacteristic(
+      serviceId: serviceId,
+      characteristicId: characteristicId,
+      deviceId: deviceId,
+    );
+
+    await flutterReactiveBle.writeCharacteristicWithResponse(
+      characteristic,
+      value: value,
+    );
+  }
+
   Future<void> dispose() async {
     await stopScanning();
-    await _deviceConnector.dispose(); // Cierra el conector
-    await _bleScanner.dispose(); // Cierra el escáner
+    await _deviceConnector.dispose();
+    await _bleScanner.dispose();
   }
 }
 
@@ -77,7 +103,7 @@ class BleScanner implements ReactiveState<BleScannerState> {
   final FlutterReactiveBle _ble;
   final void Function(String message) _logMessage;
   final StreamController<BleScannerState> _stateStreamController =
-      StreamController<BleScannerState>.broadcast(); // Cambiado a broadcast
+      StreamController<BleScannerState>.broadcast();
 
   final List<DiscoveredDevice> _devices = [];
   StreamSubscription<DiscoveredDevice>? _subscription;
@@ -122,7 +148,7 @@ class BleScanner implements ReactiveState<BleScannerState> {
   }
 
   Future<void> dispose() async {
-    await _stateStreamController.close(); // Cierra el controlador de estado
+    await _stateStreamController.close();
   }
 }
 
@@ -137,7 +163,6 @@ class BleScannerState {
   final bool scanIsInProgress;
 }
 
-// Clase para manejar la conexión
 class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
   BleDeviceConnector({
     required FlutterReactiveBle ble,
@@ -175,7 +200,6 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
     } on Exception catch (e, _) {
       _logMessage("Error disconnecting from device: $e");
     } finally {
-      // Emitir estado de desconexión
       _deviceConnectionController.add(
         ConnectionStateUpdate(
           deviceId: deviceId,
@@ -187,7 +211,6 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
   }
 
   Future<void> dispose() async {
-    await _deviceConnectionController
-        .close(); // Cierra el controlador de conexión
+    await _deviceConnectionController.close();
   }
 }

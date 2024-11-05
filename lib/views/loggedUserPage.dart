@@ -1,8 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:ladys_app/views/auth_user.dart';
-import 'package:ladys_app/views/bluetooth_plus_ui.dart';
-import 'package:ladys_app/views/bluetooth_ui.dart';
+import 'package:smartclothingproject/views/auth_user.dart';
+import 'package:smartclothingproject/views/bluetooth_plus_ui.dart';
+import 'package:smartclothingproject/views/bluetooth_ui.dart';
 
 import '../functions/LastPage.dart';
 import 'home_user_patient.dart';

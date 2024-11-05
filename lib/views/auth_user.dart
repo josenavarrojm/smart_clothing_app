@@ -2,8 +2,8 @@ import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:ladys_app/functions/LastPage.dart';
-import 'package:ladys_app/views/loggedUserPage.dart';
+import 'package:smartclothingproject/functions/LastPage.dart';
+import 'package:smartclothingproject/views/loggedUserPage.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
 

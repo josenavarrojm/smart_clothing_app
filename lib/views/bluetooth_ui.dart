@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:ladys_app/controllers/BLE/bluetooth_services.dart';
+import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -30,7 +30,9 @@ class _BluetoothUI extends State<BluetoothUI> {
     _subscription = blController.bleScanner.state.listen((state) {
       if (mounted) {
         setState(() {
-          discoveredDevices = state.discoveredDevices;
+          discoveredDevices = state.discoveredDevices
+              .where((device) => device.connectable == Connectable.available)
+              .toList();
           scanned = state.scanIsInProgress; // Actualiza el estado del escaneo
         });
       }

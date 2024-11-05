@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ladys_app/controllers/mqtt_functions.dart';
+import 'package:smartclothingproject/controllers/mqtt_functions.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 final mqttService = MqttService();

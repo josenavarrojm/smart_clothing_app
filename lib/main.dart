@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:ladys_app/firebase_options.dart';
-import 'package:ladys_app/views/loggedUserPage.dart';
+import 'package:smartclothingproject/firebase_options.dart';
+import 'package:smartclothingproject/views/loggedUserPage.dart';
 import 'functions/LastPage.dart';
 import 'views/auth_user.dart';
 
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: lastPage != 'userLoggedHome'
+      home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
           : const AuthSwitcher(),
     );
