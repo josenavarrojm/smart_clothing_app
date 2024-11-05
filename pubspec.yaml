@@ -1,13 +1,12 @@
 name: ladys_app
 description: "APLICACIÓN SMARTH CLOTHING"
 
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
   sdk: ^3.5.3
-
 
 dependencies:
   flutter:
@@ -24,6 +23,9 @@ dependencies:
   syncfusion_flutter_charts: ^27.1.57
   flutter_blue_plus: ^1.33.6
   get: ^4.6.6
+  flutter_reactive_ble: ^5.3.1
+  meta: ^1.15.0
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
@@ -36,7 +38,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

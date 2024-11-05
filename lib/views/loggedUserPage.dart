@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:ladys_app/views/auth_user.dart';
+import 'package:ladys_app/views/bluetooth_plus_ui.dart';
 import 'package:ladys_app/views/bluetooth_ui.dart';
 
 import '../functions/LastPage.dart';
@@ -25,8 +26,20 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(() {
+      final index = _pageController.page!.round();
+      if (index != _selectedIndex) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -38,12 +51,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context)
-            .scaffoldBackgroundColor, //Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(0.0),
-        )),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(0.0))),
         elevation: 0.5,
         shadowColor: Colors.grey,
         title: Text(
@@ -62,28 +72,19 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const AuthSwitcher()),
-                (Route<dynamic> route) =>
-                    false, // Aquí false indica que todas las vistas anteriores deben eliminarse
+                (Route<dynamic> route) => false,
               );
             },
           ),
-          // Puedes agregar más botones en esta lista si lo deseas
         ],
       ),
       body: PageView(
         controller: _pageController,
         allowImplicitScrolling: false,
-        onPageChanged: (index) {
-          setState(() {
-            _selectedIndex = index; // Actualiza el índice al cambiar la página
-          });
-        },
         children: [
-          const BlueetoothUI(),
+          const BluetoothPlusUI(),
+          const BluetoothUI(),
           const HomeUserPatient(),
-          Center(
-              child: Text('Página 3: Detalles',
-                  style: TextStyle(color: Theme.of(context).primaryColor))),
           Center(
               child: Text('Página 4: Ajustes',
                   style: TextStyle(color: Theme.of(context).primaryColor))),
@@ -119,11 +120,22 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                   Color.fromRGBO(150, 170, 170, 0.85),
                 ],
               ),
-              label: 'Bluetooth',
+              label: 'BT Plus',
             ),
             BottomNavigationBarItem(
               icon: AnimatedIconContainer(
                 isSelected: _selectedIndex == 1,
+                icon: Icons.bluetooth_rounded,
+                gradientColors: const [
+                  Color.fromRGBO(100, 120, 120, 0.85),
+                  Color.fromRGBO(150, 170, 170, 0.85),
+                ],
+              ),
+              label: 'BT',
+            ),
+            BottomNavigationBarItem(
+              icon: AnimatedIconContainer(
+                isSelected: _selectedIndex == 2,
                 icon: Icons.home,
                 gradientColors: const [
                   Color.fromRGBO(100, 120, 120, 0.85),
@@ -131,17 +143,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 ],
               ),
               label: 'Inicio',
-            ),
-            BottomNavigationBarItem(
-              icon: AnimatedIconContainer(
-                isSelected: _selectedIndex == 2,
-                icon: Icons.note_alt,
-                gradientColors: const [
-                  Color.fromRGBO(100, 120, 120, 0.85),
-                  Color.fromRGBO(150, 170, 170, 0.85),
-                ],
-              ),
-              label: 'Recomendaciones',
             ),
             BottomNavigationBarItem(
               icon: AnimatedIconContainer(
