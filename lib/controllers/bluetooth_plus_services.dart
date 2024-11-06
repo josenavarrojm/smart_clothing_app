@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:uuid/uuid.dart';
+
 class BluetoothPlusController extends GetxController {
   // Comprueba si el dispositivo soporta Bluetooth
   Future<bool> isSupported() async {
@@ -162,37 +164,64 @@ class BluetoothPlusController extends GetxController {
     }
   }
 
-  // Enviar datos JSON al dispositivo
-  Future<void> sendJsonData(BluetoothDevice device, Map<String, dynamic> data,
-      String characteristicUuid) async {
+  Future<void> writeDataToDevice(BluetoothDevice device, Uuid serviceUuid,
+      Uuid characteristicUuid, String data) async {
     try {
-      // Convertir el mapa de datos a JSON y luego a bytes
-      String jsonData = json.encode(data);
-      List<int> dataBytes = utf8.encode(jsonData);
+      // Obtener el servicio del dispositivo
+      BluetoothService service =
+          await device.discoverServices().then((services) {
+        return services.firstWhere((service) => service.uuid == serviceUuid,
+            orElse: () => throw Exception("Servicio no encontrado"));
+      });
 
-      // Obtener el servicio y la característica correctos para enviar los datos
-      List<BluetoothService> services = await device.discoverServices();
-      for (BluetoothService service in services) {
-        for (BluetoothCharacteristic characteristic
-            in service.characteristics) {
-          if (characteristic.properties.write) {
-            await characteristic.write(dataBytes, withoutResponse: true);
-            print("Datos enviados: $jsonData");
-            return;
-          } else {
-            print("La característica no soporta escritura.");
-          }
-          if (characteristic.uuid.toString() == characteristicUuid) {
-            await characteristic.write(dataBytes, withoutResponse: true);
-            print("Datos enviados: $jsonData");
-            return;
-          }
-        }
-      }
+      // Obtener la característica donde queremos escribir
+      BluetoothCharacteristic characteristic = service.characteristics
+          .firstWhere(
+              (characteristic) => characteristic.uuid == characteristicUuid,
+              orElse: () => throw Exception("Característica no encontrada"));
+
+      // Convertir los datos a formato adecuado (en este caso String a List<int>)
+      List<int> value = data.codeUnits;
+
+      // Escribir los datos en la característica
+      await characteristic.write(value);
+      print("Datos enviados correctamente.");
     } catch (e) {
-      print("Error al enviar datos: $e");
+      print("Error al enviar los datos: $e");
     }
   }
+
+  // Enviar datos JSON al dispositivo
+  // Future<void> sendJsonData(BluetoothDevice device, Map<String, dynamic> data,
+  //     String characteristicUuid) async {
+  //   try {
+  //     // Convertir el mapa de datos a JSON y luego a bytes
+  //     String jsonData = json.encode(data);
+  //     List<int> dataBytes = utf8.encode(jsonData);
+
+  //     // Obtener el servicio y la característica correctos para enviar los datos
+  //     List<BluetoothService> services = await device.discoverServices();
+  //     for (BluetoothService service in services) {
+  //       for (BluetoothCharacteristic characteristic
+  //           in service.characteristics) {
+  //         if (characteristic.properties.write) {
+  //           await characteristic.write(dataBytes, withoutResponse: true);
+  //           print("Datos enviados: $jsonData");
+  //           return;
+  //         } else {
+  //           print("La característica no soporta escritura.");
+  //         }
+  //         if (characteristic.uuid.toString() == characteristicUuid) {
+  //           await characteristic.write(dataBytes, withoutResponse: true);
+  //           print("Datos enviados: $jsonData");
+  //           return;
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print("Error al enviar datos: $e");
+  //   }
+  // }
 
   // // Configurar notificaciones para recibir datos JSON del dispositivo
   // Future<void> configureNotifications(

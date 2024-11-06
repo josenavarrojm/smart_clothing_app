@@ -141,10 +141,10 @@ class _BluetoothPlusUI extends State<BluetoothPlusUI> {
                   onPressed: () {
                     if (connectedDevice != null) {
                       // Reemplaza "characteristicUuid" con el UUID correcto de la característica
-                      blController.sendJsonData(
-                          connectedDevice!,
-                          json.decode(jsonController.text),
-                          "characteristicUuid");
+                      // blController.sendJsonData(
+                      //     connectedDevice!,
+                      //     json.decode(jsonController.text),
+                      //     "characteristicUuid");
                     }
                   },
                   child: const Text('Enviar'),

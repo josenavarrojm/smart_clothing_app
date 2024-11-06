@@ -3,12 +3,18 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'reactive_state.dart';
 import 'package:meta/meta.dart';
+import 'dart:convert';
 
 final flutterReactiveBle = FlutterReactiveBle();
 
 class BluetoothController {
   final BleScanner _bleScanner;
   final BleDeviceConnector _deviceConnector;
+  String accelerometerXData = '';
+  String accelerometerYData = '';
+  String accelerometerZData = '';
+  String temperatureData = '';
+  String humidityData = '';
 
   BluetoothController()
       : _bleScanner = BleScanner(
@@ -53,7 +59,9 @@ class BluetoothController {
   }
 
   // Método de suscripción a una característica
-  Stream<List<int>> subscribeToCharacteristic({
+  // StringBuffer _receivedDataBuffer = StringBuffer();
+
+  StreamSubscription<List<int>>? subscribeToCharacteristic({
     required String deviceId,
     required Uuid serviceId,
     required Uuid characteristicId,
@@ -64,15 +72,145 @@ class BluetoothController {
       deviceId: deviceId,
     );
 
-    return flutterReactiveBle.subscribeToCharacteristic(characteristic);
+    // Suscripción al flujo de datos de la característica
+    final subscription =
+        flutterReactiveBle.subscribeToCharacteristic(characteristic).listen(
+      (data) {
+        // Convertir el fragmento de datos recibido en texto
+        final decodedFragment = String.fromCharCodes(data);
+
+        print("Fragmento decodificado: $decodedFragment");
+
+        // Verificar si el fragmento contiene la palabra 'temperature'
+        if (decodedFragment.contains('temperature')) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
+
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String temperatureValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            temperatureData =
+                temperatureValue; // Asignamos el valor a la variable temperatureData
+
+            print("Temperatura extraída: $temperatureData");
+          }
+        } else if ((decodedFragment.contains('humidity'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
+
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String humidityValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            humidityData =
+                humidityValue; // Asignamos el valor a la variable temperatureData
+
+            print("Temperatura extraída: $humidityData");
+          }
+        } else if ((decodedFragment.contains('accelx'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
+
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String accelXValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            accelerometerXData =
+                accelXValue; // Asignamos el valor a la variable temperatureData
+
+            print("Temperatura extraída: $accelerometerXData");
+          }
+        } else if ((decodedFragment.contains('accely'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
+
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String accelYValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            accelerometerYData =
+                accelYValue; // Asignamos el valor a la variable temperatureData
+
+            print("Temperatura extraída: $accelerometerYData");
+          }
+        } else if ((decodedFragment.contains('accelz'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
+
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String accelZValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            accelerometerZData =
+                accelZValue; // Asignamos el valor a la variable temperatureData
+
+            print("Temperatura extraída: $accelerometerZData");
+          }
+        }
+      },
+      onError: (error) {
+        print("Error de suscripción: $error");
+      },
+    );
+
+    return subscription; // Retorna la suscripción para poder cancelarla después
   }
+
+  // return flutterReactiveBle
+  //     .subscribeToCharacteristic(characteristic)
+  //     .map((data) {
+  //   // Convertir los bytes recibidos en un string y luego en JSON
+  //   final jsonString = String.fromCharCodes(data);
+  //   final jsonData = jsonDecode(jsonString);
+  //   print(jsonData);
+  //   return jsonData;
+
+//     String accelerometerData = '';
+// String temperatureData = '';
+// String humidityData = '';
+
+// void parseReceivedData(String data) {
+//   setState(() {
+//     // Aquí decodificas el JSON recibido
+//     var jsonData = json.decode(data);
+//     accelerometerData = jsonData['accelerometer'].toString();
+//     temperatureData = jsonData['temperature'].toString();
+//     humidityData = jsonData['humidity'].toString();
+//   });
+// }
+
+  // Stream<List<int>> subscribeToCharacteristic({
+  //   required String deviceId,
+  //   required Uuid serviceId,
+  //   required Uuid characteristicId,
+  // }) {
+  //   final characteristic = QualifiedCharacteristic(
+  //     serviceId: serviceId,
+  //     characteristicId: characteristicId,
+  //     deviceId: deviceId,
+  //   );
+
+  //   return flutterReactiveBle.subscribeToCharacteristic(characteristic);
+  // }
+
+  // var data = {}
+
+  // Future<void> printData(){
+
+  // }
 
   // Método para enviar datos a una característica
   Future<void> writeCharacteristic({
     required String deviceId,
     required Uuid serviceId,
     required Uuid characteristicId,
-    required List<int> value,
+    required String value, // Cambié el tipo de `value` a String
   }) async {
     final characteristic = QualifiedCharacteristic(
       serviceId: serviceId,
@@ -80,10 +218,16 @@ class BluetoothController {
       deviceId: deviceId,
     );
 
+    // Convierte el texto en una lista de bytes (List<int>)
+    List<int> valueBytes = utf8.encode(value);
+
+    // Escribe el valor en la característica
     await flutterReactiveBle.writeCharacteristicWithResponse(
       characteristic,
-      value: value,
+      value: valueBytes,
     );
+
+    print("Texto enviado: $value");
   }
 
   Future<void> dispose() async {

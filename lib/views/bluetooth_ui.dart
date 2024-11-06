@@ -31,8 +31,9 @@ class _BluetoothUI extends State<BluetoothUI> {
       if (mounted) {
         setState(() {
           discoveredDevices = state.discoveredDevices
-              .where((device) => device.connectable == Connectable.available)
+              .where((device) => device.name != "ESP32-Sensor")
               .toList();
+          // .where((device) => device.connectable == Connectable.available)
           scanned = state.scanIsInProgress; // Actualiza el estado del escaneo
         });
       }
@@ -81,6 +82,36 @@ class _BluetoothUI extends State<BluetoothUI> {
                 },
                 child: const Text('Escanear Dispositivos'),
               ),
+              ElevatedButton(
+                onPressed: () async {
+                  blController.subscribeToCharacteristic(
+                    deviceId: "40:4C:CA:8A:96:7A",
+                    serviceId:
+                        Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
+                    characteristicId:
+                        Uuid.parse("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"),
+                  ); // Inicia el escaneo
+                  // await Future.delayed(const Duration(seconds: 15));
+                  // blController.stopScanning();
+                },
+                child: const Text('Suscripción'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  // blPlusController.writeDataToDevice(device, serviceUuid, characteristicUuid, data)
+                  // blController.writeCharacteristic(
+                  //   deviceId: "40:4C:CA:8A:96:7A",
+                  //   serviceId:
+                  //       Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
+                  //   characteristicId:
+                  //       Uuid.parse("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"),
+                  //   value: "Enviado",
+                  // ); // Inicia el escaneo
+                  // // await Future.delayed(const Duration(seconds: 15));
+                  // // blController.stopScanning();
+                },
+                child: const Text('Enviar data'),
+              ),
               scanned
                   ? Column(
                       children: [
@@ -122,26 +153,31 @@ class _BluetoothUI extends State<BluetoothUI> {
                       child: Text('Inicia el escaneo para buscar dispositivos'),
                     ),
               const SizedBox(height: 20),
-              if (connectedDevice != null) ...[
-                const Text('Enviar datos JSON', style: TextStyle(fontSize: 18)),
-                TextField(
-                  controller: jsonController,
-                  decoration: const InputDecoration(
-                      labelText: 'Ingrese datos JSON a enviar'),
-                ),
-                const SizedBox(height: 20),
-                const Text('Datos recibidos', style: TextStyle(fontSize: 18)),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Text(receivedData.isNotEmpty
-                      ? receivedData
-                      : 'No se han recibido datos aún'),
-                ),
-              ],
+              Text('Temperatura: ${blController.temperatureData}'),
+              Text('Humedad: ${blController.humidityData}'),
+              Text('Accelerometro Z: ${blController.accelerometerXData}'),
+              Text('Accelerometro Y: ${blController.accelerometerYData}'),
+              Text('Accelerometro Z: ${blController.accelerometerZData}'),
+              // if (connectedDevice != null) ...[
+              //   const Text('Enviar datos JSON', style: TextStyle(fontSize: 18)),
+              //   TextField(
+              //     controller: jsonController,
+              //     decoration: const InputDecoration(
+              //         labelText: 'Ingrese datos JSON a enviar'),
+              //   ),
+              //   const SizedBox(height: 20),
+              //   const Text('Datos recibidos', style: TextStyle(fontSize: 18)),
+              //   Container(
+              //     padding: const EdgeInsets.all(8),
+              //     decoration: BoxDecoration(
+              //       border: Border.all(color: Colors.blue),
+              //       borderRadius: BorderRadius.circular(5),
+              //     ),
+              //     child: Text(receivedData.isNotEmpty
+              //         ? receivedData
+              //         : 'No se han recibido datos aún'),
+              //   ),
+              // ],
             ],
           ),
         ),
