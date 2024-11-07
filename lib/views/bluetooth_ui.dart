@@ -5,6 +5,7 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 final blController = BluetoothController();
+String deviceId = '';
 
 class BluetoothUI extends StatefulWidget {
   const BluetoothUI({super.key});
@@ -31,7 +32,7 @@ class _BluetoothUI extends State<BluetoothUI> {
       if (mounted) {
         setState(() {
           discoveredDevices = state.discoveredDevices
-              .where((device) => device.name != "ESP32-Sensor")
+              .where((device) => device.name.contains("ESP32"))
               .toList();
           // .where((device) => device.connectable == Connectable.available)
           scanned = state.scanIsInProgress; // Actualiza el estado del escaneo
@@ -85,7 +86,7 @@ class _BluetoothUI extends State<BluetoothUI> {
               ElevatedButton(
                 onPressed: () async {
                   blController.subscribeToCharacteristic(
-                    deviceId: "40:4C:CA:8A:96:7A",
+                    deviceId: deviceId,
                     serviceId:
                         Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
                     characteristicId:
@@ -98,29 +99,27 @@ class _BluetoothUI extends State<BluetoothUI> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  // blPlusController.writeDataToDevice(device, serviceUuid, characteristicUuid, data)
-                  // blController.writeCharacteristic(
-                  //   deviceId: "40:4C:CA:8A:96:7A",
-                  //   serviceId:
-                  //       Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
-                  //   characteristicId:
-                  //       Uuid.parse("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"),
-                  //   value: "Enviado",
-                  // ); // Inicia el escaneo
-                  // // await Future.delayed(const Duration(seconds: 15));
-                  // // blController.stopScanning();
+                  blController.writeCharacteristic(
+                      deviceId: deviceId,
+                      serviceId:
+                          Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
+                      characteristicId:
+                          Uuid.parse("6E400002-B5A3-F393-E0A9-E50E24DCCA9E"),
+                      value: "Hola");
                 },
                 child: const Text('Enviar data'),
               ),
               scanned
                   ? Column(
                       children: [
-                        const Text(
+                        Text(
                           'Dispositivos encontrados',
-                          style: TextStyle(fontSize: 18),
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Theme.of(context).primaryColor),
                         ),
                         SizedBox(
-                          height: 300,
+                          height: 150,
                           child: discoveredDevices.isNotEmpty
                               ? ListView.builder(
                                   itemCount: discoveredDevices.length,
@@ -131,12 +130,22 @@ class _BluetoothUI extends State<BluetoothUI> {
                                         device.name.isNotEmpty
                                             ? device.name
                                             : 'Dispositivo sin nombre: ${device.connectable}',
+                                        style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor),
                                       ),
-                                      subtitle: Text(device.id),
+                                      subtitle: Text(
+                                        device.id,
+                                        style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
                                       onTap: () async {
-                                        await blController
-                                            .connectToDevice(device.id);
+                                        await blController.connectToDevice(
+                                          device.id,
+                                        );
                                         setState(() {
+                                          deviceId = device.id;
                                           connectedDevice = device;
                                         });
                                       },
@@ -149,15 +158,32 @@ class _BluetoothUI extends State<BluetoothUI> {
                         ),
                       ],
                     )
-                  : const Center(
-                      child: Text('Inicia el escaneo para buscar dispositivos'),
+                  : Center(
+                      child: Text(
+                        'Inicia el escaneo para buscar dispositivos',
+                        style: TextStyle(color: Theme.of(context).primaryColor),
+                      ),
                     ),
-              const SizedBox(height: 20),
-              Text('Temperatura: ${blController.temperatureData}'),
-              Text('Humedad: ${blController.humidityData}'),
-              Text('Accelerometro Z: ${blController.accelerometerXData}'),
-              Text('Accelerometro Y: ${blController.accelerometerYData}'),
-              Text('Accelerometro Z: ${blController.accelerometerZData}'),
+              Text(
+                'Temperatura: ${blController.temperatureData}',
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              Text(
+                'Humedad: ${blController.humidityData}',
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              Text(
+                'Accelerometro Z: ${blController.accelerometerXData}',
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              Text(
+                'Accelerometro Y: ${blController.accelerometerYData}',
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
+              Text(
+                'Accelerometro Z: ${blController.accelerometerZData}',
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
               // if (connectedDevice != null) ...[
               //   const Text('Enviar datos JSON', style: TextStyle(fontSize: 18)),
               //   TextField(

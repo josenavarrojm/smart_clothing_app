@@ -79,7 +79,7 @@ class BluetoothController {
         // Convertir el fragmento de datos recibido en texto
         final decodedFragment = String.fromCharCodes(data);
 
-        print("Fragmento decodificado: $decodedFragment");
+        // print("Fragmento decodificado: $decodedFragment");
 
         // Verificar si el fragmento contiene la palabra 'temperature'
         if (decodedFragment.contains('temperature')) {
@@ -94,7 +94,7 @@ class BluetoothController {
             temperatureData =
                 temperatureValue; // Asignamos el valor a la variable temperatureData
 
-            print("Temperatura extraída: $temperatureData");
+            print("Temperatura: $temperatureData");
           }
         } else if ((decodedFragment.contains('humidity'))) {
           // Separar la cadena por el delimitador ":"
@@ -108,7 +108,7 @@ class BluetoothController {
             humidityData =
                 humidityValue; // Asignamos el valor a la variable temperatureData
 
-            print("Temperatura extraída: $humidityData");
+            print("Humedad: $humidityData");
           }
         } else if ((decodedFragment.contains('accelx'))) {
           // Separar la cadena por el delimitador ":"
@@ -122,7 +122,7 @@ class BluetoothController {
             accelerometerXData =
                 accelXValue; // Asignamos el valor a la variable temperatureData
 
-            print("Temperatura extraída: $accelerometerXData");
+            print("Ángulo X: $accelerometerXData");
           }
         } else if ((decodedFragment.contains('accely'))) {
           // Separar la cadena por el delimitador ":"
@@ -136,7 +136,7 @@ class BluetoothController {
             accelerometerYData =
                 accelYValue; // Asignamos el valor a la variable temperatureData
 
-            print("Temperatura extraída: $accelerometerYData");
+            print("Ángulo Y: $accelerometerYData");
           }
         } else if ((decodedFragment.contains('accelz'))) {
           // Separar la cadena por el delimitador ":"
@@ -150,7 +150,7 @@ class BluetoothController {
             accelerometerZData =
                 accelZValue; // Asignamos el valor a la variable temperatureData
 
-            print("Temperatura extraída: $accelerometerZData");
+            print("Ángulo Z: $accelerometerZData");
           }
         }
       },
