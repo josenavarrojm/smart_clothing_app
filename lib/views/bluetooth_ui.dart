@@ -48,20 +48,15 @@ class _BluetoothUI extends State<BluetoothUI> {
   }
 
   Future<void> requestPermissions() async {
-    if (await Permission.location.request().isGranted) {
-      print("Location permission is granted");
-      if (await Permission.bluetoothScan.request().isGranted) {
-        print("Bluetooth permission is granted");
-        if (await Permission.bluetoothConnect.request().isGranted) {
-          print("Bluetooth Connection permission is granted");
-        } else {
-          print("Bluetooth permission is not granted");
-        }
+    if (await Permission.bluetoothScan.request().isGranted) {
+      print("Bluetooth permission is granted");
+      if (await Permission.bluetoothConnect.request().isGranted) {
+        print("Bluetooth Connection permission is granted");
       } else {
         print("Bluetooth permission is not granted");
       }
     } else {
-      print("Location permission is not granted");
+      print("Bluetooth permission is not granted");
     }
   }
 
@@ -184,26 +179,26 @@ class _BluetoothUI extends State<BluetoothUI> {
                 'Accelerometro Z: ${blController.accelerometerZData}',
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
-              // if (connectedDevice != null) ...[
-              //   const Text('Enviar datos JSON', style: TextStyle(fontSize: 18)),
-              //   TextField(
-              //     controller: jsonController,
-              //     decoration: const InputDecoration(
-              //         labelText: 'Ingrese datos JSON a enviar'),
-              //   ),
-              //   const SizedBox(height: 20),
-              //   const Text('Datos recibidos', style: TextStyle(fontSize: 18)),
-              //   Container(
-              //     padding: const EdgeInsets.all(8),
-              //     decoration: BoxDecoration(
-              //       border: Border.all(color: Colors.blue),
-              //       borderRadius: BorderRadius.circular(5),
-              //     ),
-              //     child: Text(receivedData.isNotEmpty
-              //         ? receivedData
-              //         : 'No se han recibido datos aún'),
-              //   ),
-              // ],
+              if (connectedDevice != null) ...[
+                const Text('Enviar datos JSON', style: TextStyle(fontSize: 18)),
+                TextField(
+                  controller: jsonController,
+                  decoration: const InputDecoration(
+                      labelText: 'Ingrese datos JSON a enviar'),
+                ),
+                const SizedBox(height: 20),
+                const Text('Datos recibidos', style: TextStyle(fontSize: 18)),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text(receivedData.isNotEmpty
+                      ? receivedData
+                      : 'No se han recibido datos aún'),
+                ),
+              ],
             ],
           ),
         ),

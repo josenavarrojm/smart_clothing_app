@@ -70,39 +70,6 @@ class _HomeUserPatient extends State<HomeUserPatient> {
               ),
             ),
             Card(
-              color: Colors.transparent.withOpacity(0.0),
-              elevation: 0,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                ),
-                onPressed: () {
-                  mqttProcess();
-                },
-                child: const Text('Conectar a MQTT Broker'),
-              ),
-            ),
-            Card(
-              color: Colors.transparent.withOpacity(0.0),
-              elevation: 0,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                ),
-                onPressed: () {
-                  mqttService.publishMessage('esp32/test', 'Hola, he vuelto!');
-                  print(tempAlert);
-                },
-                child: const Text('SEND Message to MQTT Broker'),
-              ),
-            ),
-            Card(
               child: Container(
                 width: screenWidth * 0.95,
                 height: screenHeight * 0.2,

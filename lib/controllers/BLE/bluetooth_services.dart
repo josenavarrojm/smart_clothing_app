@@ -323,6 +323,7 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
   final _deviceConnectionController = StreamController<ConnectionStateUpdate>();
 
   late StreamSubscription<ConnectionStateUpdate> _connection;
+  bool connected = false;
 
   Future<void> connect(String deviceId) async {
     _logMessage('Start connecting to $deviceId');

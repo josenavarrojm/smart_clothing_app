@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: lastPage == 'userLoggedHome'
+      home: lastPage != 'userLoggedHome'
           ? const LoggedUserPage()
           : const AuthSwitcher(),
     );
