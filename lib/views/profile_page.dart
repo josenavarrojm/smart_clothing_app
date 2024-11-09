@@ -38,6 +38,8 @@ class _ProfilePage extends State<ProfilePage> {
       ));
     });
 
+    bool lightMode = true;
+
     return SingleChildScrollView(
         child: Center(
       child: Container(
@@ -63,33 +65,29 @@ class _ProfilePage extends State<ProfilePage> {
                 style: TextStyle(color: Colors.white, fontSize: 80),
               ),
             ),
-            // UserProfileAvatar(
-            //   avatarUrl: '',
-            //   onAvatarTap: () {
-            //     print('Avatar Tapped..');
-            //   },
-            //   // notificationCount: null,
-            //   // notificationBubbleTextStyle: const TextStyle(
-            //   //   fontSize: 30,
-            //   //   color: Colors.white,
-            //   //   fontWeight: FontWeight.bold,
-            //   // ),
-            //   avatarSplashColor: const Color.fromARGB(255, 76, 0, 255),
-            //   radius: 80,
-            //   isActivityIndicatorSmall: false,
-            //   avatarBorderData: AvatarBorderData(
-            //     borderColor: Colors.red,
-            //     borderWidth: 5.0,
-            //   ),
-            // ),
+            Container(
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.only(
+                  left: 25,
+                  bottom: 0,
+                ),
+                child: const Text(
+                  'Información General',
+                  style: TextStyle(
+                      color: Colors.grey,
+                      // color: Theme.of(context).primaryColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal),
+                )),
             SizedBox(
               width: screenWidth * 0.92,
-              height: 400,
               child: Container(
-                margin: const EdgeInsets.only(bottom: 50, top: 10),
-                padding: const EdgeInsets.only(bottom: 10, top: 10),
+                margin: const EdgeInsets.only(bottom: 15, top: 10),
+                padding: const EdgeInsets.only(
+                    bottom: 20, top: 20, left: 10, right: 10),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
+                  // color: Theme.of(context).scaffoldBackgroundColor,
+                  color: const Color.fromRGBO(230, 230, 230, 1),
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
@@ -106,23 +104,35 @@ class _ProfilePage extends State<ProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Container(
-                        alignment: Alignment.centerLeft,
-                        margin: const EdgeInsets.only(left: 15, bottom: 10),
-                        child: Text(
-                          'Información General',
-                          style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold),
-                        )),
-                    Container(
                         margin: const EdgeInsets.symmetric(horizontal: 10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.person_outline,
-                              color: Theme.of(context).primaryColor,
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.5), // Color de la sombra
+                                    spreadRadius:
+                                        0.1, // Cuánto se extiende la sombra
+                                    blurRadius:
+                                        0.1, // Qué tan difusa es la sombra
+                                    offset: const Offset(
+                                        0, 0), // Ángulo de la sombra (x, y)
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.person_outline,
+                                color: Theme.of(context).primaryColor,
+                                size: 25,
+                              ),
                             ),
                             const SizedBox(
                               width: 10,
@@ -131,7 +141,7 @@ class _ProfilePage extends State<ProfilePage> {
                               'Name',
                               style: TextStyle(
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w300,
                                   letterSpacing: 1.1),
                             )
@@ -147,9 +157,31 @@ class _ProfilePage extends State<ProfilePage> {
                         margin: const EdgeInsets.symmetric(horizontal: 10),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.date_range_outlined,
-                              color: Theme.of(context).primaryColor,
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.5), // Color de la sombra
+                                    spreadRadius:
+                                        0.1, // Cuánto se extiende la sombra
+                                    blurRadius:
+                                        0.1, // Qué tan difusa es la sombra
+                                    offset: const Offset(
+                                        0, 0), // Ángulo de la sombra (x, y)
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.date_range_outlined,
+                                color: Theme.of(context).primaryColor,
+                                size: 25,
+                              ),
                             ),
                             const SizedBox(
                               width: 10,
@@ -158,7 +190,7 @@ class _ProfilePage extends State<ProfilePage> {
                               'Fecha de nacimiento',
                               style: TextStyle(
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w300,
                                   letterSpacing: 1.1),
                             )
@@ -174,9 +206,31 @@ class _ProfilePage extends State<ProfilePage> {
                         margin: const EdgeInsets.symmetric(horizontal: 10),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.email_outlined,
-                              color: Theme.of(context).primaryColor,
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.5), // Color de la sombra
+                                    spreadRadius:
+                                        0.1, // Cuánto se extiende la sombra
+                                    blurRadius:
+                                        0.1, // Qué tan difusa es la sombra
+                                    offset: const Offset(
+                                        0, 0), // Ángulo de la sombra (x, y)
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.email_outlined,
+                                color: Theme.of(context).primaryColor,
+                                size: 25,
+                              ),
                             ),
                             const SizedBox(
                               width: 10,
@@ -184,7 +238,7 @@ class _ProfilePage extends State<ProfilePage> {
                             Text(
                               'Correo Electrónico',
                               style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.w300,
                                   letterSpacing: 1.1),
@@ -201,9 +255,31 @@ class _ProfilePage extends State<ProfilePage> {
                         margin: const EdgeInsets.symmetric(horizontal: 10),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.smartphone_outlined,
-                              color: Theme.of(context).primaryColor,
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.5), // Color de la sombra
+                                    spreadRadius:
+                                        0.1, // Cuánto se extiende la sombra
+                                    blurRadius:
+                                        0.1, // Qué tan difusa es la sombra
+                                    offset: const Offset(
+                                        0, 0), // Ángulo de la sombra (x, y)
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.smartphone_outlined,
+                                color: Theme.of(context).primaryColor,
+                                size: 25,
+                              ),
                             ),
                             const SizedBox(
                               width: 10,
@@ -212,7 +288,7 @@ class _ProfilePage extends State<ProfilePage> {
                               'Celular',
                               style: TextStyle(
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w300,
                                   letterSpacing: 1.1),
                             )
@@ -223,7 +299,110 @@ class _ProfilePage extends State<ProfilePage> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(bottom: 20),
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.only(
+                  left: 25,
+                  bottom: 0,
+                ),
+                child: const Text(
+                  'Preferencias',
+                  style: TextStyle(
+                      color: Colors.grey,
+                      // color: Theme.of(context).primaryColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal),
+                )),
+            SizedBox(
+              width: screenWidth * 0.92,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 50, top: 10),
+                padding: const EdgeInsets.only(
+                    bottom: 20, top: 20, left: 10, right: 10),
+                decoration: BoxDecoration(
+                  // color: Theme.of(context).scaffoldBackgroundColor,
+                  color: const Color.fromRGBO(230, 230, 230, 1),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context)
+                          .primaryColor
+                          .withOpacity(0.5), // Color de la sombra
+                      spreadRadius: 0.1, // Cuánto se extiende la sombra
+                      blurRadius: 0.1, // Qué tan difusa es la sombra
+                      offset: const Offset(0, 0), // Ángulo de la sombra (x, y)
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withOpacity(
+                                                0.5), // Color de la sombra
+                                        spreadRadius:
+                                            0.1, // Cuánto se extiende la sombra
+                                        blurRadius:
+                                            0.1, // Qué tan difusa es la sombra
+                                        offset: const Offset(
+                                            0, 0), // Ángulo de la sombra (x, y)
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    lightMode
+                                        ? Icons.light_mode_outlined
+                                        : Icons.dark_mode_outlined,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Tema oscuro',
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w300,
+                                      letterSpacing: 1.1),
+                                ),
+                              ],
+                            ),
+                            Switch(
+                              activeColor: Colors.blue,
+                              activeTrackColor: Colors.black,
+                              inactiveTrackColor: Colors.grey,
+                              value: lightMode,
+                              onChanged: (value) {
+                                setState(() {
+                                  lightMode = value;
+                                });
+                              },
+                            ),
+                          ],
+                        )),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
               width: screenWidth * 0.92,
               height: 60,
               child: ElevatedButton(

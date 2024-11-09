@@ -6,16 +6,16 @@ import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 final mqttService = MqttService();
 String tempAlert = '';
 
-void mqttProcess() async {
-  await mqttService.connect(
-      '192.168.88.253', 1883, 'mqttx_App', 'pasante', '1234');
-  mqttService.subscribe('esp32/test');
-  mqttService.listenToMessages();
-  mqttService.publishMessage('esp32/test', 'Hello ESP32!');
-}
+// void mqttProcess() async {
+//   await mqttService.connect(
+//       '192.168.88.253', 1883, 'mqttx_App', 'pasante', '1234');
+//   mqttService.subscribe('esp32/test');
+//   mqttService.listenToMessages();
+//   mqttService.publishMessage('esp32/test', 'Hello ESP32!');
+// }
 
-class HomeUserPatient extends StatefulWidget {
-  const HomeUserPatient({
+class HomeUserWorker extends StatefulWidget {
+  const HomeUserWorker({
     super.key,
     /*required this.isSelected,
     required this.icon,
@@ -25,10 +25,10 @@ class HomeUserPatient extends StatefulWidget {
   });
 
   @override
-  _HomeUserPatient createState() => _HomeUserPatient();
+  _HomeUserWorker createState() => _HomeUserWorker();
 }
 
-class _HomeUserPatient extends State<HomeUserPatient> {
+class _HomeUserWorker extends State<HomeUserWorker> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;

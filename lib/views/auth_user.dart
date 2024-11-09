@@ -2,6 +2,7 @@ import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:get/get_navigation/src/routes/default_transitions.dart';
 import 'package:smartclothingproject/functions/LastPage.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
 import '../models/user_model.dart';
@@ -169,9 +170,29 @@ void LoggedUser(context) {
   saveLastPage('userLoggedHome');
   Navigator.pushAndRemoveUntil(
     context,
-    MaterialPageRoute(builder: (context) => const LoggedUserPage()),
-    (Route<dynamic> route) =>
-        false, // Aquí false indica que todas las vistas anteriores deben eliminarse
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const LoggedUserPage(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+        const endOffset = Offset.zero; // Termina en el centro
+        const curve = Curves.easeInOut;
+
+        var offsetTween = Tween(begin: beginOffset, end: endOffset)
+            .chain(CurveTween(curve: curve));
+        var opacityTween =
+            Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(offsetTween),
+          child: FadeTransition(
+            opacity: animation.drive(opacityTween),
+            child: child,
+          ),
+        );
+      },
+    ),
+    (Route<dynamic> route) => false, // Elimina todas las vistas anteriores
   );
 }
 
@@ -242,19 +263,51 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                       email = '';
                       password = '';
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const LoginForm())); // Muestra el formulario de inicio de sesión
-                    },
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const LoginForm(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            const begin =
+                                Offset(1.0, 0.0); // Comienza desde la derecha
+                            const end = Offset.zero; // Termina en el centro
+                            const curve = Curves.easeInOut;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+
+                            return SlideTransition(
+                              position: animation.drive(tween),
+                              child: child,
+                            );
+                          },
+                        ),
+                      );
+                    } // Muestra el formulario de inicio de sesión
+                    ,
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(radiusBtn))),
-                    child: const Text(
-                      'Iniciar Sesión',
-                      style: TextStyle(fontSize: 20),
-                    ),
+                    child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Iniciar Sesión',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Icon(Icons.login),
+                          ),
+                        ]),
                   ),
                 ),
                 Container(
@@ -273,19 +326,55 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                       confirmPassword = '';
                       samePsw = false;
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const RegisterForm())); // Muestra el formulario de registro
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const RegisterForm(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            const begin =
+                                Offset(1.0, 0.0); // Comienza desde la derecha
+                            const end = Offset.zero; // Termina en el centro
+                            const curve = Curves.easeInOut;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+
+                            return SlideTransition(
+                              position: animation.drive(tween),
+                              child: child,
+                            );
+                          },
+                        ),
+                      );
+                      // Muestra el formulario de registro
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(radiusBtn))),
-                    child: const Text(
-                      'Registrarse',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
-                    ),
+                    child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Registrarse',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.app_registration_outlined,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ]),
                   ),
                 )
               ],
@@ -311,10 +400,40 @@ class _LoginForm extends State<LoginForm> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          foregroundColor: Theme.of(context).primaryColor,
+        // appBar: AppBar(
+        //   elevation: 0,
+        //   // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        //   backgroundColor: Colors.transparent,
+        //   foregroundColor: Theme.of(context).primaryColor,
+        // ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const AuthSwitcher(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin =
+                      Offset(-1.0, 0.0); // Comienza desde la izquierda
+                  const end = Offset.zero; // Termina en el centro
+                  const curve = Curves.easeInOut;
+
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ),
+              (Route<dynamic> route) =>
+                  false, // Elimina todas las vistas anteriores
+            );
+          },
+          child: const Icon(Icons.arrow_back_ios_new),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -322,12 +441,21 @@ class _LoginForm extends State<LoginForm> {
             child: Container(
               // registro de usuario
               width: screenWidth,
-              height: screenHeight * 0.88,
+              height: screenHeight * 1,
               alignment: Alignment.topCenter,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-              ),
+                  // color: Theme.of(context).scaffoldBackgroundColor,
+                  gradient: LinearGradient(
+                colors: [
+                  Colors.pink.withOpacity(0.25),
+                  Colors.purple.withOpacity(0.25),
+                  const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
+                  Colors.blue.withOpacity(0.25),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -352,6 +480,14 @@ class _LoginForm extends State<LoginForm> {
                               horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
+                              prefixIcon: Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                    start: 12.0),
+                                child: Icon(
+                                  Icons.email_outlined,
+                                  color: Theme.of(context).primaryColor,
+                                ), // myIcon is a 48px-wide widget.
+                              ),
                               labelText: 'Correo electrónico',
                               labelStyle: TextStyle(
                                   color: Theme.of(context).primaryColor),
@@ -391,6 +527,13 @@ class _LoginForm extends State<LoginForm> {
                               horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
+                              prefixIcon: Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                    start: 12.0),
+                                child: Icon(Icons.password,
+                                    color: Theme.of(context)
+                                        .primaryColor), // myIcon is a 48px-wide widget.
+                              ),
                               labelText: 'Contraseña',
                               labelStyle: TextStyle(
                                   color: Theme.of(context).primaryColor),
@@ -551,13 +694,43 @@ class _RegisterForm extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     //double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          foregroundColor: Theme.of(context).primaryColor,
+        // appBar: AppBar(
+        //   elevation: 0,
+        //   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        //   foregroundColor: Theme.of(context).primaryColor,
+        // ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const AuthSwitcher(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin =
+                      Offset(-1.0, 0.0); // Comienza desde la izquierda
+                  const end = Offset.zero; // Termina en el centro
+                  const curve = Curves.easeInOut;
+
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ),
+              (Route<dynamic> route) =>
+                  false, // Elimina todas las vistas anteriores
+            );
+          },
+          child: const Icon(Icons.arrow_back_ios_new),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -565,11 +738,21 @@ class _RegisterForm extends State<RegisterForm> {
             child: Container(
               // registro de usuario
               width: screenWidth,
+              height: screenHeight * 1,
               alignment: Alignment.center,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-              ),
+                  // color: Theme.of(context).scaffoldBackgroundColor,
+                  gradient: LinearGradient(
+                colors: [
+                  Colors.pink.withOpacity(0.25),
+                  Colors.purple.withOpacity(0.25),
+                  const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
+                  Colors.blue.withOpacity(0.25),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.min,
@@ -595,6 +778,13 @@ class _RegisterForm extends State<RegisterForm> {
                                 horizontal: 2, vertical: 5),
                             child: TextFormField(
                               decoration: InputDecoration(
+                                  prefixIcon: Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                        start: 12.0),
+                                    child: Icon(Icons.text_format,
+                                        color: Theme.of(context)
+                                            .primaryColor), // myIcon is a 48px-wide widget.
+                                  ),
                                   counterStyle: TextStyle(
                                       color:
                                           Theme.of(context).primaryColorDark),
@@ -634,6 +824,13 @@ class _RegisterForm extends State<RegisterForm> {
                               horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(Icons.text_fields,
+                                      color: Theme.of(context)
+                                          .primaryColor), // myIcon is a 48px-wide widget.
+                                ),
                                 labelText: 'Apellidos',
                                 labelStyle: TextStyle(
                                     color: Theme.of(context).primaryColor),
@@ -671,6 +868,13 @@ class _RegisterForm extends State<RegisterForm> {
                               horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(Icons.email_outlined,
+                                      color: Theme.of(context)
+                                          .primaryColor), // myIcon is a 48px-wide widget.
+                                ),
                                 labelText: 'Correo electrónico',
                                 labelStyle: TextStyle(
                                     color: Theme.of(context).primaryColor),
@@ -715,6 +919,13 @@ class _RegisterForm extends State<RegisterForm> {
                               horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
+                              prefixIcon: Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                    start: 12.0),
+                                child: Icon(Icons.password,
+                                    color: Theme.of(context)
+                                        .primaryColor), // myIcon is a 48px-wide widget.
+                              ),
                               labelText: 'Contraseña',
                               labelStyle: TextStyle(
                                   color: Theme.of(context).primaryColor),
@@ -741,10 +952,10 @@ class _RegisterForm extends State<RegisterForm> {
                                   )),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obsTextConfirm
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                ),
+                                    obsTextConfirm
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Theme.of(context).primaryColor),
                                 onPressed: () {
                                   setState(() {
                                     obsTextConfirm = !obsTextConfirm;
@@ -779,6 +990,13 @@ class _RegisterForm extends State<RegisterForm> {
                               horizontal: 2, vertical: 5),
                           child: TextFormField(
                             decoration: InputDecoration(
+                              prefixIcon: Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                    start: 12.0),
+                                child: Icon(Icons.password,
+                                    color: Theme.of(context)
+                                        .primaryColor), // myIcon is a 48px-wide widget.
+                              ),
                               labelText: 'Confirme su contraseña',
                               labelStyle: TextStyle(
                                   color: Theme.of(context).primaryColor),
@@ -806,10 +1024,10 @@ class _RegisterForm extends State<RegisterForm> {
                                   )),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obsTextConfirm
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                ),
+                                    obsTextConfirm
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Theme.of(context).primaryColor),
                                 onPressed: () {
                                   setState(() {
                                     obsTextConfirm = !obsTextConfirm;
@@ -853,6 +1071,14 @@ class _RegisterForm extends State<RegisterForm> {
                                       color: Theme.of(context).primaryColor),
                                   borderRadius: BorderRadius.circular(40),
                                   decoration: InputDecoration(
+                                      prefixIcon: Padding(
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                                start: 12.0),
+                                        child: Icon(Icons.wc_outlined,
+                                            color: Theme.of(context)
+                                                .primaryColor), // myIcon is a 48px-wide widget.
+                                      ),
                                       labelText: 'Género',
                                       labelStyle: TextStyle(
                                           color:
@@ -882,7 +1108,7 @@ class _RegisterForm extends State<RegisterForm> {
                                   items: <String>[
                                     'Masculino',
                                     'Femenino',
-                                    '29 tipos de gays'
+                                    'Otro'
                                   ].map((String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
@@ -912,6 +1138,14 @@ class _RegisterForm extends State<RegisterForm> {
                                 child: TextFormField(
                                   controller: _dateController,
                                   decoration: InputDecoration(
+                                      prefixIcon: Padding(
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                                start: 12.0),
+                                        child: Icon(Icons.date_range_outlined,
+                                            color: Theme.of(context)
+                                                .primaryColor), // myIcon is a 48px-wide widget.
+                                      ),
                                       labelText: 'Fecha de Nacimiento',
                                       labelStyle: TextStyle(
                                           color:
@@ -954,6 +1188,13 @@ class _RegisterForm extends State<RegisterForm> {
                             dropdownColor:
                                 Theme.of(context).scaffoldBackgroundColor,
                             decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(Icons.assignment_ind_outlined,
+                                      color: Theme.of(context)
+                                          .primaryColor), // myIcon is a 48px-wide widget.
+                                ),
                                 labelText: 'Selecciona un tipo de usuario',
                                 labelStyle: TextStyle(
                                     color: Theme.of(context).primaryColor),

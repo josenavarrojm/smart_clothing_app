@@ -5,7 +5,7 @@ import 'package:smartclothingproject/views/bluetooth_ui.dart';
 import 'package:smartclothingproject/views/profile_page.dart';
 
 import '../functions/LastPage.dart';
-import 'home_user_patient.dart';
+import 'home_user_worker.dart';
 
 class LoggedUserPage extends StatefulWidget {
   const LoggedUserPage({super.key});
@@ -43,6 +43,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+        systemNavigationBarIconBrightness: Brightness.light,
       ));
     });
     return Scaffold(
@@ -92,7 +93,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
         controller: _pageController,
         allowImplicitScrolling: false,
         children: [
-          const HomeUserPatient(),
+          const HomeUserWorker(),
           const BluetoothUI(),
           Center(
               child: Text('Página 3: Detalles',
@@ -101,7 +102,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
         ],
       ),
       bottomNavigationBar: Container(
-        height: 75,
+        height: 85,
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
