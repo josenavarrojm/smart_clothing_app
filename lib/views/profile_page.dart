@@ -1,44 +1,44 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:smartclothingproject/functions/persistance_data.dart';
+import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
-import 'package:user_profile_avatar/user_profile_avatar.dart';
+import 'package:provider/provider.dart';
+import '../functions/theme_notifier.dart';
+import '../models/user_model.dart';
 
 // import 'home_user_patient.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final UserModel user;
+  const ProfilePage({super.key, required this.user});
 
   @override
   _ProfilePage createState() => _ProfilePage();
 }
 
 class _ProfilePage extends State<ProfilePage> {
-  String initLetter = '';
+  late UserModel user;
 
-  void letterCheck() async {
-    for (int i = 65; i <= 90; i++) {
-      // Cambiamos la letra actual y actualizamos el estado
-      setState(() {
-        initLetter = String.fromCharCode(i);
-      });
-
-      // Espera 2 segundos antes de continuar al siguiente ciclo
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
     double screenWidth = MediaQuery.of(context).size.width;
     // double screenHeight = MediaQuery.of(context).size.height;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
-      ));
+      if (mounted) {
+        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+        ));
+      }
     });
-
-    bool lightMode = true;
 
     return SingleChildScrollView(
         child: Center(
@@ -61,8 +61,11 @@ class _ProfilePage extends State<ProfilePage> {
                 shape: BoxShape.circle, // Forma circular
               ),
               child: Text(
-                initLetter,
-                style: TextStyle(color: Colors.white, fontSize: 80),
+                user.name[0].toUpperCase(),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 80,
+                    fontWeight: FontWeight.normal),
               ),
             ),
             Container(
@@ -87,7 +90,9 @@ class _ProfilePage extends State<ProfilePage> {
                     bottom: 20, top: 20, left: 10, right: 10),
                 decoration: BoxDecoration(
                   // color: Theme.of(context).scaffoldBackgroundColor,
-                  color: const Color.fromRGBO(230, 230, 230, 1),
+                  color: themeNotifier.isLightTheme
+                      ? const Color.fromRGBO(230, 230, 230, 1)
+                      : const Color.fromRGBO(30, 30, 30, 1),
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
@@ -111,7 +116,9 @@ class _ProfilePage extends State<ProfilePage> {
                             Container(
                               padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: themeNotifier.isLightTheme
+                                    ? Colors.white
+                                    : Colors.black,
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(10)),
                                 boxShadow: [
@@ -137,13 +144,16 @@ class _ProfilePage extends State<ProfilePage> {
                             const SizedBox(
                               width: 10,
                             ),
-                            Text(
-                              'Name',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: 1.1),
+                            Flexible(
+                              child: Text(
+                                '${user.name} ${user.surname}',
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w300,
+                                    letterSpacing: 1.1),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             )
                           ],
                         )),
@@ -160,7 +170,9 @@ class _ProfilePage extends State<ProfilePage> {
                             Container(
                               padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: themeNotifier.isLightTheme
+                                    ? Colors.white
+                                    : Colors.black,
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(10)),
                                 boxShadow: [
@@ -186,14 +198,16 @@ class _ProfilePage extends State<ProfilePage> {
                             const SizedBox(
                               width: 10,
                             ),
-                            Text(
-                              'Fecha de nacimiento',
+                            Flexible(
+                                child: Text(
+                              user.birthDate,
                               style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w300,
                                   letterSpacing: 1.1),
-                            )
+                              overflow: TextOverflow.ellipsis,
+                            ))
                           ],
                         )),
                     Divider(
@@ -209,7 +223,9 @@ class _ProfilePage extends State<ProfilePage> {
                             Container(
                               padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: themeNotifier.isLightTheme
+                                    ? Colors.white
+                                    : Colors.black,
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(10)),
                                 boxShadow: [
@@ -235,14 +251,14 @@ class _ProfilePage extends State<ProfilePage> {
                             const SizedBox(
                               width: 10,
                             ),
-                            Text(
-                              'Correo Electrónico',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: 1.1),
-                            )
+                            Flexible(
+                                child: Text(user.email,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Theme.of(context).primaryColor,
+                                        fontWeight: FontWeight.w300,
+                                        letterSpacing: 1.1),
+                                    overflow: TextOverflow.ellipsis))
                           ],
                         )),
                     Divider(
@@ -258,7 +274,9 @@ class _ProfilePage extends State<ProfilePage> {
                             Container(
                               padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: themeNotifier.isLightTheme
+                                    ? Colors.white
+                                    : Colors.black,
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(10)),
                                 boxShadow: [
@@ -284,14 +302,14 @@ class _ProfilePage extends State<ProfilePage> {
                             const SizedBox(
                               width: 10,
                             ),
-                            Text(
-                              'Celular',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: 1.1),
-                            )
+                            Flexible(
+                                child: Text(user.phoneNumber,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Theme.of(context).primaryColor,
+                                        fontWeight: FontWeight.w300,
+                                        letterSpacing: 1.1),
+                                    overflow: TextOverflow.ellipsis))
                           ],
                         )),
                   ],
@@ -320,7 +338,9 @@ class _ProfilePage extends State<ProfilePage> {
                     bottom: 20, top: 20, left: 10, right: 10),
                 decoration: BoxDecoration(
                   // color: Theme.of(context).scaffoldBackgroundColor,
-                  color: const Color.fromRGBO(230, 230, 230, 1),
+                  color: themeNotifier.isLightTheme
+                      ? const Color.fromRGBO(230, 230, 230, 1)
+                      : const Color.fromRGBO(30, 30, 30, 1),
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
@@ -346,7 +366,9 @@ class _ProfilePage extends State<ProfilePage> {
                                 Container(
                                   padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: themeNotifier.isLightTheme
+                                        ? Colors.white
+                                        : Colors.black,
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(10)),
                                     boxShadow: [
@@ -365,7 +387,7 @@ class _ProfilePage extends State<ProfilePage> {
                                     ],
                                   ),
                                   child: Icon(
-                                    lightMode
+                                    themeNotifier.isLightTheme
                                         ? Icons.light_mode_outlined
                                         : Icons.dark_mode_outlined,
                                     color: Theme.of(context).primaryColor,
@@ -388,11 +410,9 @@ class _ProfilePage extends State<ProfilePage> {
                               activeColor: Colors.blue,
                               activeTrackColor: Colors.black,
                               inactiveTrackColor: Colors.grey,
-                              value: lightMode,
+                              value: !(themeNotifier.isLightTheme),
                               onChanged: (value) {
-                                setState(() {
-                                  lightMode = value;
-                                });
+                                themeNotifier.toggleTheme(!value);
                               },
                             ),
                           ],
@@ -418,17 +438,33 @@ class _ProfilePage extends State<ProfilePage> {
                               color: Colors.red.withOpacity(0.5),
                               width: 0.8,
                               style: BorderStyle.solid))),
-                  onPressed: () {
-                    setState(() {
-                      letterCheck();
-                    });
-                    // saveLastPage('StartPageApp');
-                    // Navigator.pushAndRemoveUntil(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const AuthSwitcher()),
-                    //   (Route<dynamic> route) => false,
-                    // );
+                  onPressed: () async {
+                    await DatabaseHandler.instance.deleteUser();
+                    saveLastPage('AuthSwitch');
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const AuthSwitcher(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin =
+                              Offset(-1.0, 0.0); // Comienza desde la izquierda
+                          const end = Offset.zero; // Termina en el centro
+                          const curve = Curves.easeInOut;
+
+                          var tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+
+                          return SlideTransition(
+                            position: animation.drive(tween),
+                            child: child,
+                          );
+                        },
+                      ),
+                      (Route<dynamic> route) =>
+                          false, // Elimina todas las vistas anteriores
+                    );
                   },
                   child: const Text(
                     'Cerrar Sesión',

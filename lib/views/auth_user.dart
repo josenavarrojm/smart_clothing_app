@@ -2,8 +2,8 @@ import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:get/get_navigation/src/routes/default_transitions.dart';
-import 'package:smartclothingproject/functions/LastPage.dart';
+import 'package:smartclothingproject/functions/persistance_data.dart';
+import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +13,7 @@ String password = '';
 String confirmPassword = '';
 String name = '';
 String surname = '';
+String phoneNumber = '';
 int age = 0;
 bool samePsw = false;
 bool registerBtn = false;
@@ -40,22 +41,24 @@ Future<bool> isEmailInUse(String email) async {
 }
 
 // Creación y registro de usuarios en la base de datos
-void saveUserToFirestore(BuildContext context) async {
-  String hashPassword(String password) {
-    final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-    return hashedPassword;
-  }
+String hashPassword(String password) {
+  final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+  return hashedPassword;
+}
 
-  // Crear instancia de UserModel a partir de los datos del formulario
+void saveUserToFirestore(BuildContext context) async {
   UserModel newUser = UserModel(
     email: email,
     hashpwd: hashPassword(password),
     name: name,
     surname: surname,
-    age: age,
+    age: age.toString(),
+    birthDate: _dateController.text,
     gender: selectedGender!,
     userType: selectedUserType!,
+    phoneNumber: phoneNumber,
   );
+  // Crear instancia de UserModel a partir de los datos del formulario
 
   // Verificar si el correo ya está en uso
   if (await isEmailInUse(newUser.email)) {
@@ -68,22 +71,23 @@ void saveUserToFirestore(BuildContext context) async {
     );
     return; // Terminar la función si el correo ya está en uso
   } else {
+    // Guardar en Firestore si el correo no está en uso
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text("Ya puede iniciar sesión"),
+        content: Text("Registro Exitoso"),
         duration: Duration(seconds: 2), // Duración de la notificación
       ),
     );
   }
-
-  // Guardar en Firestore si el correo no está en uso
   await db
       .collection("users")
       .add(newUser.toJson())
       .then((value) => print("Usuario agregado con ID: ${value.id}"))
       .catchError((error) => print("Error al agregar usuario: $error"));
-  Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (context) => const LoginForm()));
+
+  // Guardar datos en SQLite
+  await DatabaseHandler.instance.saveOrUpdateUser(newUser.toJson());
+  LoggedUser(context);
 }
 
 // Lectura para la verificación de la existencia de usuarios en la base de datos e inicio de sesión
@@ -104,8 +108,9 @@ Future<void> loginUser(
 
     // Comprobar si la contraseña coincide
     if (verifyPassword(password, userData["Hashpwd"])) {
+      //Registrar los datos de usuario en la base de datos local
+      await DatabaseHandler.instance.saveOrUpdateUser(userData);
       // Mostrar SnackBar de éxito
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Inicio de sesión exitoso."),
@@ -685,8 +690,6 @@ class _RegisterForm extends State<RegisterForm> {
                 currentDate.day < picked.day)) {
           age--;
         }
-
-        print("Edad: $age años");
       });
     }
   }
@@ -738,7 +741,7 @@ class _RegisterForm extends State<RegisterForm> {
             child: Container(
               // registro de usuario
               width: screenWidth,
-              height: screenHeight * 1,
+              height: screenHeight * 1.1,
               alignment: Alignment.center,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               decoration: BoxDecoration(
@@ -819,6 +822,7 @@ class _RegisterForm extends State<RegisterForm> {
                                 setState(() {});
                               },
                             )),
+                        // phoneNumber
                         Container(
                           margin: const EdgeInsets.symmetric(
                               horizontal: 2, vertical: 5),
@@ -859,6 +863,55 @@ class _RegisterForm extends State<RegisterForm> {
                             },
                             onChanged: (value) {
                               surname = value;
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(Icons.numbers,
+                                      color: Theme.of(context)
+                                          .primaryColor), // myIcon is a 48px-wide widget.
+                                ),
+                                labelText: 'Celular',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                suffixStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.blue, width: 1.5),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusFocus)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: (registerBtn &&
+                                                phoneNumber == '')
+                                            ? Colors.red
+                                            : Theme.of(context).primaryColor,
+                                        width: 0.75),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal))),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor ingresa un número válido';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              phoneNumber = value;
                               setState(() {});
                             },
                           ),
@@ -1253,7 +1306,7 @@ class _RegisterForm extends State<RegisterForm> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius:
                                         BorderRadius.circular(radiusBtn))),
-                            onPressed: () {
+                            onPressed: () async {
                               registerBtn = true;
                               if (registerBtn) {
                                 if (samePsw &&

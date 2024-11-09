@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'package:smartclothingproject/views/bluetooth_ui.dart';
 import 'package:smartclothingproject/views/profile_page.dart';
+import '../handlers/data_base_handler.dart';
+import '../models/user_model.dart';
 
-import '../functions/LastPage.dart';
+import '../functions/persistance_data.dart';
 import 'home_user_worker.dart';
 
 class LoggedUserPage extends StatefulWidget {
@@ -17,6 +19,7 @@ class LoggedUserPage extends StatefulWidget {
 class _LoggedUserPageState extends State<LoggedUserPage> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
+  List<UserModel> users = [];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -28,6 +31,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   @override
   void initState() {
     super.initState();
+    loadUsers();
     _pageController.addListener(() {
       final index = _pageController.page!.round();
       if (index != _selectedIndex) {
@@ -36,6 +40,14 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
         });
       }
     });
+  }
+
+  Future<void> loadUsers() async {
+    // Llama a getAllUsers y guarda los datos en el arreglo users
+    users = await DatabaseHandler.instance.getAllUsers();
+    // await DatabaseHandler.instance.getAllUsers();
+
+    setState(() {});
   }
 
   @override
@@ -75,14 +87,35 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
               IconButton(
                 icon: Icon(_selectedIndex != 3 ? Icons.logout : Icons.settings),
                 color: Colors.blueAccent,
-                onPressed: () {
-                  saveLastPage('StartPageApp');
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AuthSwitcher()),
-                    (Route<dynamic> route) => false,
-                  );
+                onPressed: () async {
+                  if (_selectedIndex != 3) {
+                    await DatabaseHandler.instance.deleteUser();
+                    saveLastPage('AuthSwitch');
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const AuthSwitcher(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin =
+                              Offset(-1.0, 0.0); // Comienza desde la izquierda
+                          const end = Offset.zero; // Termina en el centro
+                          const curve = Curves.easeInOut;
+
+                          var tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+
+                          return SlideTransition(
+                            position: animation.drive(tween),
+                            child: child,
+                          );
+                        },
+                      ),
+                      (Route<dynamic> route) =>
+                          false, // Elimina todas las vistas anteriores
+                    );
+                  }
                 },
               ),
             ],
@@ -98,7 +131,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           Center(
               child: Text('Página 3: Detalles',
                   style: TextStyle(color: Theme.of(context).primaryColor))),
-          const ProfilePage(),
+          users.isNotEmpty
+              ? ProfilePage(user: users[0])
+              : const Center(child: CircularProgressIndicator()),
         ],
       ),
       bottomNavigationBar: Container(
