@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:smartclothingproject/controllers/mqtt_functions.dart';
+import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
+import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
+
+final blController = BluetoothController();
 
 final mqttService = MqttService();
 String tempAlert = '';
@@ -66,7 +71,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                 width: screenWidth * 0.95,
                 height: screenHeight * 0.2,
                 alignment: Alignment.center,
-                child: const Text('Estado:'),
+                child: Text(blController.temperatureData),
               ),
             ),
             Card(
@@ -81,6 +86,14 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                 ),
               ),
             ),
+            AlertDialog(
+              elevation: 30,
+              content: TextButton(
+                  onPressed: () {
+                    showCustomToast(blController.temperatureData);
+                  },
+                  child: const Text('Toast')),
+            )
           ],
         ),
       ),

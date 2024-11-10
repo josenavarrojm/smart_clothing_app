@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/firebase_options.dart';
 import 'functions/theme_notifier.dart';
+import 'functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
 import 'functions/persistance_data.dart';
 import 'views/auth_user.dart';
@@ -15,14 +17,23 @@ Future<void> main() async {
 
   String? lastPage = await getLastPage();
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeNotifier(),
-      child: MyApp(
-        lastPage: lastPage,
+  // Restringir la orientación a vertical (portrait)
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => ThemeNotifier()),
+          ChangeNotifierProvider(create: (context) => ConnectionService()),
+        ],
+        child: MyApp(
+          lastPage: lastPage,
+        ),
       ),
-    ),
-  );
+    );
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -56,6 +67,7 @@ class MyApp extends StatelessWidget {
       home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
           : const AuthSwitcher(),
+      // home: BluetoothDialog(),
     );
   }
 }

@@ -1,13 +1,28 @@
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
+import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
+import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'package:smartclothingproject/views/bluetooth_ui.dart';
 import 'package:smartclothingproject/views/profile_page.dart';
 import '../handlers/data_base_handler.dart';
 import '../models/user_model.dart';
 
+import 'dart:async';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 import '../functions/persistance_data.dart';
 import 'home_user_worker.dart';
+
+final blController = BluetoothController();
+bool closeAlertDialog = false;
 
 class LoggedUserPage extends StatefulWidget {
   const LoggedUserPage({super.key});
@@ -40,6 +55,25 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
         });
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final connectionService =
+          Provider.of<ConnectionService>(context, listen: false);
+      if (!connectionService.isSuscripted) {
+        showDialogIfNeeded(connectionService);
+      }
+    });
+  }
+
+  void showDialogIfNeeded(ConnectionService connectionService) {
+    if (!connectionService.isSuscripted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return const BluetoothDialog();
+        },
+      );
+    }
   }
 
   Future<void> loadUsers() async {
@@ -52,6 +86,8 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
   @override
   Widget build(BuildContext context) {
+    // double screenWidth = MediaQuery.of(context).size.width;
+    // double screenHeight = MediaQuery.of(context).size.height;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
@@ -133,7 +169,12 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                   style: TextStyle(color: Theme.of(context).primaryColor))),
           users.isNotEmpty
               ? ProfilePage(user: users[0])
-              : const Center(child: CircularProgressIndicator()),
+              : Center(
+                  child: LoadingAnimationWidget.progressiveDots(
+                    color: Colors.blueAccent,
+                    size: 50,
+                  ),
+                ),
         ],
       ),
       bottomNavigationBar: Container(

@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:smartclothingproject/functions/connected_state_notifier.dart';
+import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'reactive_state.dart';
 import 'package:meta/meta.dart';
 import 'dart:convert';
@@ -15,6 +18,7 @@ class BluetoothController {
   String accelerometerZData = '';
   String temperatureData = '';
   String humidityData = '';
+  bool isConnection = false;
 
   BluetoothController()
       : _bleScanner = BleScanner(
@@ -52,6 +56,11 @@ class BluetoothController {
 
   Future<void> connectToDevice(String deviceId) async {
     await _deviceConnector.connect(deviceId);
+    isConnection = _deviceConnector.connected;
+  }
+
+  bool isConnected() {
+    return _deviceConnector.connected;
   }
 
   Future<void> disconnectFromDevice(String deviceId) async {
@@ -73,9 +82,17 @@ class BluetoothController {
     );
 
     // Suscripción al flujo de datos de la característica
+    bool dataNoEmpty = false;
     final subscription =
         flutterReactiveBle.subscribeToCharacteristic(characteristic).listen(
-      (data) {
+      (data) async {
+        if (data.isNotEmpty && !dataNoEmpty) {
+          dataNoEmpty = true;
+          ConnectionService().updateSuscriptionStatus(true);
+          showCustomToast('Conexión exitosa');
+        }
+        await Future.delayed(const Duration(milliseconds: 800));
+        Fluttertoast.cancel();
         // Convertir el fragmento de datos recibido en texto
         final decodedFragment = String.fromCharCodes(data);
 
@@ -84,6 +101,7 @@ class BluetoothController {
         // Verificar si el fragmento contiene la palabra 'temperature'
         if (decodedFragment.contains('temperature')) {
           // Separar la cadena por el delimitador ":"
+          if (!ConnectionService().isSuscripted) {}
           var parts = decodedFragment.split(':');
 
           // Asegurarnos de que hay al menos dos partes (la variable y el valor)
@@ -161,49 +179,6 @@ class BluetoothController {
 
     return subscription; // Retorna la suscripción para poder cancelarla después
   }
-
-  // return flutterReactiveBle
-  //     .subscribeToCharacteristic(characteristic)
-  //     .map((data) {
-  //   // Convertir los bytes recibidos en un string y luego en JSON
-  //   final jsonString = String.fromCharCodes(data);
-  //   final jsonData = jsonDecode(jsonString);
-  //   print(jsonData);
-  //   return jsonData;
-
-//     String accelerometerData = '';
-// String temperatureData = '';
-// String humidityData = '';
-
-// void parseReceivedData(String data) {
-//   setState(() {
-//     // Aquí decodificas el JSON recibido
-//     var jsonData = json.decode(data);
-//     accelerometerData = jsonData['accelerometer'].toString();
-//     temperatureData = jsonData['temperature'].toString();
-//     humidityData = jsonData['humidity'].toString();
-//   });
-// }
-
-  // Stream<List<int>> subscribeToCharacteristic({
-  //   required String deviceId,
-  //   required Uuid serviceId,
-  //   required Uuid characteristicId,
-  // }) {
-  //   final characteristic = QualifiedCharacteristic(
-  //     serviceId: serviceId,
-  //     characteristicId: characteristicId,
-  //     deviceId: deviceId,
-  //   );
-
-  //   return flutterReactiveBle.subscribeToCharacteristic(characteristic);
-  // }
-
-  // var data = {}
-
-  // Future<void> printData(){
-
-  // }
 
   // Método para enviar datos a una característica
   Future<void> writeCharacteristic({
@@ -314,6 +289,7 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
   })  : _ble = ble,
         _logMessage = logMessage;
 
+  bool? connectionStateDevice;
   final FlutterReactiveBle _ble;
   final void Function(String message) _logMessage;
 
@@ -328,10 +304,15 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
   Future<void> connect(String deviceId) async {
     _logMessage('Start connecting to $deviceId');
     _connection = _ble.connectToDevice(id: deviceId).listen(
-      (update) {
+      (update) async {
         _logMessage(
             'ConnectionState for device $deviceId : ${update.connectionState}');
         _deviceConnectionController.add(update);
+        connected = update.connectionState == DeviceConnectionState.connected;
+        if (connected) {
+          showCustomToast('Dispositivo conectado');
+          ConnectionService().updateConnectionStatus(true);
+        }
       },
       onError: (Object e) =>
           _logMessage('Connecting to device $deviceId resulted in error $e'),
@@ -352,6 +333,10 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
           failure: null,
         ),
       );
+      connected = false;
+      if (connected) showCustomToast('Dispositivo desconectado');
+      ConnectionService().updateSuscriptionStatus(false);
+      ConnectionService().updateConnectionStatus(false);
     }
   }
 
