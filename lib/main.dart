@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/firebase_options.dart';
+import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'functions/theme_notifier.dart';
 import 'functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
         providers: [
           ChangeNotifierProvider(create: (context) => ThemeNotifier()),
           ChangeNotifierProvider(create: (context) => ConnectionService()),
+          ChangeNotifierProvider(create: (context) => BlDataNotifier()),
         ],
         child: MyApp(
           lastPage: lastPage,

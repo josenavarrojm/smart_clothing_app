@@ -154,7 +154,7 @@ void registerPage(context) {
       context,
       MaterialPageRoute(
           builder: (context) =>
-              const RegisterForm())); // Muestra el formulario de registro
+              RegisterForm())); // Muestra el formulario de registro
 }
 
 void loginPage(context) {
@@ -164,7 +164,7 @@ void loginPage(context) {
       context,
       MaterialPageRoute(
           builder: (context) =>
-              const LoginForm())); // Muestra el formulario de inicio de sesión
+              LoginForm())); // Muestra el formulario de inicio de sesión
 }
 
 void LoggedUser(context) {
@@ -176,8 +176,7 @@ void LoggedUser(context) {
   Navigator.pushAndRemoveUntil(
     context,
     PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          const LoggedUserPage(),
+      pageBuilder: (context, animation, secondaryAnimation) => LoggedUserPage(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
         const endOffset = Offset.zero; // Termina en el centro
@@ -202,7 +201,9 @@ void LoggedUser(context) {
 }
 
 class AuthSwitcher extends StatefulWidget {
-  const AuthSwitcher({super.key});
+  const AuthSwitcher({
+    super.key,
+  });
 
   @override
   _AuthSwitcherState createState() => _AuthSwitcherState();
@@ -272,7 +273,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                         PageRouteBuilder(
                           pageBuilder:
                               (context, animation, secondaryAnimation) =>
-                                  const LoginForm(),
+                                  LoginForm(),
                           transitionsBuilder:
                               (context, animation, secondaryAnimation, child) {
                             const begin =
@@ -335,7 +336,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                         PageRouteBuilder(
                           pageBuilder:
                               (context, animation, secondaryAnimation) =>
-                                  const RegisterForm(),
+                                  RegisterForm(),
                           transitionsBuilder:
                               (context, animation, secondaryAnimation, child) {
                             const begin =
@@ -392,7 +393,9 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
 }
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+  const LoginForm({
+    super.key,
+  });
 
   @override
   _LoginForm createState() => _LoginForm();
@@ -417,7 +420,7 @@ class _LoginForm extends State<LoginForm> {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    const AuthSwitcher(),
+                    AuthSwitcher(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
                   const begin =
@@ -659,7 +662,9 @@ class _LoginForm extends State<LoginForm> {
 }
 
 class RegisterForm extends StatefulWidget {
-  const RegisterForm({super.key});
+  const RegisterForm({
+    super.key,
+  });
 
   @override
   _RegisterForm createState() => _RegisterForm();
@@ -712,7 +717,7 @@ class _RegisterForm extends State<RegisterForm> {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    const AuthSwitcher(),
+                    AuthSwitcher(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
                   const begin =

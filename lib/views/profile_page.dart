@@ -11,7 +11,10 @@ import '../models/user_model.dart';
 
 class ProfilePage extends StatefulWidget {
   final UserModel user;
-  const ProfilePage({super.key, required this.user});
+  const ProfilePage({
+    super.key,
+    required this.user,
+  });
 
   @override
   _ProfilePage createState() => _ProfilePage();
@@ -445,7 +448,7 @@ class _ProfilePage extends State<ProfilePage> {
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            const AuthSwitcher(),
+                            AuthSwitcher(),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
                           const begin =

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'reactive_state.dart';
@@ -19,6 +18,7 @@ class BluetoothController {
   String accelerometerZData = '';
   String temperatureData = '';
   String humidityData = '';
+  bool isConnection = false;
 
   BluetoothController()
       : _bleScanner = BleScanner(
@@ -56,6 +56,11 @@ class BluetoothController {
 
   Future<void> connectToDevice(String deviceId) async {
     await _deviceConnector.connect(deviceId);
+    isConnection = _deviceConnector.connected;
+  }
+
+  bool isConnected() {
+    return _deviceConnector.connected;
   }
 
   Future<void> disconnectFromDevice(String deviceId) async {
@@ -84,6 +89,7 @@ class BluetoothController {
         if (data.isNotEmpty && !dataNoEmpty) {
           dataNoEmpty = true;
           ConnectionService().updateSuscriptionStatus(true);
+          showCustomToast('Conexión exitosa');
         }
         await Future.delayed(const Duration(milliseconds: 800));
         Fluttertoast.cancel();
@@ -103,8 +109,8 @@ class BluetoothController {
             // Extraer el valor de temperatura y limpiarlo
             String temperatureValue =
                 parts[1].trim(); // .trim() elimina espacios extra
-            temperatureData = temperatureValue;
-            BlDataNotifier().updateTemperatureData(temperatureValue);
+            temperatureData =
+                temperatureValue; // Asignamos el valor a la variable temperatureData
 
             print("Temperatura: $temperatureData");
           }
@@ -117,8 +123,9 @@ class BluetoothController {
             // Extraer el valor de temperatura y limpiarlo
             String humidityValue =
                 parts[1].trim(); // .trim() elimina espacios extra
-            humidityData = humidityValue;
-            BlDataNotifier().updateHumidityData(humidityValue);
+            humidityData =
+                humidityValue; // Asignamos el valor a la variable temperatureData
+
             print("Humedad: $humidityData");
           }
         } else if ((decodedFragment.contains('accelx'))) {
@@ -130,8 +137,8 @@ class BluetoothController {
             // Extraer el valor de temperatura y limpiarlo
             String accelXValue =
                 parts[1].trim(); // .trim() elimina espacios extra
-            accelerometerXData = accelXValue;
-            BlDataNotifier().updateAccelerometerXData(accelXValue);
+            accelerometerXData =
+                accelXValue; // Asignamos el valor a la variable temperatureData
 
             print("Ángulo X: $accelerometerXData");
           }
@@ -144,10 +151,10 @@ class BluetoothController {
             // Extraer el valor de temperatura y limpiarlo
             String accelYValue =
                 parts[1].trim(); // .trim() elimina espacios extra
-            accelerometerYData = accelYValue;
-            BlDataNotifier().updateAccelerometerYData(accelerometerYData);
+            accelerometerYData =
+                accelYValue; // Asignamos el valor a la variable temperatureData
 
-            print(" BlDataNotifier(): ${BlDataNotifier().accelerometerYData}");
+            print("Ángulo Y: $accelerometerYData");
           }
         } else if ((decodedFragment.contains('accelz'))) {
           // Separar la cadena por el delimitador ":"
@@ -160,9 +167,8 @@ class BluetoothController {
                 parts[1].trim(); // .trim() elimina espacios extra
             accelerometerZData =
                 accelZValue; // Asignamos el valor a la variable temperatureData
-            BlDataNotifier().updateAccelerometerZData(accelerometerZData);
 
-            print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
+            print("Ángulo Z: $accelerometerZData");
           }
         }
       },
@@ -235,7 +241,6 @@ class BleScanner implements ReactiveState<BleScannerState> {
           _devices[knownDeviceIndex] = device;
         } else {
           _devices.add(device);
-          ConnectionService().updateDeviceStatus(true);
         }
         _pushState();
       },
@@ -297,40 +302,20 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
   bool connected = false;
 
   Future<void> connect(String deviceId) async {
-    final completer = Completer<void>();
-
     _logMessage('Start connecting to $deviceId');
-
     _connection = _ble.connectToDevice(id: deviceId).listen(
       (update) {
         _logMessage(
             'ConnectionState for device $deviceId : ${update.connectionState}');
         _deviceConnectionController.add(update);
-
         if (update.connectionState == DeviceConnectionState.connected) {
+          showCustomToast('Dispositivo conectado');
           ConnectionService().updateConnectionStatus(true);
-          ConnectionService().updateLostConnection(false);
-          connected = true;
-          completer.complete(); // Completa la conexión cuando está conectado.
-        }
-        if (update.connectionState == DeviceConnectionState.disconnected &&
-            connected) {
-          connected = false;
-          ConnectionService().updateConnectionStatus(false);
-          ConnectionService().updateSuscriptionStatus(false);
-          ConnectionService().updateLostConnection(true);
         }
       },
-      onError: (Object e) {
-        _logMessage('Connecting to device $deviceId resulted in error $e');
-        if (!completer.isCompleted) {
-          completer.completeError(e); // Completa con error si ocurre.
-        }
-      },
+      onError: (Object e) =>
+          _logMessage('Connecting to device $deviceId resulted in error $e'),
     );
-
-    // Espera a que se complete la conexión o ocurra un error.
-    await completer.future;
   }
 
   Future<void> disconnect(String deviceId) async {
