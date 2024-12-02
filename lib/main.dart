@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/firebase_options.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
+import 'package:smartclothingproject/functions/loaderLogged.dart';
 // import 'package:smartclothingproject/views/demographic_profile.dart';
 import 'functions/theme_notifier.dart';
 import 'functions/connected_state_notifier.dart';
@@ -30,6 +31,7 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (context) => ThemeNotifier()),
           ChangeNotifierProvider(create: (context) => ConnectionService()),
           ChangeNotifierProvider(create: (context) => BlDataNotifier()),
+          ChangeNotifierProvider(create: (context) => AuthState()),
         ],
         child: MyApp(
           lastPage: lastPage,
@@ -53,9 +55,9 @@ class MyApp extends StatelessWidget {
           ? ThemeData(
               scaffoldBackgroundColor: Colors.white,
               primaryColorLight: Colors.white,
-              primaryColor: const Color.fromARGB(255, 150, 230, 255),
+              primaryColor: const Color.fromARGB(255, 255, 255, 255),
               colorScheme: ColorScheme.fromSwatch().copyWith(
-                secondary: const Color.fromARGB(255, 0, 10, 80),
+                secondary: const Color.fromARGB(255, 0, 0, 0),
               ),
             )
           : ThemeData(

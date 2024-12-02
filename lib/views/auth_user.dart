@@ -1,15 +1,22 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:smartclothingproject/functions/loaderLogged.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
+import 'package:smartclothingproject/views/demographic_profile.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
 
 String email = '';
+String codeSession = '';
 String password = '';
 String confirmPassword = '';
 String name = '';
@@ -89,20 +96,72 @@ void saveUserToFirestore(BuildContext context) async {
       .catchError((error) => print("Error al agregar usuario: $error"));
 
   // Guardar datos en SQLite
-  await DatabaseHandler.instance.saveOrUpdateUser(newUser.toJson());
-  LoggedUser(context);
+  // await DatabaseHandler.instance.saveOrUpdateUser(newUser.toJson());
+  // LoggedUser(context,);
 }
 
 // Lectura para la verificación de la existencia de usuarios en la base de datos e inicio de sesión
-Future<void> loginUser(
-    BuildContext context, String email, String password) async {
+// Future<void> loginUser(
+//     BuildContext context, String email, String password) async {
+//   bool verifyPassword(String password, String hashedPassword) {
+//     return BCrypt.checkpw(password, hashedPassword);
+//   }
+
+//   // Buscar el usuario en Firestore
+//   final QuerySnapshot result =
+//       await db.collection("users").where("Email", isEqualTo: email).get();
+
+//   // Verificar si se encontró algún usuario
+//   if (result.docs.isNotEmpty) {
+//     // Usuario encontrado, comprobar la contraseña
+//     final userData = result.docs.first.data() as Map<String, dynamic>;
+
+//     // Comprobar si la contraseña coincide
+//     if (verifyPassword(password, userData["Hashpwd"])) {
+//       //Registrar los datos de usuario en la base de datos local
+//       await DatabaseHandler.instance.saveOrUpdateUser(userData);
+//       // Mostrar SnackBar de éxito
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(
+//           content: Text("Inicio de sesión exitoso."),
+//           duration: Duration(seconds: 2),
+//         ),
+//       );
+//       LoggedUser(context);
+
+//       // Aquí puedes realizar la navegación o cualquier otra acción después del inicio de sesión
+//     } else {
+//       // Contraseña incorrecta
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(
+//           content: Text("Contraseña incorrecta."),
+//           duration: Duration(seconds: 2),
+//         ),
+//       );
+//     }
+//   } else {
+//     // No se encontró ningún usuario
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(
+//         content: Text("No existe un usuario con ese correo."),
+//         duration: Duration(seconds: 2),
+//       ),
+//     );
+//   }
+// }
+
+Future<void> signInUser(
+    BuildContext context, String codeSession, String password) async {
+  loginBtn = true;
   bool verifyPassword(String password, String hashedPassword) {
     return BCrypt.checkpw(password, hashedPassword);
   }
 
   // Buscar el usuario en Firestore
-  final QuerySnapshot result =
-      await db.collection("users").where("Email", isEqualTo: email).get();
+  final QuerySnapshot result = await db
+      .collection("users")
+      .where("UserCode", isEqualTo: codeSession)
+      .get();
 
   // Verificar si se encontró algún usuario
   if (result.docs.isNotEmpty) {
@@ -112,7 +171,7 @@ Future<void> loginUser(
     // Comprobar si la contraseña coincide
     if (verifyPassword(password, userData["Hashpwd"])) {
       //Registrar los datos de usuario en la base de datos local
-      await DatabaseHandler.instance.saveOrUpdateUser(userData);
+      // await DatabaseHandler.instance.saveOrUpdateUser(userData);
       // Mostrar SnackBar de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -120,11 +179,13 @@ Future<void> loginUser(
           duration: Duration(seconds: 2),
         ),
       );
-      LoggedUser(context);
+      loggedUser(context, userData["DataCompleted"]);
 
       // Aquí puedes realizar la navegación o cualquier otra acción después del inicio de sesión
     } else {
       // Contraseña incorrecta
+      loginBtn = false;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Contraseña incorrecta."),
@@ -134,9 +195,11 @@ Future<void> loginUser(
     }
   } else {
     // No se encontró ningún usuario
+    loginBtn = false;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text("No existe un usuario con ese correo."),
+        content: Text("Las credenciales de acceso no son válidas."),
         duration: Duration(seconds: 2),
       ),
     );
@@ -160,47 +223,79 @@ void registerPage(context) {
               RegisterForm())); // Muestra el formulario de registro
 }
 
-void loginPage(context) {
-  email = '';
-  password = '';
-  Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-          builder: (context) =>
-              LoginForm())); // Muestra el formulario de inicio de sesión
-}
+// void loginPage(context) {
+//   email = '';
+//   password = '';
+//   Navigator.pushReplacement(
+//       context,
+//       MaterialPageRoute(
+//           builder: (context) =>
+//               LoginForm())); // Muestra el formulario de inicio de sesión
+// }
 
-void LoggedUser(context) {
+void loggedUser(context, bool DataCompleted) {
   email = '';
+  codeSession = '';
   password = '';
   loginBtn = false;
   validEmail = false;
-  saveLastPage('userLoggedHome');
-  Navigator.pushAndRemoveUntil(
-    context,
-    PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => LoggedUserPage(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
-        const endOffset = Offset.zero; // Termina en el centro
-        const curve = Curves.easeInOut;
+  if (DataCompleted) {
+    saveLastPage('userLoggedHome');
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const LoggedUserPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+          const endOffset = Offset.zero; // Termina en el centro
+          const curve = Curves.easeInOut;
 
-        var offsetTween = Tween(begin: beginOffset, end: endOffset)
-            .chain(CurveTween(curve: curve));
-        var opacityTween =
-            Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: curve));
+          var offsetTween = Tween(begin: beginOffset, end: endOffset)
+              .chain(CurveTween(curve: curve));
+          var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
+              .chain(CurveTween(curve: curve));
 
-        return SlideTransition(
-          position: animation.drive(offsetTween),
-          child: FadeTransition(
-            opacity: animation.drive(opacityTween),
-            child: child,
-          ),
-        );
-      },
-    ),
-    (Route<dynamic> route) => false, // Elimina todas las vistas anteriores
-  );
+          return SlideTransition(
+            position: animation.drive(offsetTween),
+            child: FadeTransition(
+              opacity: animation.drive(opacityTween),
+              child: child,
+            ),
+          );
+        },
+      ),
+      (Route<dynamic> route) => false, // Elimina todas las vistas anteriores
+    );
+  } else {
+    saveLastPage('demographicProfile');
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const DemographicProfileWorker(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+          const endOffset = Offset.zero; // Termina en el centro
+          const curve = Curves.easeInOut;
+
+          var offsetTween = Tween(begin: beginOffset, end: endOffset)
+              .chain(CurveTween(curve: curve));
+          var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
+              .chain(CurveTween(curve: curve));
+
+          return SlideTransition(
+            position: animation.drive(offsetTween),
+            child: FadeTransition(
+              opacity: animation.drive(opacityTween),
+              child: child,
+            ),
+          );
+        },
+      ),
+      (Route<dynamic> route) => false, // Elimina todas las vistas anteriores
+    );
+  }
 }
 
 class AuthSwitcher extends StatefulWidget {
@@ -215,6 +310,14 @@ class AuthSwitcher extends StatefulWidget {
 class _AuthSwitcherState extends State<AuthSwitcher> {
   bool isLogin = true; // Estado para saber cuál formulario mostrar
   bool _showCard = false;
+  final TextEditingController _codeSessionController = TextEditingController();
+  final TextEditingController _controllerPassword = TextEditingController();
+
+  @override
+  void dispose() {
+    _codeSessionController.dispose(); // Liberar recursos al destruir el widget
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -311,63 +414,95 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
         AnimatedPositioned(
             duration: durationAnimation,
             curve: Curves.easeInOut,
-            bottom: _showCard ? 0 : -screenHeight * 0.6, // Animación
+            bottom: _showCard ? 0 : -screenHeight * 0.9, // Animación
             left: 0,
             right: 0,
             child: Card(
-              margin: const EdgeInsets.all(0),
-              elevation: 0.0,
-              // color: Colors.transparent,
-              color: Theme.of(context).colorScheme.secondary,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(50),
-                  topRight: Radius.circular(50),
+                margin: const EdgeInsets.all(0),
+                elevation: 0.0,
+                // color: Colors.transparent,
+                color: Theme.of(context).colorScheme.secondary,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
                 ),
-              ),
-
-              child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 25),
-                  // decoration: BoxDecoration(
-                  //   color: Theme.of(context).colorScheme.secondary,
-                  //   borderRadius: BorderRadius.circular(40),
-                  // ),
-                  child: Column(children: [
-                    Container(
-                      height: screenHeight * 0.4,
-                      decoration: BoxDecoration(
-                        // color: Colors.pink,
-                        borderRadius: BorderRadius.circular(50),
-                      ), // Altura del Card
-                      child: Center(child: const LoginForm()), // Tu formulario
-                    ),
-                    FloatingActionButton(
-                      elevation: 0.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            radiusBtn), // Esquinas redondeadas
-                      ),
-                      backgroundColor: Theme.of(context).primaryColor,
-                      onPressed: () {
-                        setState(() {
-                          _showCard = !_showCard;
-                        });
-                      },
-                      child: Icon(
-                        Icons.arrow_downward_outlined,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    )
-                  ])),
-            )),
+                child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 25),
+                    // decoration: BoxDecoration(
+                    //   color: Theme.of(context).colorScheme.secondary,
+                    //   borderRadius: BorderRadius.circular(40),
+                    // ),
+                    child: Consumer<AuthState>(
+                        builder: (context, authState, child) {
+                      return authState.loginBtn
+                          ? Center(
+                              child: Container(
+                                height: screenHeight * 0.474,
+                                decoration: BoxDecoration(
+                                  // color: Colors.pink,
+                                  borderRadius: BorderRadius.circular(50),
+                                ), // Altura del Card
+                                child: Center(
+                                  child: LoadingAnimationWidget.waveDots(
+                                    color: Theme.of(context).primaryColor,
+                                    size: 50,
+                                  ),
+                                ), // Tu formulario
+                              ),
+                            )
+                          : Column(children: [
+                              Container(
+                                height: screenHeight * 0.4,
+                                decoration: BoxDecoration(
+                                  // color: Colors.pink,
+                                  borderRadius: BorderRadius.circular(50),
+                                ), // Altura del Card
+                                child: Center(
+                                    child: LoginForm(
+                                  controllerCodeSession: _codeSessionController,
+                                  controllerPassword: _controllerPassword,
+                                )), // Tu formulario
+                              ),
+                              FloatingActionButton(
+                                elevation: 0.0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      radiusBtn), // Esquinas redondeadas
+                                ),
+                                backgroundColor: Theme.of(context).primaryColor,
+                                onPressed: () {
+                                  codeSession = '';
+                                  password = '';
+                                  setState(() {
+                                    _showCard = !_showCard;
+                                    FocusScope.of(context).unfocus();
+                                    _controllerPassword.clear();
+                                    _codeSessionController.clear();
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.arrow_downward_outlined,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                  size: 40,
+                                ),
+                              )
+                            ]);
+                    })))),
       ]),
     );
   }
 }
 
 class LoginForm extends StatefulWidget {
+  final TextEditingController controllerCodeSession;
+  final TextEditingController controllerPassword;
   const LoginForm({
     super.key,
+    required this.controllerCodeSession,
+    required this.controllerPassword,
   });
 
   @override
@@ -459,10 +594,11 @@ class _LoginForm extends State<LoginForm> {
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 15),
                 child: Text(
-                  'Inicio de sesión ',
+                  'Inicio de Sesión',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.pattaya(
-                      fontSize: 35,
+                      fontSize: 38,
+                      letterSpacing: 2,
                       fontWeight: FontWeight.w800,
                       color: Theme.of(context).primaryColor),
                 ),
@@ -476,43 +612,51 @@ class _LoginForm extends State<LoginForm> {
                       margin: const EdgeInsets.symmetric(
                           horizontal: 2, vertical: 5),
                       child: TextFormField(
+                        controller: widget.controllerCodeSession,
+                        keyboardType:
+                            TextInputType.number, // Activa el teclado numérico
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .digitsOnly, // Permite solo números
+                        ],
                         decoration: InputDecoration(
                           prefixIcon: Padding(
                             padding:
                                 const EdgeInsetsDirectional.only(start: 12.0),
                             child: Icon(
-                              Icons.email_outlined,
+                              Icons.vpn_key_outlined,
                               color: Theme.of(context).primaryColor,
                             ), // myIcon is a 48px-wide widget.
                           ),
-                          labelText: 'Correo electrónico',
+                          labelText: 'Código',
                           labelStyle:
                               TextStyle(color: Theme.of(context).primaryColor),
                           suffixStyle:
                               TextStyle(color: Theme.of(context).primaryColor),
                           focusedBorder: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                  color: Colors.blue, width: 1.5),
+                                  color: Colors.blue, width: 2.2),
                               borderRadius: BorderRadius.circular(radiusFocus)),
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  color: (loginBtn && email == '')
+                                  color: (loginBtn && codeSession == '')
                                       ? Colors.red
                                       : Theme.of(context).primaryColor,
-                                  width: 0.75),
+                                  width: 2.2),
                               borderRadius:
                                   BorderRadius.circular(radiusNormal)),
                         ),
-                        style: TextStyle(color: Theme.of(context).primaryColor),
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 20),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu correo electrónico';
+                            return 'Por favor ingresa tu código';
                           }
                           return null;
                         },
                         onChanged: (value) {
-                          validEmail = EmailValidator.validate(value);
-                          email = value;
+                          codeSession = value;
                           setState(() {});
                         },
                       ),
@@ -521,6 +665,7 @@ class _LoginForm extends State<LoginForm> {
                       margin: const EdgeInsets.symmetric(
                           horizontal: 2, vertical: 5),
                       child: TextFormField(
+                        controller: widget.controllerPassword,
                         decoration: InputDecoration(
                           prefixIcon: Padding(
                             padding:
@@ -536,14 +681,14 @@ class _LoginForm extends State<LoginForm> {
                               TextStyle(color: Theme.of(context).primaryColor),
                           focusedBorder: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                  color: Colors.blue, width: 1.5),
+                                  color: Colors.blue, width: 2.2),
                               borderRadius: BorderRadius.circular(radiusFocus)),
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: (loginBtn && email == '')
                                       ? Colors.red
                                       : Theme.of(context).primaryColor,
-                                  width: 0.75),
+                                  width: 2.2),
                               borderRadius:
                                   BorderRadius.circular(radiusNormal)),
                           suffixIcon: IconButton(
@@ -560,7 +705,9 @@ class _LoginForm extends State<LoginForm> {
                             },
                           ),
                         ),
-                        style: TextStyle(color: Theme.of(context).primaryColor),
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 20),
                         obscureText: !obsTextConfirm,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -593,49 +740,52 @@ class _LoginForm extends State<LoginForm> {
                                 borderRadius:
                                     BorderRadius.circular(radiusBtn))),
                         onPressed: () {
-                          loginBtn = true;
-                          if (loginBtn) {
-                            if (email != '' && validEmail && password != '') {
-                              loginUser(context, email, password);
-                            }
+                          final authState =
+                              Provider.of<AuthState>(context, listen: false);
+                          authState.setLoginBtn(true); // Cambia el estado
+
+                          if (authState.loginBtn &&
+                              codeSession != '' &&
+                              password != '') {
+                            signInUser(context, codeSession, password);
+                            authState.setLoginBtn(false);
                           }
-                          setState(() {});
                         },
                         child: Text(
                           'Iniciar Sesión',
                           style: GoogleFonts.pattaya(
                               fontSize: 25,
+                              letterSpacing: 2,
                               fontWeight: FontWeight.w100,
                               color: Theme.of(context).colorScheme.secondary),
                         ),
                       ),
                     ),
-
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     Text(
-                    //       '¿No tienes una cuenta?',
-                    //       style: TextStyle(
-                    //           fontSize: 18,
-                    //           color: Theme.of(context).primaryColor,
-                    //           fontWeight: FontWeight.w400),
-                    //     ),
-                    //     TextButton(
-                    //       onPressed: () {
-                    //         registerPage(context);
-                    //       },
-                    //       child: const Text(
-                    //         'Registrarse',
-                    //         style: TextStyle(
-                    //             fontSize: 18,
-                    //             color: Colors.lightBlue,
-                    //             fontWeight: FontWeight.w600,
-                    //             letterSpacing: 0.5),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Ingresar como administrador',
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.w400),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            registerPage(context);
+                          },
+                          child: const Text(
+                            'Registrarse',
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.lightBlue,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -1330,8 +1480,8 @@ class _RegisterForm extends State<RegisterForm> {
                             ),
                             TextButton(
                               onPressed: () {
-                                loginPage(
-                                    context); // Muestra el formulario de inicio de sesión
+                                // loginPage(
+                                //     context); // Muestra el formulario de inicio de sesión
                               },
                               child: const Text(
                                 'Iniciar Sesión',
