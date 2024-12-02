@@ -4,11 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/firebase_options.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
+// import 'package:smartclothingproject/views/demographic_profile.dart';
 import 'functions/theme_notifier.dart';
 import 'functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
-import 'functions/persistance_data.dart';
 import 'views/auth_user.dart';
+import 'functions/persistance_data.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,14 +48,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'SmartClothing App',
       theme: themeNotifier.isLightTheme
           ? ThemeData(
               scaffoldBackgroundColor: Colors.white,
               primaryColorLight: Colors.white,
-              primaryColor: Colors.black,
+              primaryColor: const Color.fromARGB(255, 150, 230, 255),
               colorScheme: ColorScheme.fromSwatch().copyWith(
-                secondary: Colors.blueAccent,
+                secondary: const Color.fromARGB(255, 0, 10, 80),
               ),
             )
           : ThemeData(
@@ -69,7 +70,8 @@ class MyApp extends StatelessWidget {
       home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
           : const AuthSwitcher(),
-      // home: BluetoothDialog(),
+      // home: const AuthSwitcher(),
+      // home: const DemographicProfileWorker(),
     );
   }
 }

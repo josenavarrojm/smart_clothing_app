@@ -40,7 +40,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   @override
   void initState() {
     super.initState();
-    loadUsers();
+    loadUser();
     _pageController.addListener(() {
       final index = _pageController.page!.round();
       if (index != _selectedIndex) {
@@ -76,7 +76,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
     }
   }
 
-  Future<void> loadUsers() async {
+  Future<void> loadUser() async {
     // Llama a getAllUsers y guarda los datos en el arreglo users
     users = await DatabaseHandler.instance.getAllUsers();
     // await DatabaseHandler.instance.getAllUsers();

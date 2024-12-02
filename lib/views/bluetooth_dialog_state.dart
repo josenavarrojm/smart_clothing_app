@@ -54,7 +54,8 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
           if (!ConnectionService().isConnected &&
               !ConnectionService().isSuscripted) {
             discoveredDevices = state.discoveredDevices
-                .where((device) => device.name.contains("ESP32"))
+                .where((device) => ["Esp", "ESP32", "esp", "Esp32", "ESp32"]
+                    .any((keyword) => device.name.contains(keyword)))
                 .toList();
             // .where((device) => device.connectable == Connectable.available)
             if (discoveredDevices.isNotEmpty) {

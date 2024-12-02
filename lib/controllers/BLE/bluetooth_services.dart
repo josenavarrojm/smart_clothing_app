@@ -89,6 +89,7 @@ class BluetoothController {
         Fluttertoast.cancel();
         // Convertir el fragmento de datos recibido en texto
         final decodedFragment = String.fromCharCodes(data);
+        print(decodedFragment);
 
         // print("Fragmento decodificado: $decodedFragment");
 
@@ -165,6 +166,22 @@ class BluetoothController {
             print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
           }
         }
+        //  else if ((decodedFragment.contains('accelz'))) {
+        //   // Separar la cadena por el delimitador ":"
+        //   var parts = decodedFragment.split(':');
+
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     String accelZValue =
+        //         parts[1].trim(); // .trim() elimina espacios extra
+        //     accelerometerZData =
+        //         accelZValue; // Asignamos el valor a la variable temperatureData
+        //     BlDataNotifier().updateAccelerometerZData(accelerometerZData);
+
+        //     print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
+        //   }
+        // }
       },
       onError: (error) {
         print("Error de suscripción: $error");

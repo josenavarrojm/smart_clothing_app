@@ -129,6 +129,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  csv:
+    dependency: "direct main"
+    description:
+      name: csv
+      sha256: c6aa2679b2a18cb57652920f674488d89712efaf4d3fdf2e537215b35fc19d6c
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -280,6 +288,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.6.6"
+  google_fonts:
+    dependency: "direct main"
+    description:
+      name: google_fonts
+      sha256: b1ac0fe2832c9cc95e5e88b57d627c5e68c223b9657f4b96e1487aa9098c7b82
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.2.1"
   html:
     dependency: transitive
     description:
@@ -705,18 +721,18 @@ packages:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_charts
-      sha256: "977a6bbf67b542e8b59566b9963f1c3c270feae7737f9c85891c3ad81a40dd53"
+      sha256: "1cd2b58b8f2cebbc3f87c470be37cb906d4e3fe4cd16855626071f56ef24fd8f"
       url: "https://pub.dev"
     source: hosted
-    version: "27.1.57"
+    version: "27.2.4"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "6a2445aef2adc77136aedaf8b0c1b7f22c43b43d7036f219414db9acd679570a"
+      sha256: "795530addc930b3b06f4f2fe99a039de276860af505fcf54c4516fbcb838a3cb"
       url: "https://pub.dev"
     source: hosted
-    version: "27.1.57"
+    version: "27.2.4"
   synchronized:
     dependency: transitive
     description:

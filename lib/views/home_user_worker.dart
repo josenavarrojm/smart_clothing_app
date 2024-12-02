@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:smartclothingproject/controllers/mqtt_functions.dart';
+import 'package:intl/intl.dart';
+import 'package:smartclothingproject/components/charts.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
-import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
+import 'package:smartclothingproject/functions/loadCSVData.dart';
 // import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 
-final mqttService = MqttService();
+// final mqttService = MqttService();
 String tempAlert = '';
 
 // void mqttProcess() async {
@@ -32,16 +32,34 @@ class HomeUserWorker extends StatefulWidget {
 }
 
 class _HomeUserWorker extends State<HomeUserWorker> {
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+  late Future<Map<String, List>> csvData;
 
+  @override
+  void initState() {
+    super.initState();
+    // Cargar el CSV
+    csvData = loadCsvData('assets/data/data.csv');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
       ));
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    final double tempValue =
+        double.tryParse(widget.blDataNotifier.temperatureData) ?? 0.0;
+
+    final double humidityValue =
+        double.tryParse(widget.blDataNotifier.humidityData) ?? 0.0;
+    // Obtén la fecha y hora actual
+    DateTime now = DateTime.now();
+
+    // Formatea la fecha y hora (puedes personalizar el formato)
+    String formattedDate = DateFormat('EEE, MMM d, yyyy - hh:mm a').format(now);
 
     return AnimatedContainer(
         width: 500,
@@ -49,63 +67,300 @@ class _HomeUserWorker extends State<HomeUserWorker> {
         padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(0.0),
-          gradient: LinearGradient(
-            colors: [
-              Colors.pink.withOpacity(0.25),
-              Colors.purple.withOpacity(0.25),
-              const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
-              Colors.blue.withOpacity(0.25),
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.topRight,
-          ),
+          color: Color.fromRGBO(255, 255, 255, 1.0),
+          // gradient: LinearGradient(
+          //   colors: [
+          //     Colors.pink.withOpacity(0.25),
+          //     Colors.purple.withOpacity(0.25),
+          //     const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
+          //     Colors.blue.withOpacity(0.25),
+          //   ],
+          //   begin: Alignment.centerLeft,
+          //   end: Alignment.topRight,
+          // ),
         ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Card(
-                child: Container(
-                  width: screenWidth * 0.95,
-                  height: screenHeight * 0.2,
-                  alignment: Alignment.center,
-                  child: Text(widget.blDataNotifier.accelerometerXData),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(50), // Esquinas redondeadas
                 ),
+                elevation: 0,
+                child: AnimatedContainer(
+                    decoration: BoxDecoration(
+                      color: Color.fromRGBO(180, 238, 255, 1),
+                      borderRadius:
+                          BorderRadius.circular(500), // Esquinas redondeadas
+                      // border: Border.all(
+                      //     color: Colors.black, width: 2), // Borde opcional
+                    ),
+                    duration: Duration(milliseconds: 250),
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+                    width: screenWidth * 0.95,
+                    height: screenHeight * 0.2,
+                    alignment: Alignment.center,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                (tempValue <= 37.0 && tempValue >= 35.0)
+                                    ? 'Normal'
+                                    : (tempValue > 37.0)
+                                        ? 'Sofocación'
+                                        : 'Hipotermia',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color.fromRGBO(40, 108, 145, 1)),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Icon(
+                                (tempValue <= 37.0 && tempValue >= 35.0)
+                                    ? Icons.album_rounded
+                                    : (tempValue > 37.0)
+                                        ? Icons.thermostat_outlined
+                                        : Icons.air_outlined,
+                                color: (tempValue <= 37.0 && tempValue >= 35.0)
+                                    ? Colors.green[700]
+                                    : (tempValue > 37)
+                                        ? Colors.red[600]
+                                        : Colors.blue[300],
+                              )
+                            ],
+                          ),
+                          Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Icon(
+                                  Icons.thermostat_outlined,
+                                  size: 48,
+                                  color: Color.fromRGBO(225, 48, 0, 1),
+                                ),
+                                Text(
+                                  '${(tempValue * 10).ceil() / 10}°C',
+                                  style: TextStyle(
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromRGBO(20, 108, 145, 1)),
+                                ),
+                              ]),
+                          Center(
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              '${formattedDate}',
+                              style: TextStyle(
+                                  color: Color.fromRGBO(20, 108, 145, 1)),
+                            ),
+                          )
+                        ])),
               ),
               Card(
-                child: Container(
-                  width: screenWidth * 0.95,
-                  height: screenHeight * 0.2,
-                  alignment: Alignment.center,
-                  child: SfSparkLineChart(
-                    data: const [1, 2, 5, 4, 12, 3],
-                    highPointColor: Colors.yellow,
-                    axisLineColor: Colors.blue,
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(50), // Esquinas redondeadas
                 ),
+                elevation: 0,
+                child: AnimatedContainer(
+                    decoration: BoxDecoration(
+                      color: Color.fromRGBO(180, 238, 255, 1),
+                      borderRadius:
+                          BorderRadius.circular(500), // Esquinas redondeadas
+                      // border: Border.all(
+                      //     color: Colors.black, width: 2), // Borde opcional
+                    ),
+                    duration: Duration(milliseconds: 250),
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+                    width: screenWidth * 0.95,
+                    height: screenHeight * 0.2,
+                    alignment: Alignment.center,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                (tempValue <= 37.0 && tempValue >= 34.99)
+                                    ? 'Normal'
+                                    : (tempValue > 37.0)
+                                        ? 'Sofocación'
+                                        : 'Hipotermia',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color.fromRGBO(40, 108, 145, 1)),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Icon(
+                                (tempValue <= 37.0 && tempValue >= 35.0)
+                                    ? Icons.album_rounded
+                                    : (tempValue > 37.0)
+                                        ? Icons.thermostat_outlined
+                                        : Icons.air_outlined,
+                                color: (tempValue <= 37.0 && tempValue >= 35.0)
+                                    ? Colors.green[700]
+                                    : (tempValue > 37)
+                                        ? Colors.red[600]
+                                        : Colors.blue[300],
+                              )
+                            ],
+                          ),
+                          Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Icon(
+                                  Icons.water_drop_outlined,
+                                  size: 48,
+                                  color: Color.fromRGBO(0, 0, 255, 1),
+                                ),
+                                Text.rich(
+                                  TextSpan(
+                                    text:
+                                        '${(humidityValue * 10).ceil() / 10}g/m', // Parte principal del texto
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromRGBO(20, 108, 145, 1),
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: '³', // Superíndice
+                                        style: TextStyle(
+                                          fontSize:
+                                              40, // Tamaño más pequeño para el superíndice
+                                          fontWeight: FontWeight
+                                              .normal, // Opcional, puede ser más liviano
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ]),
+                          Center(
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              '${formattedDate}',
+                              style: TextStyle(
+                                  color: Color.fromRGBO(20, 108, 145, 1)),
+                            ),
+                          )
+                        ])),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        elevation: 30,
-                        content: TextButton(
-                          onPressed: () {
-                            showCustomToast(
-                                widget.blDataNotifier.temperatureData);
-                          },
-                          child: const Text('Toast'),
+              // Usar FutureBuilder para manejar csvData
+              FutureBuilder<Map<String, List>>(
+                future: csvData,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator(); // Indicador de carga
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData) {
+                    final data = snapshot.data!;
+                    return Column(
+                      children: [
+                        ChartCard(
+                          data: List<double>.from(data['sampleValues'] ?? [])
+                              .sublist(0, 200),
                         ),
-                      );
-                    },
-                  );
+                      ],
+                    );
+                  }
+                  return const Text('No data available');
                 },
-                child: const Text('Show Dialog'),
               ),
             ],
           ),
         ));
   }
 }
+
+
+
+// AnimatedContainer(
+//                     decoration: BoxDecoration(
+//                       color: Color.fromRGBO(0, 88, 105, 1),
+//                       borderRadius:
+//                           BorderRadius.circular(50), // Esquinas redondeadas
+//                       // border: Border.all(
+//                       //     color: Colors.black, width: 2), // Borde opcional
+//                     ),
+//                     duration: Duration(milliseconds: 250),
+//                     padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+//                     width: screenWidth * 0.95,
+//                     height: screenHeight * 0.2,
+//                     alignment: Alignment.center,
+//                     child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Row(
+//                             crossAxisAlignment: CrossAxisAlignment.center,
+//                             mainAxisAlignment: MainAxisAlignment.start,
+//                             children: [
+//                               Text(
+//                                 (tempValue <= 37.0 && tempValue >= 35.0)
+//                                     ? 'Normal'
+//                                     : (tempValue > 37.0)
+//                                         ? 'Sofocación'
+//                                         : 'Hipotermia',
+//                                 style: TextStyle(
+//                                     fontSize: 18,
+//                                     fontWeight: FontWeight.w600,
+//                                     color: Color.fromRGBO(40, 208, 245, 1)),
+//                               ),
+//                               SizedBox(
+//                                 width: 5,
+//                               ),
+//                               Icon(
+//                                 (tempValue <= 37.0 && tempValue >= 35.0)
+//                                     ? Icons.album_rounded
+//                                     : (tempValue > 37.0)
+//                                         ? Icons.thermostat_outlined
+//                                         : Icons.air_outlined,
+//                                 color: (tempValue <= 37.0 && tempValue >= 35.0)
+//                                     ? Colors.green[700]
+//                                     : (tempValue > 37)
+//                                         ? Colors.red[600]
+//                                         : Colors.blue[300],
+//                               )
+//                             ],
+//                           ),
+//                           Row(
+//                               crossAxisAlignment: CrossAxisAlignment.center,
+//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                               children: [
+//                                 Icon(
+//                                   Icons.thermostat_outlined,
+//                                   size: 48,
+//                                   color: Color.fromRGBO(245, 208, 0, 1),
+//                                 ),
+//                                 Text(
+//                                   '${(tempValue * 10).ceil() / 10}°C',
+//                                   style: TextStyle(
+//                                       fontSize: 50,
+//                                       fontWeight: FontWeight.bold,
+//                                       color: Color.fromRGBO(40, 208, 245, 1)),
+//                                 ),
+//                               ]),
+//                           Text(
+//                             '${formattedDate}',
+//                             style: TextStyle(
+//                                 color: Color.fromRGBO(40, 208, 245, 1)),
+//                           )
+//                         ])),

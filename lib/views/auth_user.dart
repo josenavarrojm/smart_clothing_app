@@ -2,6 +2,7 @@ import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
@@ -27,9 +28,11 @@ bool obsTextConfirm = false;
 final _formKey = GlobalKey<FormState>();
 final _formKey2 = GlobalKey<FormState>();
 
-const radiusNormal = 25.0;
-const radiusFocus = 15.0;
-const radiusBtn = 15.0;
+const radiusNormal = 50.0;
+const radiusFocus = 20.0;
+const radiusBtn = 50.0;
+
+const durationAnimation = Duration(milliseconds: 250);
 
 FirebaseFirestore db = FirebaseFirestore.instance;
 
@@ -211,6 +214,7 @@ class AuthSwitcher extends StatefulWidget {
 
 class _AuthSwitcherState extends State<AuthSwitcher> {
   bool isLogin = true; // Estado para saber cuál formulario mostrar
+  bool _showCard = false;
 
   @override
   Widget build(BuildContext context) {
@@ -219,175 +223,144 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
-      ));
+          systemNavigationBarColor: _showCard
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).primaryColor,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarColor: Colors.transparent));
     });
 
     return Scaffold(
-      body: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              const Color.fromRGBO(
-                  80, 80, 220, 0.40), // Color inicial del gradiente
-              Theme.of(context)
-                  .scaffoldBackgroundColor
-                  .withOpacity(0.5), // Color final del gradiente
+      body: Stack(children: [
+        AnimatedContainer(
+          duration: durationAnimation,
+          alignment: _showCard ? Alignment.center : Alignment.center,
+          padding: _showCard
+              ? const EdgeInsets.only(bottom: 250)
+              : const EdgeInsets.only(bottom: 0),
+          height: screenHeight,
+          decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Image.asset(
+                    'assets/images/ladys_logo.png',
+                    width: 200,
+                  ),
+                  Text('Smart Clothing',
+                      style: GoogleFonts.pattaya(
+                          fontSize: 50,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.secondary))
+                ],
+              ),
+              Column(
+                children: [
+                  AnimatedContainer(
+                    duration: durationAnimation,
+                    width: _showCard ? screenWidth * 0.2 : screenWidth * 0.9,
+                    height:
+                        _showCard ? screenHeight * 0.02 : screenHeight * 0.085,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _showCard =
+                              !_showCard; // Alterna la visibilidad del Card
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0.0,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(radiusBtn),
+                          side: BorderSide(width: 0.0), // Borde negro
+                        ),
+                      ),
+                      child: Row(children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Ingresar',
+                              style: GoogleFonts.pattaya(
+                                  fontSize: 30,
+                                  letterSpacing: 2,
+                                  fontWeight: FontWeight.w100,
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Icon(Icons.login,
+                              color: Theme.of(context).primaryColor),
+                        ),
+                      ]),
+                    ),
+                  ),
+                ],
+              ),
             ],
-            begin:
-                Alignment.topLeft, // Comienza en la esquina superior izquierda
-            end:
-                Alignment.bottomRight, // Termina en la esquina inferior derecha
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Column(
-              children: [
-                Image.asset(
-                  'assets/images/ladys_logo.png',
-                  width: 200,
+        AnimatedPositioned(
+            duration: durationAnimation,
+            curve: Curves.easeInOut,
+            bottom: _showCard ? 0 : -screenHeight * 0.6, // Animación
+            left: 0,
+            right: 0,
+            child: Card(
+              margin: const EdgeInsets.all(0),
+              elevation: 0.0,
+              // color: Colors.transparent,
+              color: Theme.of(context).colorScheme.secondary,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(50),
+                  topRight: Radius.circular(50),
                 ),
-                Text('Smarth Clothing',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 30,
-                        letterSpacing: 2))
-              ],
-            ),
-            Column(
-              children: [
-                Container(
-                  width: screenWidth * 0.85,
-                  height: screenHeight * 0.07,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      email = '';
-                      password = '';
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  LoginForm(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            const begin =
-                                Offset(1.0, 0.0); // Comienza desde la derecha
-                            const end = Offset.zero; // Termina en el centro
-                            const curve = Curves.easeInOut;
+              ),
 
-                            var tween = Tween(begin: begin, end: end)
-                                .chain(CurveTween(curve: curve));
-
-                            return SlideTransition(
-                              position: animation.drive(tween),
-                              child: child,
-                            );
-                          },
-                        ),
-                      );
-                    } // Muestra el formulario de inicio de sesión
-                    ,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(radiusBtn))),
-                    child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Iniciar Sesión',
-                                style: TextStyle(fontSize: 20),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Icon(Icons.login),
-                          ),
-                        ]),
-                  ),
-                ),
-                Container(
-                  width: screenWidth * 0.85,
-                  height: screenHeight * 0.07,
-                  margin: const EdgeInsets.only(top: 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      registerBtn = false;
-                      email = '';
-                      _dateController.clear();
-                      selectedDate = null;
-                      selectedUserType = null;
-                      selectedGender = null;
-                      password = '';
-                      confirmPassword = '';
-                      samePsw = false;
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  RegisterForm(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            const begin =
-                                Offset(1.0, 0.0); // Comienza desde la derecha
-                            const end = Offset.zero; // Termina en el centro
-                            const curve = Curves.easeInOut;
-
-                            var tween = Tween(begin: begin, end: end)
-                                .chain(CurveTween(curve: curve));
-
-                            return SlideTransition(
-                              position: animation.drive(tween),
-                              child: child,
-                            );
-                          },
-                        ),
-                      );
-                      // Muestra el formulario de registro
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(radiusBtn))),
-                    child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Registrarse',
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Icon(
-                              Icons.app_registration_outlined,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ]),
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
+              child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 25),
+                  // decoration: BoxDecoration(
+                  //   color: Theme.of(context).colorScheme.secondary,
+                  //   borderRadius: BorderRadius.circular(40),
+                  // ),
+                  child: Column(children: [
+                    Container(
+                      height: screenHeight * 0.4,
+                      decoration: BoxDecoration(
+                        // color: Colors.pink,
+                        borderRadius: BorderRadius.circular(50),
+                      ), // Altura del Card
+                      child: Center(child: const LoginForm()), // Tu formulario
+                    ),
+                    FloatingActionButton(
+                      elevation: 0.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            radiusBtn), // Esquinas redondeadas
+                      ),
+                      backgroundColor: Theme.of(context).primaryColor,
+                      onPressed: () {
+                        setState(() {
+                          _showCard = !_showCard;
+                        });
+                      },
+                      child: Icon(
+                        Icons.arrow_downward_outlined,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    )
+                  ])),
+            )),
+      ]),
     );
   }
 }
@@ -407,257 +380,271 @@ class _LoginForm extends State<LoginForm> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-        // appBar: AppBar(
-        //   elevation: 0,
-        //   // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        //   backgroundColor: Colors.transparent,
-        //   foregroundColor: Theme.of(context).primaryColor,
-        // ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    AuthSwitcher(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  const begin =
-                      Offset(-1.0, 0.0); // Comienza desde la izquierda
-                  const end = Offset.zero; // Termina en el centro
-                  const curve = Curves.easeInOut;
+    // return Scaffold(
+    // appBar: AppBar(
+    //   elevation: 0,
+    //   // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    //   backgroundColor: Colors.transparent,
+    //   foregroundColor: Theme.of(context).primaryColor,
+    // ),
+    // floatingActionButton: FloatingActionButton(
+    //   shape: RoundedRectangleBorder(
+    //     borderRadius: BorderRadius.circular(50), // Esquinas redondeadas
+    //   ),
+    //   splashColor: const Color.fromRGBO(155, 100, 255, 1.0),
+    //   hoverElevation: 5,
+    //   elevation: 0,
+    //   backgroundColor: const Color.fromRGBO(10, 120, 255, 1.0),
+    //   onPressed: () {
+    //     Navigator.pushAndRemoveUntil(
+    //       context,
+    //       PageRouteBuilder(
+    //         pageBuilder: (context, animation, secondaryAnimation) =>
+    //             AuthSwitcher(),
+    //         transitionsBuilder:
+    //             (context, animation, secondaryAnimation, child) {
+    //           const begin =
+    //               Offset(-1.0, 0.0); // Comienza desde la izquierda
+    //           const end = Offset.zero; // Termina en el centro
+    //           const curve = Curves.easeInOut;
 
-                  var tween = Tween(begin: begin, end: end)
-                      .chain(CurveTween(curve: curve));
+    //           var tween = Tween(begin: begin, end: end)
+    //               .chain(CurveTween(curve: curve));
 
-                  return SlideTransition(
-                    position: animation.drive(tween),
-                    child: child,
-                  );
-                },
-              ),
-              (Route<dynamic> route) =>
-                  false, // Elimina todas las vistas anteriores
-            );
-          },
-          child: const Icon(Icons.arrow_back_ios_new),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 5),
-            child: Container(
-              // registro de usuario
-              width: screenWidth,
-              height: screenHeight * 1,
-              alignment: Alignment.topCenter,
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-              decoration: BoxDecoration(
-                  // color: Theme.of(context).scaffoldBackgroundColor,
-                  gradient: LinearGradient(
-                colors: [
-                  Colors.pink.withOpacity(0.25),
-                  Colors.purple.withOpacity(0.25),
-                  const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
-                  Colors.blue.withOpacity(0.25),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      'Inicio de sesión',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w800,
-                          color: Theme.of(context).primaryColor),
-                    ),
-                  ),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 2, vertical: 5),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              prefixIcon: Padding(
-                                padding: const EdgeInsetsDirectional.only(
-                                    start: 12.0),
-                                child: Icon(
-                                  Icons.email_outlined,
-                                  color: Theme.of(context).primaryColor,
-                                ), // myIcon is a 48px-wide widget.
-                              ),
-                              labelText: 'Correo electrónico',
-                              labelStyle: TextStyle(
-                                  color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(
-                                  color: Theme.of(context).primaryColor),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.blue, width: 1.5),
-                                  borderRadius:
-                                      BorderRadius.circular(radiusFocus)),
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: (loginBtn && email == '')
-                                          ? Colors.red
-                                          : Theme.of(context).primaryColor,
-                                      width: 0.75),
-                                  borderRadius:
-                                      BorderRadius.circular(radiusNormal)),
-                            ),
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor ingresa tu correo electrónico';
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              validEmail = EmailValidator.validate(value);
-                              email = value;
-                              setState(() {});
-                            },
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 2, vertical: 5),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              prefixIcon: Padding(
-                                padding: const EdgeInsetsDirectional.only(
-                                    start: 12.0),
-                                child: Icon(Icons.password,
-                                    color: Theme.of(context)
-                                        .primaryColor), // myIcon is a 48px-wide widget.
-                              ),
-                              labelText: 'Contraseña',
-                              labelStyle: TextStyle(
-                                  color: Theme.of(context).primaryColor),
-                              suffixStyle: TextStyle(
-                                  color: Theme.of(context).primaryColor),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.blue, width: 1.5),
-                                  borderRadius:
-                                      BorderRadius.circular(radiusFocus)),
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: (loginBtn && email == '')
-                                          ? Colors.red
-                                          : Theme.of(context).primaryColor,
-                                      width: 0.75),
-                                  borderRadius:
-                                      BorderRadius.circular(radiusNormal)),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  obsTextConfirm
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    obsTextConfirm = !obsTextConfirm;
-                                  });
-                                },
-                              ),
-                            ),
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor),
-                            obscureText: !obsTextConfirm,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor ingresa tu contraseña';
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              password = value;
-                              if (confirmPassword == password &&
-                                  confirmPassword.isNotEmpty &&
-                                  password.isNotEmpty) {
-                                samePsw = true;
-                              } else {
-                                samePsw = false;
-                              }
-                              setState(() {});
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 2.0, horizontal: 30.0),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(radiusBtn))),
-                            onPressed: () {
-                              loginBtn = true;
-                              if (loginBtn) {
-                                if (email != '' &&
-                                    validEmail &&
-                                    password != '') {
-                                  loginUser(context, email, password);
-                                }
-                              }
-                              setState(() {});
-                            },
-                            child: const Text(
-                              'Iniciar Sesión',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '¿No tienes una cuenta?',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                registerPage(context);
-                              },
-                              child: const Text(
-                                'Registrarse',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.lightBlue,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.5),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    //           return SlideTransition(
+    //             position: animation.drive(tween),
+    //             child: child,
+    //           );
+    //         },
+    //       ),
+    //       (Route<dynamic> route) =>
+    //           false, // Elimina todas las vistas anteriores
+    //     );
+    //   },
+    //   child: AnimatedContainer(
+    //     duration: durationAnimation,
+    //     width: 60,
+    //     height: 60,
+    //     alignment: Alignment.center,
+    //     child: const Icon(Icons.arrow_back_ios_new),
+    //   ),
+    // ),
+    // body: SingleChildScrollView(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 5),
+        child: Container(
+          // registro de usuario
+          // width: screenWidth,
+          // height: screenHeight * 1,
+          alignment: Alignment.topCenter,
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          decoration: BoxDecoration(
+            // color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.circular(radiusBtn),
+            //     gradient: LinearGradient(
+            //   colors: [
+            //     Colors.pink.withOpacity(0.25),
+            //     Colors.purple.withOpacity(0.25),
+            //     const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
+            //     Colors.blue.withOpacity(0.25),
+            //   ],
+            //   begin: Alignment.topLeft,
+            //   end: Alignment.bottomRight,
+            // )
           ),
-        ));
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 15),
+                child: Text(
+                  'Inicio de sesión ',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.pattaya(
+                      fontSize: 35,
+                      fontWeight: FontWeight.w800,
+                      color: Theme.of(context).primaryColor),
+                ),
+              ),
+              Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 5),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Padding(
+                            padding:
+                                const EdgeInsetsDirectional.only(start: 12.0),
+                            child: Icon(
+                              Icons.email_outlined,
+                              color: Theme.of(context).primaryColor,
+                            ), // myIcon is a 48px-wide widget.
+                          ),
+                          labelText: 'Correo electrónico',
+                          labelStyle:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                          suffixStyle:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.blue, width: 1.5),
+                              borderRadius: BorderRadius.circular(radiusFocus)),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: (loginBtn && email == '')
+                                      ? Colors.red
+                                      : Theme.of(context).primaryColor,
+                                  width: 0.75),
+                              borderRadius:
+                                  BorderRadius.circular(radiusNormal)),
+                        ),
+                        style: TextStyle(color: Theme.of(context).primaryColor),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor ingresa tu correo electrónico';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          validEmail = EmailValidator.validate(value);
+                          email = value;
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 5),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Padding(
+                            padding:
+                                const EdgeInsetsDirectional.only(start: 12.0),
+                            child: Icon(Icons.password,
+                                color: Theme.of(context)
+                                    .primaryColor), // myIcon is a 48px-wide widget.
+                          ),
+                          labelText: 'Contraseña',
+                          labelStyle:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                          suffixStyle:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.blue, width: 1.5),
+                              borderRadius: BorderRadius.circular(radiusFocus)),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: (loginBtn && email == '')
+                                      ? Colors.red
+                                      : Theme.of(context).primaryColor,
+                                  width: 0.75),
+                              borderRadius:
+                                  BorderRadius.circular(radiusNormal)),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obsTextConfirm
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                obsTextConfirm = !obsTextConfirm;
+                              });
+                            },
+                          ),
+                        ),
+                        style: TextStyle(color: Theme.of(context).primaryColor),
+                        obscureText: !obsTextConfirm,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor ingresa tu contraseña';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          password = value;
+                          if (confirmPassword == password &&
+                              confirmPassword.isNotEmpty &&
+                              password.isNotEmpty) {
+                            samePsw = true;
+                          } else {
+                            samePsw = false;
+                          }
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 30.0),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(radiusBtn))),
+                        onPressed: () {
+                          loginBtn = true;
+                          if (loginBtn) {
+                            if (email != '' && validEmail && password != '') {
+                              loginUser(context, email, password);
+                            }
+                          }
+                          setState(() {});
+                        },
+                        child: Text(
+                          'Iniciar Sesión',
+                          style: GoogleFonts.pattaya(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w100,
+                              color: Theme.of(context).colorScheme.secondary),
+                        ),
+                      ),
+                    ),
+
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     Text(
+                    //       '¿No tienes una cuenta?',
+                    //       style: TextStyle(
+                    //           fontSize: 18,
+                    //           color: Theme.of(context).primaryColor,
+                    //           fontWeight: FontWeight.w400),
+                    //     ),
+                    //     TextButton(
+                    //       onPressed: () {
+                    //         registerPage(context);
+                    //       },
+                    //       child: const Text(
+                    //         'Registrarse',
+                    //         style: TextStyle(
+                    //             fontSize: 18,
+                    //             color: Colors.lightBlue,
+                    //             fontWeight: FontWeight.w600,
+                    //             letterSpacing: 0.5),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    // );
   }
 }
 
@@ -712,41 +699,53 @@ class _RegisterForm extends State<RegisterForm> {
         //   foregroundColor: Theme.of(context).primaryColor,
         // ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    AuthSwitcher(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  const begin =
-                      Offset(-1.0, 0.0); // Comienza desde la izquierda
-                  const end = Offset.zero; // Termina en el centro
-                  const curve = Curves.easeInOut;
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50), // Esquinas redondeadas
+            ),
+            splashColor: const Color.fromRGBO(155, 100, 255, 1.0),
+            hoverElevation: 5,
+            elevation: 0,
+            backgroundColor: const Color.fromRGBO(10, 120, 255, 1.0),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      AuthSwitcher(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    const begin =
+                        Offset(-1.0, 0.0); // Comienza desde la izquierda
+                    const end = Offset.zero; // Termina en el centro
+                    const curve = Curves.easeInOut;
 
-                  var tween = Tween(begin: begin, end: end)
-                      .chain(CurveTween(curve: curve));
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
 
-                  return SlideTransition(
-                    position: animation.drive(tween),
-                    child: child,
-                  );
-                },
-              ),
-              (Route<dynamic> route) =>
-                  false, // Elimina todas las vistas anteriores
-            );
-          },
-          child: const Icon(Icons.arrow_back_ios_new),
-        ),
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
+                ),
+                (Route<dynamic> route) =>
+                    false, // Elimina todas las vistas anteriores
+              );
+            },
+            child: AnimatedContainer(
+              duration: durationAnimation,
+              width: 60,
+              height: 60,
+              alignment: Alignment.center,
+              child: const Icon(Icons.arrow_back_ios_new),
+            )),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 5),
             child: Container(
               // registro de usuario
               width: screenWidth,
-              height: screenHeight * 1.1,
+              height: screenHeight * 1.2,
               alignment: Alignment.center,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               decoration: BoxDecoration(
@@ -1118,131 +1117,116 @@ class _RegisterForm extends State<RegisterForm> {
                         Container(
                           margin: const EdgeInsets.symmetric(
                               horizontal: 2, vertical: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: DropdownButtonFormField<String>(
-                                  dropdownColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor),
-                                  borderRadius: BorderRadius.circular(40),
-                                  decoration: InputDecoration(
-                                      prefixIcon: Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.only(
-                                                start: 12.0),
-                                        child: Icon(Icons.wc_outlined,
-                                            color: Theme.of(context)
-                                                .primaryColor), // myIcon is a 48px-wide widget.
-                                      ),
-                                      labelText: 'Género',
-                                      labelStyle: TextStyle(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Colors.blue, width: 1.5),
-                                        borderRadius:
-                                            BorderRadius.circular(radiusFocus),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: (registerBtn &&
-                                                      ![
-                                                        'Masculino',
-                                                        'Femenino',
-                                                        '29 tipos de gays'
-                                                      ].contains(
-                                                          selectedGender))
-                                                  ? Colors.red
-                                                  : Theme.of(context)
-                                                      .primaryColor,
-                                              width: 0.75),
-                                          borderRadius: BorderRadius.circular(
-                                              radiusNormal))),
-                                  value: selectedGender,
-                                  items: <String>[
-                                    'Masculino',
-                                    'Femenino',
-                                    'Otro'
-                                  ].map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color:
-                                                Theme.of(context).primaryColor),
-                                        overflow: TextOverflow
-                                            .ellipsis, // Agrega puntos suspensivos si es muy largo
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      selectedGender = newValue!;
-                                    });
-                                  },
-                                  validator: (value) => value == null
-                                      ? 'Por favor selecciona una opción'
-                                      : null,
+                          child: DropdownButtonFormField<String>(
+                            icon: Icon(Icons.keyboard_arrow_down_outlined),
+                            dropdownColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
+                            borderRadius: BorderRadius.circular(40),
+                            decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(Icons.wc_outlined,
+                                      color: Theme.of(context)
+                                          .primaryColor), // myIcon is a 48px-wide widget.
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Flexible(
-                                child: TextFormField(
-                                  controller: _dateController,
-                                  decoration: InputDecoration(
-                                      prefixIcon: Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.only(
-                                                start: 12.0),
-                                        child: Icon(Icons.date_range_outlined,
-                                            color: Theme.of(context)
-                                                .primaryColor), // myIcon is a 48px-wide widget.
-                                      ),
-                                      labelText: 'Fecha de Nacimiento',
-                                      labelStyle: TextStyle(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Colors.blue, width: 1.5),
-                                        borderRadius:
-                                            BorderRadius.circular(radiusFocus),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: (registerBtn &&
-                                                      selectedDate == null)
-                                                  ? Colors.red
-                                                  : Theme.of(context)
-                                                      .primaryColor,
-                                              width: 0.75),
-                                          borderRadius: BorderRadius.circular(
-                                              radiusNormal))),
-                                  readOnly: true,
-                                  onTap: () => _selectDate(context),
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Por favor selecciona tu fecha de nacimiento';
-                                    }
-                                    return null;
-                                  },
+                                labelText: 'Sexo',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 1.5),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusFocus),
                                 ),
-                              ),
-                            ],
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: (registerBtn &&
+                                                ![
+                                                  'Masculino',
+                                                  'Femenino',
+                                                ].contains(selectedGender))
+                                            ? Colors.red
+                                            : Theme.of(context).primaryColor,
+                                        width: 0.75),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal))),
+                            value: selectedGender,
+                            items: <String>['Masculino', 'Femenino', 'Otro']
+                                .map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context).primaryColor),
+                                  overflow: TextOverflow
+                                      .ellipsis, // Agrega puntos suspensivos si es muy largo
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedGender = newValue!;
+                              });
+                            },
+                            validator: (value) => value == null
+                                ? 'Por favor selecciona una opción'
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 5),
+                          child: TextFormField(
+                            controller: _dateController,
+                            decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(Icons.date_range_outlined,
+                                      color: Theme.of(context)
+                                          .primaryColor), // myIcon is a 48px-wide widget.
+                                ),
+                                labelText: 'Fecha de nacimiento',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Colors.blue, width: 1.5),
+                                  borderRadius:
+                                      BorderRadius.circular(radiusFocus),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: (registerBtn &&
+                                                selectedDate == null)
+                                            ? Colors.red
+                                            : Theme.of(context).primaryColor,
+                                        width: 0.75),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal))),
+                            readOnly: true,
+                            onTap: () => _selectDate(context),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor selecciona tu fecha de nacimiento';
+                              }
+                              return null;
+                            },
                           ),
                         ),
                         Container(
                           margin: const EdgeInsets.symmetric(
                               horizontal: 2, vertical: 5),
                           child: DropdownButtonFormField<String>(
+                            icon: Icon(Icons.keyboard_arrow_down_outlined),
                             dropdownColor:
                                 Theme.of(context).scaffoldBackgroundColor,
                             decoration: InputDecoration(
