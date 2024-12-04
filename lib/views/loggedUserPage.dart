@@ -60,11 +60,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
   bool isDialogVisible = false;
   void showDialogIfNeeded(ConnectionService connectionService) async {
-    var bluetoothState = await FlutterBluePlus.adapterState.first;
-
-    if (bluetoothState == BluetoothAdapterState.off) {
-      FlutterBluePlus.turnOn();
-    }
     if (!connectionService.isSuscripted && mounted) {
       showDialog(
         context: context,

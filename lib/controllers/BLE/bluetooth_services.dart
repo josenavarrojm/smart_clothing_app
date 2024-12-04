@@ -19,6 +19,7 @@ class BluetoothController {
   String accelerometerZData = '';
   String temperatureData = '';
   String humidityData = '';
+  StreamSubscription<List<int>>? subscription;
 
   BluetoothController()
       : _bleScanner = BleScanner(
@@ -55,7 +56,7 @@ class BluetoothController {
   }
 
   Future<void> connectToDevice(String deviceId) async {
-    await _deviceConnector.connect(deviceId);
+    await _deviceConnector.connect(deviceId, subscription);
   }
 
   Future<void> disconnectFromDevice(String deviceId) async {
@@ -78,7 +79,7 @@ class BluetoothController {
 
     // Suscripción al flujo de datos de la característica
     bool dataNoEmpty = false;
-    final subscription =
+    subscription =
         flutterReactiveBle.subscribeToCharacteristic(characteristic).listen(
       (data) async {
         if (data.isNotEmpty && !dataNoEmpty) {
@@ -313,29 +314,40 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
   late StreamSubscription<ConnectionStateUpdate> _connection;
   bool connected = false;
 
-  Future<void> connect(String deviceId) async {
+  Future<void> connect(
+      String deviceId, StreamSubscription<List<int>>? subscription) async {
     final completer = Completer<void>();
 
     _logMessage('Start connecting to $deviceId');
 
     _connection = _ble.connectToDevice(id: deviceId).listen(
-      (update) {
+      (update) async {
         _logMessage(
             'ConnectionState for device $deviceId : ${update.connectionState}');
         _deviceConnectionController.add(update);
 
         if (update.connectionState == DeviceConnectionState.connected) {
+          try {
+            // Negociar el MTU después de establecer la conexión
+            final mtu = await _ble.requestMtu(deviceId: deviceId, mtu: 247);
+            _logMessage('MTU negociado: $mtu');
+          } catch (e) {
+            _logMessage('Error al negociar el MTU: $e');
+          }
+
           ConnectionService().updateConnectionStatus(true);
           ConnectionService().updateLostConnection(false);
           connected = true;
           completer.complete(); // Completa la conexión cuando está conectado.
         }
+
         if (update.connectionState == DeviceConnectionState.disconnected &&
             connected) {
           connected = false;
           ConnectionService().updateConnectionStatus(false);
           ConnectionService().updateSuscriptionStatus(false);
           ConnectionService().updateLostConnection(true);
+          await _cancelSubscription(subscription);
         }
       },
       onError: (Object e) {
@@ -348,6 +360,15 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
 
     // Espera a que se complete la conexión o ocurra un error.
     await completer.future;
+  }
+
+  Future<void> _cancelSubscription(
+      StreamSubscription<List<int>>? subscription) async {
+    if (subscription != null) {
+      await subscription.cancel();
+      subscription = null;
+      _logMessage('Suscripción cancelada');
+    }
   }
 
   Future<void> disconnect(String deviceId) async {

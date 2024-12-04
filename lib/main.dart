@@ -69,10 +69,10 @@ class MyApp extends StatelessWidget {
               ),
             ),
       debugShowCheckedModeBanner: false,
-      home: lastPage == 'userLoggedHome'
-          ? const LoggedUserPage()
-          : const AuthSwitcher(),
-      // home: const AuthSwitcher(),
+      // home: lastPage == 'userLoggedHome'
+      //     ? const LoggedUserPage()
+      //     : const AuthSwitcher(),
+      home: const LoggedUserPage(),
       // home: const DemographicProfileWorker(),
     );
   }
