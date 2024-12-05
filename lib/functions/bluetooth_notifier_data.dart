@@ -5,20 +5,34 @@ class BlDataNotifier with ChangeNotifier {
   factory BlDataNotifier() => _instance;
   BlDataNotifier._internal();
 
-  String _temperatureData = '';
+  String _bpmData = '';
+  String _temperatureAmbData = '';
+  String _temperatureCorporalData = '';
   String _humidityData = '';
   String _accelerometerXData = '';
   String _accelerometerYData = '';
   String _accelerometerZData = '';
 
-  String get temperatureData => _temperatureData;
+  String get bpmData => _bpmData;
+  String get temperatureAmbData => _temperatureAmbData;
+  String get temperatureCorporalData => _temperatureCorporalData;
   String get humidityData => _humidityData;
   String get accelerometerXData => _accelerometerXData;
   String get accelerometerYData => _accelerometerYData;
   String get accelerometerZData => _accelerometerZData;
 
-  void updateTemperatureData(String status) {
-    _temperatureData = status;
+  void updatebpmData(String status) {
+    _bpmData = status;
+    notifyListeners();
+  }
+
+  void updateTemperatureAmbData(String status) {
+    _temperatureAmbData = status;
+    notifyListeners();
+  }
+
+  void updateTemperatureCorporalData(String status) {
+    _temperatureCorporalData = status;
     notifyListeners();
   }
 

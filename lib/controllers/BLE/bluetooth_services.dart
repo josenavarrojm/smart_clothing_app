@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
@@ -10,16 +11,35 @@ import 'package:meta/meta.dart';
 import 'dart:convert';
 
 final flutterReactiveBle = FlutterReactiveBle();
+DateTime now = DateTime.now();
+String formattedDate = DateFormat('EEE, MMM d, yyyy - hh:mm a').format(now);
 
 class BluetoothController {
   final BleScanner _bleScanner;
   final BleDeviceConnector _deviceConnector;
-  String accelerometerXData = '';
-  String accelerometerYData = '';
-  String accelerometerZData = '';
-  String temperatureData = '';
-  String humidityData = '';
+  int bpmData = 0;
+  double temperatureAmbData = 0.0;
+  double temperatureCorporalData = 0.0;
+  double humidityData = 0.0;
+  double accelerometerXData = 0.0;
+  double accelerometerYData = 0.0;
+  double accelerometerZData = 0.0;
+  List<String> ecgDataReceived = [];
+
   StreamSubscription<List<int>>? subscription;
+
+  Map<String, dynamic> dataReceived = {
+    "user_id": "smartAppUser00",
+    "bpm": 0,
+    "tempAmb": 0,
+    "tempCorp": 0,
+    "hum": 0,
+    "acelX": 0,
+    "acelY": 0,
+    "acelZ": 0,
+    "ecg": [],
+    "created_at": "",
+  };
 
   BluetoothController()
       : _bleScanner = BleScanner(
@@ -94,80 +114,104 @@ class BluetoothController {
 
         // print("Fragmento decodificado: $decodedFragment");
 
-        // Verificar si el fragmento contiene la palabra 'temperature'
-        if (decodedFragment.contains('temperature')) {
-          // Separar la cadena por el delimitador ":"
-          if (!ConnectionService().isSuscripted) {}
-          var parts = decodedFragment.split(':');
+        // // Verificar si el fragmento contiene la palabra 'temperature'
+        // if (decodedFragment.contains('bpm')) {
+        //   // Separar la cadena por el delimitador ":"
+        //   if (!ConnectionService().isSuscripted) {}
+        //   var parts = decodedFragment.split(':');
 
-          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-          if (parts.length > 1) {
-            // Extraer el valor de temperatura y limpiarlo
-            String temperatureValue =
-                parts[1].trim(); // .trim() elimina espacios extra
-            temperatureData = temperatureValue;
-            BlDataNotifier().updateTemperatureData(temperatureValue);
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     String valueReceived =
+        //         parts[1].trim(); // .trim() elimina espacios extra
+        //     bpmData = int.parse(valueReceived);
+        //     BlDataNotifier().updatebpmData(valueReceived);
 
-            print("Temperatura: $temperatureData");
-          }
-        } else if ((decodedFragment.contains('humidity'))) {
-          // Separar la cadena por el delimitador ":"
-          var parts = decodedFragment.split(':');
+        //     dataReceived["bpm"] = bpmData;
+        //     print("bpm: ${BlDataNotifier().bpmData}");
+        //   }
+        // } else if (decodedFragment.contains('tempAmb')) {
+        //   // Separar la cadena por el delimitador ":"
+        //   if (!ConnectionService().isSuscripted) {}
+        //   var parts = decodedFragment.split(':');
 
-          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-          if (parts.length > 1) {
-            // Extraer el valor de temperatura y limpiarlo
-            String humidityValue =
-                parts[1].trim(); // .trim() elimina espacios extra
-            humidityData = humidityValue;
-            BlDataNotifier().updateHumidityData(humidityValue);
-            print("Humedad: $humidityData");
-          }
-        } else if ((decodedFragment.contains('accelx'))) {
-          // Separar la cadena por el delimitador ":"
-          var parts = decodedFragment.split(':');
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     String valueReceived =
+        //         parts[1].trim(); // .trim() elimina espacios extra
+        //     temperatureAmbData = double.parse(valueReceived);
+        //     BlDataNotifier().updateTemperatureAmbData(valueReceived);
 
-          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-          if (parts.length > 1) {
-            // Extraer el valor de temperatura y limpiarlo
-            String accelXValue =
-                parts[1].trim(); // .trim() elimina espacios extra
-            accelerometerXData = accelXValue;
-            BlDataNotifier().updateAccelerometerXData(accelXValue);
+        //     dataReceived["tempAmb"] = temperatureAmbData;
+        //     print(
+        //         "Temperatura Ambiente: ${BlDataNotifier().temperatureAmbData}");
+        //   }
+        // } else if (decodedFragment.contains('tempCorp')) {
+        //   // Separar la cadena por el delimitador ":"
+        //   if (!ConnectionService().isSuscripted) {}
+        //   var parts = decodedFragment.split(':');
 
-            print("Ángulo X: $accelerometerXData");
-          }
-        } else if ((decodedFragment.contains('accely'))) {
-          // Separar la cadena por el delimitador ":"
-          var parts = decodedFragment.split(':');
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     String valueReceived =
+        //         parts[1].trim(); // .trim() elimina espacios extra
+        //     temperatureCorporalData = double.parse(valueReceived);
+        //     BlDataNotifier().updateTemperatureCorporalData(valueReceived);
 
-          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-          if (parts.length > 1) {
-            // Extraer el valor de temperatura y limpiarlo
-            String accelYValue =
-                parts[1].trim(); // .trim() elimina espacios extra
-            accelerometerYData = accelYValue;
-            BlDataNotifier().updateAccelerometerYData(accelerometerYData);
+        //     dataReceived["tempCorp"] = temperatureCorporalData;
+        //     print(
+        //         "Temperatura corporal: ${BlDataNotifier().temperatureCorporalData}");
+        //   }
+        // } else if (decodedFragment.contains('hum')) {
+        //   // Separar la cadena por el delimitador ":"
+        //   if (!ConnectionService().isSuscripted) {}
+        //   var parts = decodedFragment.split(':');
 
-            print(" BlDataNotifier(): ${BlDataNotifier().accelerometerYData}");
-          }
-        } else if ((decodedFragment.contains('accelz'))) {
-          // Separar la cadena por el delimitador ":"
-          var parts = decodedFragment.split(':');
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     String valueReceived =
+        //         parts[1].trim(); // .trim() elimina espacios extra
+        //     humidityData = double.parse(valueReceived);
+        //     BlDataNotifier().updateHumidityData(valueReceived);
 
-          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-          if (parts.length > 1) {
-            // Extraer el valor de temperatura y limpiarlo
-            String accelZValue =
-                parts[1].trim(); // .trim() elimina espacios extra
-            accelerometerZData =
-                accelZValue; // Asignamos el valor a la variable temperatureData
-            BlDataNotifier().updateAccelerometerZData(accelerometerZData);
+        //     dataReceived["hum"] = humidityData;
+        //     print("Humedad: ${BlDataNotifier().humidityData}");
+        //   }
+        // } else if ((decodedFragment.contains('acelX'))) {
+        //   // Separar la cadena por el delimitador ":"
+        //   var parts = decodedFragment.split(':');
 
-            print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
-          }
-        }
-        //  else if ((decodedFragment.contains('accelz'))) {
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     String accelXValue =
+        //         parts[1].trim(); // .trim() elimina espacios extra
+        //     accelerometerXData = double.parse(accelXValue);
+        //     BlDataNotifier().updateAccelerometerXData(accelXValue);
+
+        //     dataReceived["acelX"] = accelerometerXData;
+        //     print("Ángulo X: ${BlDataNotifier().accelerometerXData}");
+        //   }
+        // } else if ((decodedFragment.contains('acelY'))) {
+        //   // Separar la cadena por el delimitador ":"
+        //   var parts = decodedFragment.split(':');
+
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     String accelYValue =
+        //         parts[1].trim(); // .trim() elimina espacios extra
+        //     accelerometerYData = double.parse(accelYValue);
+        //     BlDataNotifier().updateAccelerometerYData(accelYValue);
+
+        //     dataReceived["acelY"] = accelerometerYData;
+        //     print(" BlDataNotifier(): ${BlDataNotifier().accelerometerYData}");
+        //   }
+        // } else if ((decodedFragment.contains('acelZ'))) {
         //   // Separar la cadena por el delimitador ":"
         //   var parts = decodedFragment.split(':');
 
@@ -176,10 +220,25 @@ class BluetoothController {
         //     // Extraer el valor de temperatura y limpiarlo
         //     String accelZValue =
         //         parts[1].trim(); // .trim() elimina espacios extra
-        //     accelerometerZData =
-        //         accelZValue; // Asignamos el valor a la variable temperatureData
-        //     BlDataNotifier().updateAccelerometerZData(accelerometerZData);
+        //     accelerometerZData = double.parse(accelZValue);
+        //     BlDataNotifier().updateAccelerometerZData(accelZValue);
 
+        //     dataReceived["acelZ"] = accelerometerZData;
+        //     print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
+        //   }
+        // }
+        // // else if ((decodedFragment.contains('ECG'))) {
+        //   // Separar la cadena por el delimitador ":"
+        //   var parts = decodedFragment.split(':');
+
+        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+        //   if (parts.length > 1) {
+        //     // Extraer el valor de temperatura y limpiarlo
+        //     List<String> listReceived = ; // .trim() elimina espacios extra
+        //     accelerometerZData = double.parse(accelZValue);
+        //     BlDataNotifier().updateAccelerometerZData(accelZValue);
+
+        //     dataReceived["acelZ"] = accelerometerZData;
         //     print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
         //   }
         // }

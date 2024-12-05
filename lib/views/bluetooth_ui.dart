@@ -160,7 +160,7 @@ class _BluetoothUI extends State<BluetoothUI> {
                       ),
                     ),
               Text(
-                'Temperatura: ${blController.temperatureData}',
+                'Temperatura: ${blController.temperatureAmbData}',
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
               Text(

@@ -1,12 +1,12 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
+import 'package:smartclothingproject/views/bluetooth_ui.dart';
 import 'package:smartclothingproject/views/profile_page.dart';
 import '../handlers/data_base_handler.dart';
 import '../models/user_model.dart';
@@ -224,12 +224,13 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
               allowImplicitScrolling: false,
               children: [
                 HomeUserWorker(blDataNotifier: blDataNotifier),
-                Center(
-                  child: Text(
-                    'Página 2: Cachón',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
-                  ),
-                ),
+                BluetoothUI(),
+                // Center(
+                //   child: Text(
+                //     'Página 2: Cachón',
+                //     style: TextStyle(color: Theme.of(context).primaryColor),
+                //   ),
+                // ),
                 Center(
                   child: Text(
                     'Página 3: Detalles',

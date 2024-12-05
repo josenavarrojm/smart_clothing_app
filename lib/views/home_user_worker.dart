@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:smartclothingproject/components/charts.dart';
+import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/loadCSVData.dart';
+import 'package:smartclothingproject/handlers/mongo_database.dart';
 // import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 
 // final mqttService = MqttService();
@@ -46,12 +49,22 @@ class _HomeUserWorker extends State<HomeUserWorker> {
     });
   }
 
+  final Map<String, dynamic> dataValues = {
+    "user_id": "smartUserA1",
+    "Name": "Jhon",
+    "Apellido": "Pea",
+    "Edad": 45
+  };
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+
+    final mongoService = Provider.of<MongoService>(context);
+
     final double tempValue =
-        double.tryParse(widget.blDataNotifier.temperatureData) ?? 0.0;
+        double.tryParse(widget.blDataNotifier.temperatureAmbData) ?? 0.0;
 
     final double humidityValue =
         double.tryParse(widget.blDataNotifier.humidityData) ?? 0.0;
@@ -83,6 +96,23 @@ class _HomeUserWorker extends State<HomeUserWorker> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              FloatingActionButton(
+                onPressed: () async {
+                  try {
+                    await mongoService.insertDocument(dataValues, "users");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Documento insertado correctamente')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Error al insertar documento: $e')),
+                    );
+                  }
+                },
+                child: const Icon(Icons.abc),
+              ),
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius:
