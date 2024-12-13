@@ -5,11 +5,9 @@ import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/loaderLogged.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
-// import 'package:smartclothingproject/views/demographic_profile.dart';
 import 'functions/theme_notifier.dart';
 import 'functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
-// import 'views/auth_user.dart';
 import 'functions/persistance_data.dart';
 
 Future<void> main() async {
@@ -72,7 +70,7 @@ class MyApp extends StatelessWidget {
             ),
       debugShowCheckedModeBanner: false,
       // Selección de página inicial según la última visitada
-      home: lastPage != 'userLoggedHome'
+      home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
           : const AuthSwitcher(), // Cambia a AuthSwitcher si es necesario
     );

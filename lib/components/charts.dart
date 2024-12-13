@@ -37,7 +37,7 @@ class ChartCard extends StatelessWidget {
                     children: List.generate(
                       5, // Número de divisiones en el eje Y
                       (index) => Text(
-                        '${(((((-maxValue + minValue) / 4) * (index) + maxValue - 1.665) * 100).ceil() / 100)}', // Ejemplo de valores del eje Y
+                        '${(((((-maxValue + minValue) / 2) * (index) + maxValue + 0.665) * 100).ceil() / 100)}', // Ejemplo de valores del eje Y
                         style: TextStyle(fontSize: 10, color: Colors.grey),
                       ),
                     ),

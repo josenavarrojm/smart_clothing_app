@@ -1,20 +1,24 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:mongo_dart/mongo_dart.dart';
+import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/connected_state_notifier.dart';
+import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'reactive_state.dart';
 import 'package:meta/meta.dart';
 import 'dart:convert';
 
 final flutterReactiveBle = FlutterReactiveBle();
-DateTime now = DateTime.now();
-String formattedDate = DateFormat('EEE, MMM d, yyyy - hh:mm a').format(now);
+String userid = BlDataNotifier().user_id;
 
 class BluetoothController {
+  final MongoService mongoService;
   final BleScanner _bleScanner;
   final BleDeviceConnector _deviceConnector;
   int bpmData = 0;
@@ -24,12 +28,14 @@ class BluetoothController {
   double accelerometerXData = 0.0;
   double accelerometerYData = 0.0;
   double accelerometerZData = 0.0;
-  List<String> ecgDataReceived = [];
+  List<double> ecgDataReceived = [];
+  String readData = '';
 
   StreamSubscription<List<int>>? subscription;
 
   Map<String, dynamic> dataReceived = {
-    "user_id": "smartAppUser00",
+    "_id": ObjectId(),
+    "user_id": userid,
     "bpm": 0,
     "tempAmb": 0,
     "tempCorp": 0,
@@ -37,12 +43,36 @@ class BluetoothController {
     "acelX": 0,
     "acelY": 0,
     "acelZ": 0,
-    "ecg": [],
+    "ecg": <double>[],
     "created_at": "",
   };
 
-  BluetoothController()
-      : _bleScanner = BleScanner(
+  List<Map<String, dynamic>> parseEcgData(List<String> ecgDataReceived) {
+    List<Map<String, dynamic>> parsedData = [];
+
+    for (String data in ecgDataReceived) {
+      // Match para extraer índice y valores
+      final regex = RegExp(r"(\d+)\sECG:\s\[(.+)\]");
+      final match = regex.firstMatch(data);
+
+      if (match != null) {
+        int index = int.parse(match.group(1)!);
+        List<double> values = match
+            .group(2)!
+            .split(', ')
+            .map((value) => double.parse(value))
+            .toList();
+
+        parsedData.add({"index": index, "values": values});
+      }
+    }
+
+    return parsedData;
+  }
+
+  BluetoothController(BuildContext context)
+      : mongoService = Provider.of<MongoService>(context, listen: false),
+        _bleScanner = BleScanner(
           ble: flutterReactiveBle,
           logMessage: (message) {
             print(message);
@@ -110,138 +140,173 @@ class BluetoothController {
         Fluttertoast.cancel();
         // Convertir el fragmento de datos recibido en texto
         final decodedFragment = String.fromCharCodes(data);
-        print(decodedFragment);
+        // print(decodedFragment);
 
         // print("Fragmento decodificado: $decodedFragment");
 
         // // Verificar si el fragmento contiene la palabra 'temperature'
-        // if (decodedFragment.contains('bpm')) {
-        //   // Separar la cadena por el delimitador ":"
-        //   if (!ConnectionService().isSuscripted) {}
-        //   var parts = decodedFragment.split(':');
+        if (decodedFragment.contains('BPM')) {
+          // Separar la cadena por el delimitador ":"
+          if (!ConnectionService().isSuscripted) {}
+          var parts = decodedFragment.split(':');
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     String valueReceived =
-        //         parts[1].trim(); // .trim() elimina espacios extra
-        //     bpmData = int.parse(valueReceived);
-        //     BlDataNotifier().updatebpmData(valueReceived);
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String valueReceived =
+                parts[1].trim(); // .trim() elimina espacios extra
+            bpmData = double.parse(valueReceived).toInt();
+            BlDataNotifier().updatebpmData(valueReceived);
 
-        //     dataReceived["bpm"] = bpmData;
-        //     print("bpm: ${BlDataNotifier().bpmData}");
-        //   }
-        // } else if (decodedFragment.contains('tempAmb')) {
-        //   // Separar la cadena por el delimitador ":"
-        //   if (!ConnectionService().isSuscripted) {}
-        //   var parts = decodedFragment.split(':');
+            dataReceived["bpm"] = bpmData;
+            print("bpm: ${BlDataNotifier().bpmData}");
+          }
+        } else if (decodedFragment.contains('tempAmb')) {
+          // Separar la cadena por el delimitador ":"
+          if (!ConnectionService().isSuscripted) {}
+          var parts = decodedFragment.split(':');
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     String valueReceived =
-        //         parts[1].trim(); // .trim() elimina espacios extra
-        //     temperatureAmbData = double.parse(valueReceived);
-        //     BlDataNotifier().updateTemperatureAmbData(valueReceived);
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String valueReceived =
+                parts[1].trim(); // .trim() elimina espacios extra
+            temperatureAmbData = double.parse(valueReceived);
+            BlDataNotifier().updateTemperatureAmbData(valueReceived);
 
-        //     dataReceived["tempAmb"] = temperatureAmbData;
-        //     print(
-        //         "Temperatura Ambiente: ${BlDataNotifier().temperatureAmbData}");
-        //   }
-        // } else if (decodedFragment.contains('tempCorp')) {
-        //   // Separar la cadena por el delimitador ":"
-        //   if (!ConnectionService().isSuscripted) {}
-        //   var parts = decodedFragment.split(':');
+            dataReceived["tempAmb"] = temperatureAmbData;
+            print(
+                "Temperatura Ambiente: ${BlDataNotifier().temperatureAmbData}");
+          }
+        } else if (decodedFragment.contains('tempCorp')) {
+          // Separar la cadena por el delimitador ":"
+          if (!ConnectionService().isSuscripted) {}
+          var parts = decodedFragment.split(':');
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     String valueReceived =
-        //         parts[1].trim(); // .trim() elimina espacios extra
-        //     temperatureCorporalData = double.parse(valueReceived);
-        //     BlDataNotifier().updateTemperatureCorporalData(valueReceived);
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            if (parts[1].trim() == 'None') {
+            } else {
+              // Extraer el valor de temperatura y limpiarlo
+              String valueReceived =
+                  parts[1].trim(); // .trim() elimina espacios extra
+              temperatureCorporalData = double.parse(valueReceived);
+              BlDataNotifier().updateTemperatureCorporalData(valueReceived);
 
-        //     dataReceived["tempCorp"] = temperatureCorporalData;
-        //     print(
-        //         "Temperatura corporal: ${BlDataNotifier().temperatureCorporalData}");
-        //   }
-        // } else if (decodedFragment.contains('hum')) {
-        //   // Separar la cadena por el delimitador ":"
-        //   if (!ConnectionService().isSuscripted) {}
-        //   var parts = decodedFragment.split(':');
+              dataReceived["tempCorp"] = temperatureCorporalData;
+              print(
+                  "Temperatura corporal: ${BlDataNotifier().temperatureCorporalData}");
+            }
+          }
+        } else if (decodedFragment.contains('hum')) {
+          // Separar la cadena por el delimitador ":"
+          if (!ConnectionService().isSuscripted) {}
+          var parts = decodedFragment.split(':');
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     String valueReceived =
-        //         parts[1].trim(); // .trim() elimina espacios extra
-        //     humidityData = double.parse(valueReceived);
-        //     BlDataNotifier().updateHumidityData(valueReceived);
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String valueReceived =
+                parts[1].trim(); // .trim() elimina espacios extra
+            humidityData = double.parse(valueReceived);
+            BlDataNotifier().updateHumidityData(valueReceived);
 
-        //     dataReceived["hum"] = humidityData;
-        //     print("Humedad: ${BlDataNotifier().humidityData}");
-        //   }
-        // } else if ((decodedFragment.contains('acelX'))) {
-        //   // Separar la cadena por el delimitador ":"
-        //   var parts = decodedFragment.split(':');
+            dataReceived["hum"] = humidityData;
+            print("Humedad: ${BlDataNotifier().humidityData}");
+          }
+        } else if ((decodedFragment.contains('acelX1'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     String accelXValue =
-        //         parts[1].trim(); // .trim() elimina espacios extra
-        //     accelerometerXData = double.parse(accelXValue);
-        //     BlDataNotifier().updateAccelerometerXData(accelXValue);
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String accelXValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            accelerometerXData = double.parse(accelXValue);
+            BlDataNotifier().updateAccelerometerXData(accelXValue);
 
-        //     dataReceived["acelX"] = accelerometerXData;
-        //     print("Ángulo X: ${BlDataNotifier().accelerometerXData}");
-        //   }
-        // } else if ((decodedFragment.contains('acelY'))) {
-        //   // Separar la cadena por el delimitador ":"
-        //   var parts = decodedFragment.split(':');
+            dataReceived["acelX"] = accelerometerXData;
+            print("Ángulo X1: ${BlDataNotifier().accelerometerXData}");
+          }
+        } else if ((decodedFragment.contains('acelX2'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     String accelYValue =
-        //         parts[1].trim(); // .trim() elimina espacios extra
-        //     accelerometerYData = double.parse(accelYValue);
-        //     BlDataNotifier().updateAccelerometerYData(accelYValue);
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String accelYValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            accelerometerYData = double.parse(accelYValue);
+            BlDataNotifier().updateAccelerometerYData(accelYValue);
 
-        //     dataReceived["acelY"] = accelerometerYData;
-        //     print(" BlDataNotifier(): ${BlDataNotifier().accelerometerYData}");
-        //   }
-        // } else if ((decodedFragment.contains('acelZ'))) {
-        //   // Separar la cadena por el delimitador ":"
-        //   var parts = decodedFragment.split(':');
+            dataReceived["acelY"] = accelerometerYData;
+            print("Ángulo X2: ${BlDataNotifier().accelerometerYData}");
+          }
+        } else if ((decodedFragment.contains('acelZ'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     String accelZValue =
-        //         parts[1].trim(); // .trim() elimina espacios extra
-        //     accelerometerZData = double.parse(accelZValue);
-        //     BlDataNotifier().updateAccelerometerZData(accelZValue);
+          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          if (parts.length > 1) {
+            // Extraer el valor de temperatura y limpiarlo
+            String accelZValue =
+                parts[1].trim(); // .trim() elimina espacios extra
+            accelerometerZData = double.parse(accelZValue);
+            BlDataNotifier().updateAccelerometerZData(accelZValue);
 
-        //     dataReceived["acelZ"] = accelerometerZData;
-        //     print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
-        //   }
-        // }
-        // // else if ((decodedFragment.contains('ECG'))) {
-        //   // Separar la cadena por el delimitador ":"
-        //   var parts = decodedFragment.split(':');
+            dataReceived["acelZ"] = accelerometerZData;
+            print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
+          }
+        } else if ((decodedFragment.contains('ECG'))) {
+          // Separar la cadena por el delimitador ":"
+          var parts = decodedFragment.split(':');
+          var partsx = parts[0].split(' ');
+          if (readData != partsx[0]) {
+            readData = partsx[0];
+            print(readData);
+            if (parts.length > 1 &&
+                parts[1].contains('[') &&
+                parts[1].contains(']')) {
+              // Elimina los corchetes iniciales y finales
+              String cleanData =
+                  parts[1].replaceAll("[", "").replaceAll("]", "");
+              List<double> values = cleanData
+                  .split(",") // Divide los valores por comas
+                  .map((value) =>
+                      double.parse(value.trim())) // Convierte a double
+                  .toList();
+              print(values);
 
-        //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-        //   if (parts.length > 1) {
-        //     // Extraer el valor de temperatura y limpiarlo
-        //     List<String> listReceived = ; // .trim() elimina espacios extra
-        //     accelerometerZData = double.parse(accelZValue);
-        //     BlDataNotifier().updateAccelerometerZData(accelZValue);
-
-        //     dataReceived["acelZ"] = accelerometerZData;
-        //     print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
-        //   }
-        // }
+              // print("ECG Data Notifier: ${BlDataNotifier().ecgData}");
+              // print('Antes de agregar: ${ecgDataReceived.length}');
+              ecgDataReceived.addAll(values);
+              BlDataNotifier().updateECGData(ecgDataReceived);
+              // print(ecgDataReceived);
+              print('Después de agregar: ${ecgDataReceived.length}');
+            }
+          }
+        } else if ((decodedFragment.contains('Send'))) {
+          // print(ecgDataReceived.length);
+          var parts = decodedFragment.split(':');
+          if (readData != parts[0]) {
+            readData = parts[0];
+            dataReceived["_id"] = ObjectId();
+            dataReceived["user_id"] = BlDataNotifier().user_id;
+            dataReceived["ecg"] = BlDataNotifier().ecgData;
+            dataReceived["created_at"] =
+                DateFormat('EEE, MMM d, yyyy - hh:mm a').format(DateTime.now());
+            print(dataReceived["created_at"]);
+            try {
+              await mongoService.insertDocument(dataReceived, "data");
+              print("Documento insertado exitosamente.");
+            } catch (e) {
+              print("Error al insertar documento: $e");
+            }
+            ecgDataReceived.clear();
+          }
+        }
       },
       onError: (error) {
         print("Error de suscripción: $error");

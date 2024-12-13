@@ -5,6 +5,7 @@ class BlDataNotifier with ChangeNotifier {
   factory BlDataNotifier() => _instance;
   BlDataNotifier._internal();
 
+  String _user_id = '';
   String _bpmData = '';
   String _temperatureAmbData = '';
   String _temperatureCorporalData = '';
@@ -12,7 +13,9 @@ class BlDataNotifier with ChangeNotifier {
   String _accelerometerXData = '';
   String _accelerometerYData = '';
   String _accelerometerZData = '';
+  List<double> _ecgData = [];
 
+  String get user_id => _user_id;
   String get bpmData => _bpmData;
   String get temperatureAmbData => _temperatureAmbData;
   String get temperatureCorporalData => _temperatureCorporalData;
@@ -20,6 +23,12 @@ class BlDataNotifier with ChangeNotifier {
   String get accelerometerXData => _accelerometerXData;
   String get accelerometerYData => _accelerometerYData;
   String get accelerometerZData => _accelerometerZData;
+  List<double> get ecgData => _ecgData;
+
+  void updateUserID(String status) {
+    _user_id = status;
+    notifyListeners();
+  }
 
   void updatebpmData(String status) {
     _bpmData = status;
@@ -53,6 +62,11 @@ class BlDataNotifier with ChangeNotifier {
 
   void updateAccelerometerZData(String status) {
     _accelerometerZData = status;
+    notifyListeners();
+  }
+
+  void updateECGData(List<double> status) {
+    _ecgData = status;
     notifyListeners();
   }
 }

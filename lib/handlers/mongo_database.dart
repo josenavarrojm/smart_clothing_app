@@ -30,17 +30,18 @@ class MongoService {
   }
 
   // Obtener documentos
-  Future<List<Map<String, dynamic>>> getDocuments(String collectionName) async {
+  Future<List<Map<String, dynamic>>> getDocuments(String collectionName,
+      {Map<String, dynamic>? filter}) async {
     collection = db.collection(collectionName);
-    return await collection.find().toList();
+    return await collection.find(filter ?? {}).toList();
   }
 
   // Actualizar un documento
-  Future<void> updateDocument(dynamic id, Map<String, dynamic> updatedData,
-      String collectionName) async {
+  Future<void> updateDocument(String codeSession,
+      Map<String, dynamic> updatedData, String collectionName) async {
     collection = db.collection(collectionName);
-    await collection.update(where.eq('_id', id), updatedData);
-    print("Documento actualizado con ID: $id");
+    await collection.update(where.eq('user_id', codeSession), updatedData);
+    print("Documento actualizado con user_id: $codeSession");
   }
 
   // Eliminar un documento

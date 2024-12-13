@@ -4,7 +4,6 @@ import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-final blController = BluetoothController();
 String deviceId = '';
 
 class BluetoothUI extends StatefulWidget {
@@ -21,14 +20,15 @@ class _BluetoothUI extends State<BluetoothUI> {
   final TextEditingController jsonController = TextEditingController();
   String receivedData = '';
   StreamSubscription? _subscription;
+  late BluetoothController bleController;
 
   @override
   void initState() {
     super.initState();
     requestPermissions();
-
+    bleController = BluetoothController(context);
     // Escuchar el estado del escáner
-    _subscription = blController.bleScanner.state.listen((state) {
+    _subscription = bleController.bleScanner.state.listen((state) {
       if (mounted) {
         setState(() {
           discoveredDevices = state.discoveredDevices
@@ -71,16 +71,16 @@ class _BluetoothUI extends State<BluetoothUI> {
             children: [
               ElevatedButton(
                 onPressed: () async {
-                  await blController.requestBluetoothActivation();
-                  blController.startScanning([]); // Inicia el escaneo
+                  await bleController.requestBluetoothActivation();
+                  bleController.startScanning([]); // Inicia el escaneo
                   // await Future.delayed(const Duration(seconds: 15));
-                  // blController.stopScanning();
+                  // bleController.stopScanning();
                 },
                 child: const Text('Escanear Dispositivos'),
               ),
               ElevatedButton(
                 onPressed: () async {
-                  blController.subscribeToCharacteristic(
+                  bleController.subscribeToCharacteristic(
                     deviceId: deviceId,
                     serviceId:
                         Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
@@ -88,13 +88,13 @@ class _BluetoothUI extends State<BluetoothUI> {
                         Uuid.parse("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"),
                   ); // Inicia el escaneo
                   // await Future.delayed(const Duration(seconds: 15));
-                  // blController.stopScanning();
+                  // bleController.stopScanning();
                 },
                 child: const Text('Suscripción'),
               ),
               ElevatedButton(
                 onPressed: () async {
-                  blController.writeCharacteristic(
+                  bleController.writeCharacteristic(
                       deviceId: deviceId,
                       serviceId:
                           Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
@@ -136,7 +136,7 @@ class _BluetoothUI extends State<BluetoothUI> {
                                                 Theme.of(context).primaryColor),
                                       ),
                                       onTap: () async {
-                                        await blController.connectToDevice(
+                                        await bleController.connectToDevice(
                                           device.id,
                                         );
                                         setState(() {
@@ -160,23 +160,23 @@ class _BluetoothUI extends State<BluetoothUI> {
                       ),
                     ),
               Text(
-                'Temperatura: ${blController.temperatureAmbData}',
+                'Temperatura: ${bleController.temperatureAmbData}',
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
               Text(
-                'Humedad: ${blController.humidityData}',
+                'Humedad: ${bleController.humidityData}',
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
               Text(
-                'Accelerometro Z: ${blController.accelerometerXData}',
+                'Accelerometro Z: ${bleController.accelerometerXData}',
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
               Text(
-                'Accelerometro Y: ${blController.accelerometerYData}',
+                'Accelerometro Y: ${bleController.accelerometerYData}',
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
               Text(
-                'Accelerometro Z: ${blController.accelerometerZData}',
+                'Accelerometro Z: ${bleController.accelerometerZData}',
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
               if (connectedDevice != null) ...[

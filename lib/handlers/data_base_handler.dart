@@ -23,7 +23,7 @@ class DatabaseHandler {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 4,
       onCreate: _createDB,
     );
   }
@@ -32,15 +32,31 @@ class DatabaseHandler {
     await db.execute('''
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      Email TEXT,
-      Hashpwd TEXT,
+      user_id TEXT,
       Name TEXT,
       Surname TEXT,
-      Age INTEGER,
-      BirthDate TEXT,
+      PhoneNumber TEXT,
+      Email TEXT,
       Gender TEXT,
-      UserType TEXT,
-      PhoneNumber TEXT
+      BirthDate TEXT,
+      Age TEXT,
+      Cedula TEXT,
+      DateCedula TEXT,
+      DepartamentoCedula TEXT,
+      CiudadCedula TEXT,
+      ScholarityLevel TEXT,
+      Occupation TEXT,
+      MaritalStatus TEXT,
+      NumberOfChildren TEXT,
+      PeopleEconomlyDepend TEXT,
+      StateOfResidence TEXT,
+      CityOfResidence TEXT,
+      BarrioOfResidence TEXT,
+      AddressOfResidence TEXT,
+      BloodType TEXT,
+      EPS TEXT,
+      ARL TEXT,
+      PensionFondo TEXT
     )
   ''');
   }

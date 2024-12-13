@@ -21,8 +21,6 @@ void showCustomToast(String message) {
       fontSize: 16.0);
 }
 
-final bleController = BluetoothController();
-
 class BluetoothDialog extends StatefulWidget {
   const BluetoothDialog({
     super.key,
@@ -40,13 +38,14 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
   final TextEditingController jsonController = TextEditingController();
   String receivedData = '';
   StreamSubscription? _subscription;
+  late BluetoothController bleController;
 
   @override
   void initState() {
     super.initState();
     requestPermissions();
     startScanningDevices();
-
+    bleController = BluetoothController(context);
     // Escuchar el estado del escáner
     _subscription = bleController.bleScanner.state.listen((state) {
       if (mounted) {
