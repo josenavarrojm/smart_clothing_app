@@ -53,26 +53,27 @@ class MyApp extends StatelessWidget {
       title: 'SmartClothing App',
       theme: themeNotifier.isLightTheme
           ? ThemeData(
-              scaffoldBackgroundColor: Colors.white,
-              primaryColorLight: Colors.white,
-              primaryColor: const Color.fromARGB(255, 255, 255, 255),
+              scaffoldBackgroundColor: Color.fromARGB(255, 238, 238, 238),
+              primaryColor: Color.fromARGB(255, 5, 74, 145),
+              primaryColorLight: const Color.fromARGB(255, 129, 164, 205),
               colorScheme: ColorScheme.fromSwatch().copyWith(
-                secondary: const Color.fromARGB(255, 0, 0, 0),
-              ),
+                  secondary: const Color.fromARGB(255, 62, 124, 177),
+                  tertiary: const Color.fromARGB(255, 241, 115, 0)),
             )
           : ThemeData(
-              scaffoldBackgroundColor: Colors.black,
-              primaryColor: Colors.white,
-              primaryColorDark: const Color.fromRGBO(12, 32, 100, 1.0),
+              scaffoldBackgroundColor: Color.fromARGB(255, 238, 238, 238),
+              primaryColor: Color.fromARGB(255, 5, 74, 145),
+              primaryColorLight: const Color.fromARGB(255, 129, 164, 205),
               colorScheme: ColorScheme.fromSwatch().copyWith(
-                secondary: Colors.blue[900],
-              ),
+                  secondary: const Color.fromARGB(255, 62, 124, 177),
+                  tertiary: const Color.fromARGB(255, 241, 115, 0)),
             ),
       debugShowCheckedModeBanner: false,
       // Selección de página inicial según la última visitada
       home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
           : const AuthSwitcher(), // Cambia a AuthSwitcher si es necesario
+      // home: const AuthSwitcher(), // Cambia a AuthSwitcher si es necesario
     );
   }
 }

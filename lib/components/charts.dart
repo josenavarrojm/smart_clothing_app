@@ -22,6 +22,8 @@ class ChartCard extends StatelessWidget {
     double minValue = data.reduce((a, b) => a < b ? a : b);
 
     return Card(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      elevation: 0,
       child: Container(
         padding: const EdgeInsets.all(10),
         width: screenWidth * widthFactor,

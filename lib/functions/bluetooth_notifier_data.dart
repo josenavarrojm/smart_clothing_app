@@ -13,7 +13,9 @@ class BlDataNotifier with ChangeNotifier {
   String _accelerometerXData = '';
   String _accelerometerYData = '';
   String _accelerometerZData = '';
+  String _dateTimeData = '';
   List<double> _ecgData = [];
+  List<double> _ecgDataApp = [];
 
   String get user_id => _user_id;
   String get bpmData => _bpmData;
@@ -23,7 +25,9 @@ class BlDataNotifier with ChangeNotifier {
   String get accelerometerXData => _accelerometerXData;
   String get accelerometerYData => _accelerometerYData;
   String get accelerometerZData => _accelerometerZData;
+  String get dateTimeData => _dateTimeData;
   List<double> get ecgData => _ecgData;
+  List<double> get ecgDataApp => _ecgDataApp;
 
   void updateUserID(String status) {
     _user_id = status;
@@ -67,6 +71,16 @@ class BlDataNotifier with ChangeNotifier {
 
   void updateECGData(List<double> status) {
     _ecgData = status;
+    notifyListeners();
+  }
+
+  void updateECGDataApp(List<double> status) {
+    _ecgDataApp = status;
+    notifyListeners();
+  }
+
+  void updateDateTimeData(String status) {
+    _dateTimeData = status;
     notifyListeners();
   }
 }

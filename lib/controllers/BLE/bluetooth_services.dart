@@ -4,6 +4,8 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
@@ -11,7 +13,6 @@ import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'reactive_state.dart';
-import 'package:meta/meta.dart';
 import 'dart:convert';
 
 final flutterReactiveBle = FlutterReactiveBle();
@@ -30,6 +31,7 @@ class BluetoothController {
   double accelerometerZData = 0.0;
   List<double> ecgDataReceived = [];
   String readData = '';
+  List<Map<String, dynamic>> dataMongoDB = [];
 
   StreamSubscription<List<int>>? subscription;
 
@@ -156,10 +158,9 @@ class BluetoothController {
             String valueReceived =
                 parts[1].trim(); // .trim() elimina espacios extra
             bpmData = double.parse(valueReceived).toInt();
-            BlDataNotifier().updatebpmData(valueReceived);
 
             dataReceived["bpm"] = bpmData;
-            print("bpm: ${BlDataNotifier().bpmData}");
+            // print("bpm: ${BlDataNotifier().bpmData}");
           }
         } else if (decodedFragment.contains('tempAmb')) {
           // Separar la cadena por el delimitador ":"
@@ -172,11 +173,9 @@ class BluetoothController {
             String valueReceived =
                 parts[1].trim(); // .trim() elimina espacios extra
             temperatureAmbData = double.parse(valueReceived);
-            BlDataNotifier().updateTemperatureAmbData(valueReceived);
 
             dataReceived["tempAmb"] = temperatureAmbData;
-            print(
-                "Temperatura Ambiente: ${BlDataNotifier().temperatureAmbData}");
+            // print("Temperatura Ambiente: ${BlDataNotifier().temperatureAmbData}");
           }
         } else if (decodedFragment.contains('tempCorp')) {
           // Separar la cadena por el delimitador ":"
@@ -191,11 +190,9 @@ class BluetoothController {
               String valueReceived =
                   parts[1].trim(); // .trim() elimina espacios extra
               temperatureCorporalData = double.parse(valueReceived);
-              BlDataNotifier().updateTemperatureCorporalData(valueReceived);
 
               dataReceived["tempCorp"] = temperatureCorporalData;
-              print(
-                  "Temperatura corporal: ${BlDataNotifier().temperatureCorporalData}");
+              // print("Temperatura corporal: ${BlDataNotifier().temperatureCorporalData}");
             }
           }
         } else if (decodedFragment.contains('hum')) {
@@ -209,10 +206,9 @@ class BluetoothController {
             String valueReceived =
                 parts[1].trim(); // .trim() elimina espacios extra
             humidityData = double.parse(valueReceived);
-            BlDataNotifier().updateHumidityData(valueReceived);
 
             dataReceived["hum"] = humidityData;
-            print("Humedad: ${BlDataNotifier().humidityData}");
+            // print("Humedad: ${BlDataNotifier().humidityData}");
           }
         } else if ((decodedFragment.contains('acelX1'))) {
           // Separar la cadena por el delimitador ":"
@@ -224,10 +220,9 @@ class BluetoothController {
             String accelXValue =
                 parts[1].trim(); // .trim() elimina espacios extra
             accelerometerXData = double.parse(accelXValue);
-            BlDataNotifier().updateAccelerometerXData(accelXValue);
 
             dataReceived["acelX"] = accelerometerXData;
-            print("Ángulo X1: ${BlDataNotifier().accelerometerXData}");
+            // print("Ángulo X1: ${BlDataNotifier().accelerometerXData}");
           }
         } else if ((decodedFragment.contains('acelX2'))) {
           // Separar la cadena por el delimitador ":"
@@ -239,10 +234,9 @@ class BluetoothController {
             String accelYValue =
                 parts[1].trim(); // .trim() elimina espacios extra
             accelerometerYData = double.parse(accelYValue);
-            BlDataNotifier().updateAccelerometerYData(accelYValue);
 
             dataReceived["acelY"] = accelerometerYData;
-            print("Ángulo X2: ${BlDataNotifier().accelerometerYData}");
+            // print("Ángulo X2: ${BlDataNotifier().accelerometerYData}");
           }
         } else if ((decodedFragment.contains('acelZ'))) {
           // Separar la cadena por el delimitador ":"
@@ -254,10 +248,9 @@ class BluetoothController {
             String accelZValue =
                 parts[1].trim(); // .trim() elimina espacios extra
             accelerometerZData = double.parse(accelZValue);
-            BlDataNotifier().updateAccelerometerZData(accelZValue);
 
             dataReceived["acelZ"] = accelerometerZData;
-            print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
+            // print("Ángulo Z: ${BlDataNotifier().accelerometerZData}");
           }
         } else if ((decodedFragment.contains('ECG'))) {
           // Separar la cadena por el delimitador ":"
@@ -265,7 +258,6 @@ class BluetoothController {
           var partsx = parts[0].split(' ');
           if (readData != partsx[0]) {
             readData = partsx[0];
-            print(readData);
             if (parts.length > 1 &&
                 parts[1].contains('[') &&
                 parts[1].contains(']')) {
@@ -277,14 +269,14 @@ class BluetoothController {
                   .map((value) =>
                       double.parse(value.trim())) // Convierte a double
                   .toList();
-              print(values);
+              // print(values);
 
               // print("ECG Data Notifier: ${BlDataNotifier().ecgData}");
               // print('Antes de agregar: ${ecgDataReceived.length}');
               ecgDataReceived.addAll(values);
               BlDataNotifier().updateECGData(ecgDataReceived);
               // print(ecgDataReceived);
-              print('Después de agregar: ${ecgDataReceived.length}');
+              // print('Después de agregar: ${ecgDataReceived.length}');
             }
           }
         } else if ((decodedFragment.contains('Send'))) {
@@ -295,12 +287,39 @@ class BluetoothController {
             dataReceived["_id"] = ObjectId();
             dataReceived["user_id"] = BlDataNotifier().user_id;
             dataReceived["ecg"] = BlDataNotifier().ecgData;
+            await initializeDateFormatting('es_ES', null);
+            Intl.defaultLocale = 'es_ES';
             dataReceived["created_at"] =
                 DateFormat('EEE, MMM d, yyyy - hh:mm a').format(DateTime.now());
             print(dataReceived["created_at"]);
             try {
               await mongoService.insertDocument(dataReceived, "data");
-              print("Documento insertado exitosamente.");
+              dataMongoDB = await mongoService.getDocuments("data");
+              BlDataNotifier()
+                  .updatebpmData(dataMongoDB.last["bpm"].toString());
+              BlDataNotifier().updateTemperatureAmbData(
+                  dataMongoDB.last["tempAmb"].toString());
+              BlDataNotifier().updateTemperatureCorporalData(
+                  dataMongoDB.last["tempCorp"].toString());
+              BlDataNotifier()
+                  .updateHumidityData(dataMongoDB.last["hum"].toString());
+              BlDataNotifier().updateAccelerometerXData(
+                  dataMongoDB.last["acelX"].toString());
+              BlDataNotifier().updateAccelerometerYData(
+                  dataMongoDB.last["acelY"].toString());
+              BlDataNotifier().updateAccelerometerZData(
+                  dataMongoDB.last["acelZ"].toString());
+              BlDataNotifier()
+                  .updateDateTimeData(dataMongoDB.last["created_at"]);
+              // Convierte "ecg" en List<double>
+              final ecgData = (dataMongoDB.last["ecg"] as List<dynamic>)
+                  .map((value) => value is double
+                      ? value
+                      : double.tryParse(value.toString()) ?? 0.0)
+                  .toList();
+              BlDataNotifier().updateECGDataApp(ecgData);
+
+              print(ecgData.runtimeType);
             } catch (e) {
               print("Error al insertar documento: $e");
             }

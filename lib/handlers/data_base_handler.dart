@@ -3,7 +3,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseHandler {
-  // Singleton para mantener una sola instancia de DatabaseHandler
   static final DatabaseHandler instance = DatabaseHandler._init();
 
   static Database? _database;
@@ -23,12 +22,13 @@ class DatabaseHandler {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
-  Future _createDB(Database db, int version) async {
+  Future<void> _createDB(Database db, int version) async {
     await db.execute('''
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,27 +61,26 @@ class DatabaseHandler {
   ''');
   }
 
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 6) {
+      await db.execute("ALTER TABLE users ADD COLUMN user_id TEXT");
+    }
+  }
+
   Future<void> saveOrUpdateUser(Map<String, dynamic> userData) async {
     final db = await instance.database;
-
-    // Eliminar todos los registros existentes
-    await db.delete('users');
-
-    // Insertar el nuevo registro (siempre será uno solo)
-    await db.insert('users', userData);
+    await db.delete('users'); // Elimina registros antiguos
+    await db.insert('users', userData); // Inserta nuevo registro
   }
 
   Future<void> deleteUser() async {
     final db = await instance.database;
-
-    // Eliminar todos los registros existentes
     await db.delete('users');
   }
 
   Future<List<UserModel>> getAllUsers() async {
     final db = await database;
-    final result = await db.query('users'); // 'users' es el nombre de la tabla
-
+    final result = await db.query('users');
     return result.map((e) => UserModel.fromJson(e)).toList();
   }
 }

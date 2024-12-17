@@ -85,7 +85,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
     // double screenHeight = MediaQuery.of(context).size.height;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+        systemNavigationBarColor: Theme.of(context).primaryColor,
         systemNavigationBarIconBrightness: Brightness.light,
       ));
     });
@@ -100,7 +100,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
             curve: Curves.ease,
             duration: const Duration(milliseconds: 600),
             child: AppBar(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Theme.of(context).primaryColor,
               shape: const RoundedRectangleBorder(
                   borderRadius:
                       BorderRadius.vertical(bottom: Radius.circular(0.0))),
@@ -111,7 +111,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
               title: Text(
                 _selectedIndex != 3 ? "Smart Clothing" : "Mi Perfil",
                 style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).primaryColorLight,
                     fontSize: _selectedIndex != 3 ? 25 : 30,
                     fontWeight: FontWeight.w700),
               ),
@@ -250,15 +250,13 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           },
         ),
         bottomNavigationBar: Container(
-          height: 85,
+          height: 100,
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context)
-                    .primaryColor
-                    .withOpacity(0.0), // Color de la sombra
-                spreadRadius: 0.1, // Cuánto se extiende la sombra
-                blurRadius: 2, // Qué tan difusa es la sombra
+                color: Theme.of(context).primaryColor, // Color de la sombra
+                // spreadRadius: 0.1, // Cuánto se extiende la sombra
+                // blurRadius: 2, // Qué tan difusa es la sombra
                 offset: const Offset(0, 0), // Ángulo de la sombra (x, y)
               ),
             ],
@@ -272,10 +270,11 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
             showUnselectedLabels: true,
             selectedLabelStyle: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 fontSize: 14),
             unselectedLabelStyle: TextStyle(
-                foreground: Paint()..color = Theme.of(context).primaryColor,
+                foreground: Paint()
+                  ..color = Theme.of(context).primaryColorLight,
                 fontWeight: FontWeight.w300,
                 fontSize: 14),
             items: <BottomNavigationBarItem>[
@@ -283,9 +282,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 icon: AnimatedIconContainer(
                   isSelected: _selectedIndex == 0,
                   icon: Icons.home,
-                  gradientColors: const [
-                    Color.fromRGBO(100, 120, 120, 0.85),
-                    Color.fromRGBO(150, 170, 170, 0.85),
+                  gradientColors: [
+                    Theme.of(context).colorScheme.secondary,
+                    Theme.of(context).colorScheme.secondary,
                   ],
                 ),
                 label: 'Inicio',
@@ -294,9 +293,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 icon: AnimatedIconContainer(
                   isSelected: _selectedIndex == 1,
                   icon: Icons.bluetooth,
-                  gradientColors: const [
-                    Color.fromRGBO(100, 120, 120, 0.85),
-                    Color.fromRGBO(150, 170, 170, 0.85),
+                  gradientColors: [
+                    Theme.of(context).colorScheme.secondary,
+                    Theme.of(context).colorScheme.secondary,
                   ],
                 ),
                 label: 'Bluetooth',
@@ -305,9 +304,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 icon: AnimatedIconContainer(
                   isSelected: _selectedIndex == 2,
                   icon: Icons.deblur,
-                  gradientColors: const [
-                    Color.fromRGBO(100, 120, 120, 0.85),
-                    Color.fromRGBO(150, 170, 170, 0.85),
+                  gradientColors: [
+                    Theme.of(context).colorScheme.secondary,
+                    Theme.of(context).colorScheme.secondary,
                   ],
                 ),
                 label: 'Detalles',
@@ -316,9 +315,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 icon: AnimatedIconContainer(
                   isSelected: _selectedIndex == 3,
                   icon: Icons.person_rounded,
-                  gradientColors: const [
-                    Color.fromRGBO(100, 120, 120, 0.85),
-                    Color.fromRGBO(150, 170, 170, 0.85),
+                  gradientColors: [
+                    Theme.of(context).colorScheme.secondary,
+                    Theme.of(context).colorScheme.secondary,
                   ],
                 ),
                 label: 'Perfil',
@@ -378,7 +377,7 @@ class AnimatedIconContainer extends StatelessWidget {
       ),
       child: Icon(
         icon,
-        color: isSelected ? Colors.white : Theme.of(context).primaryColor,
+        color: isSelected ? Colors.white : Theme.of(context).primaryColorLight,
         size: screenWidth * 0.09,
       ),
     );

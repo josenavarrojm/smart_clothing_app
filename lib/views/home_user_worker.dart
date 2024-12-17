@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/components/charts.dart';
 // import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
@@ -9,7 +9,7 @@ import 'package:smartclothingproject/functions/loadCSVData.dart';
 
 // final mqttService = MqttService();
 String tempAlert = '';
-
+List<double> asd = [34, 2, 97, 58, 73, 9, 10, 8, 7, 6, 7, 65, 30, 3, 4, 34, 5];
 // void mqttProcess() async {
 //   await mqttService.connect(
 //       '192.168.88.253', 1883, 'mqttx_App', 'pasante', '1234');
@@ -42,7 +42,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
     csvData = loadCsvData('assets/data/data.csv');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+        systemNavigationBarColor: Theme.of(context).primaryColor,
       ));
     });
   }
@@ -52,16 +52,15 @@ class _HomeUserWorker extends State<HomeUserWorker> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    final double tempValue =
+    final double tempCorpValue =
+        double.tryParse(widget.blDataNotifier.temperatureCorporalData) ?? 0.0;
+    final double tempAmbValue =
         double.tryParse(widget.blDataNotifier.temperatureAmbData) ?? 0.0;
-
     final double humidityValue =
         double.tryParse(widget.blDataNotifier.humidityData) ?? 0.0;
-    // Obtén la fecha y hora actual
-    DateTime now = DateTime.now();
 
     // Formatea la fecha y hora (puedes personalizar el formato)
-    String formattedDate = DateFormat('EEE, MMM d, yyyy - hh:mm a').format(now);
+    String formattedDate = widget.blDataNotifier.dateTimeData;
 
     return AnimatedContainer(
         width: 500,
@@ -69,7 +68,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
         padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 3.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(0.0),
-          color: Color.fromRGBO(255, 255, 255, 1.0),
+          color: Theme.of(context).scaffoldBackgroundColor,
           // gradient: LinearGradient(
           //   colors: [
           //     Colors.pink.withOpacity(0.25),
@@ -85,188 +84,250 @@ class _HomeUserWorker extends State<HomeUserWorker> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(50), // Esquinas redondeadas
+              Center(
+                child: Text(
+                  textAlign: TextAlign.center,
+                  'Última medición: $formattedDate',
+                  style: GoogleFonts.lexend(
+                      fontSize: 14,
+                      letterSpacing: 0,
+                      fontWeight: FontWeight.w300,
+                      color: Theme.of(context).primaryColor),
                 ),
-                elevation: 0,
-                child: AnimatedContainer(
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(180, 238, 255, 1),
-                      borderRadius:
-                          BorderRadius.circular(500), // Esquinas redondeadas
-                      // border: Border.all(
-                      //     color: Colors.black, width: 2), // Borde opcional
-                    ),
-                    duration: Duration(milliseconds: 250),
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
-                    width: screenWidth * 0.95,
-                    height: screenHeight * 0.2,
-                    alignment: Alignment.center,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+              ChartCard(
+                // data: List<double>.from(widget.blDataNotifier.ecgDataApp),
+                data: asd,
+              ),
+              Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Text(
+                  'BPM:',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lexend(
+                      fontSize: 30,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).primaryColor),
+                ),
+                Text(
+                  '120',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lexend(
+                      fontSize: 30,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).primaryColor),
+                )
+              ]),
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Esquinas redondeadas
+                      ),
+                      elevation: 0,
+                      child: AnimatedContainer(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            // Esquinas redondeadas
+                            // border: Border.all(
+                            //     color: Colors.black,
+                            //     width: 0), // Borde opcional
+                          ),
+                          duration: const Duration(milliseconds: 250),
+                          // padding: const EdgeInsets.symmetric(
+                          //     vertical: 15, horizontal: 35),
+                          width: screenWidth * 0.45,
+                          height: screenHeight * 0.2,
+                          alignment: Alignment.center,
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                (tempValue <= 37.0 && tempValue >= 35.0)
-                                    ? 'Normal'
-                                    : (tempValue > 37.0)
-                                        ? 'Sofocación'
-                                        : 'Hipotermia',
-                                style: TextStyle(
-                                    fontSize: 18,
+                                textAlign: TextAlign.center,
+                                'Temperatura Corporal',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 14,
+                                    letterSpacing: 0,
+                                    fontWeight: FontWeight.w200,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              Text(
+                                '${(tempCorpValue * 10).ceil() / 10}°C',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 40,
+                                    letterSpacing: 0,
                                     fontWeight: FontWeight.w600,
-                                    color: Color.fromRGBO(40, 108, 145, 1)),
+                                    color: Theme.of(context).primaryColor),
                               ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Icon(
-                                (tempValue <= 37.0 && tempValue >= 35.0)
-                                    ? Icons.album_rounded
-                                    : (tempValue > 37.0)
-                                        ? Icons.thermostat_outlined
-                                        : Icons.air_outlined,
-                                color: (tempValue <= 37.0 && tempValue >= 35.0)
-                                    ? Colors.green[700]
-                                    : (tempValue > 37)
-                                        ? Colors.red[600]
-                                        : Colors.blue[300],
-                              )
                             ],
+                          )),
+                    ),
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Esquinas redondeadas
+                      ),
+                      elevation: 0,
+                      child: AnimatedContainer(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            // Esquinas redondeadas
+                            // border: Border.all(
+                            //     color: Colors.black, width: 2), // Borde opcional
                           ),
-                          Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          duration: const Duration(milliseconds: 250),
+                          // padding: const EdgeInsets.symmetric(
+                          //     vertical: 15, horizontal: 35),
+                          width: screenWidth * 0.4,
+                          height: screenHeight * 0.2,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                textAlign: TextAlign.center,
+                                'Temperatura Ambiental',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 14,
+                                    letterSpacing: 0,
+                                    fontWeight: FontWeight.w200,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              Text(
+                                '${(tempAmbValue * 10).ceil() / 10}°C',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 40,
+                                    letterSpacing: 0,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ],
+                          )),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(10), // Esquinas redondeadas
+                        ),
+                        elevation: 0,
+                        child: AnimatedContainer(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              // Esquinas redondeadas
+                              // border: Border.all(
+                              //     color: Colors.black, width: 2), // Borde opcional
+                            ),
+                            duration: const Duration(milliseconds: 250),
+                            // padding: const EdgeInsets.symmetric(
+                            //     vertical: 15, horizontal: 35),
+                            width: screenWidth * 0.45,
+                            height: screenHeight * 0.15,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.thermostat_outlined,
-                                  size: 48,
-                                  color: Color.fromRGBO(225, 48, 0, 1),
+                                Text(
+                                  textAlign: TextAlign.center,
+                                  'Humedad',
+                                  style: GoogleFonts.lexend(
+                                      fontSize: 14,
+                                      letterSpacing: 0,
+                                      fontWeight: FontWeight.w200,
+                                      color: Theme.of(context).primaryColor),
                                 ),
                                 Text(
-                                  '${(tempValue * 10).ceil() / 10}°C',
-                                  style: TextStyle(
+                                  '${(humidityValue * 10).ceil() / 10}%',
+                                  style: GoogleFonts.lexend(
                                       fontSize: 40,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromRGBO(20, 108, 145, 1)),
+                                      letterSpacing: 0,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).primaryColor),
                                 ),
-                              ]),
-                          Center(
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              '${formattedDate}',
-                              style: TextStyle(
-                                  color: Color.fromRGBO(20, 108, 145, 1)),
-                            ),
-                          )
-                        ])),
-              ),
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(50), // Esquinas redondeadas
-                ),
-                elevation: 0,
-                child: AnimatedContainer(
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(180, 238, 255, 1),
-                      borderRadius:
-                          BorderRadius.circular(500), // Esquinas redondeadas
-                      // border: Border.all(
-                      //     color: Colors.black, width: 2), // Borde opcional
-                    ),
-                    duration: Duration(milliseconds: 250),
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
-                    width: screenWidth * 0.95,
-                    height: screenHeight * 0.2,
-                    alignment: Alignment.center,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                (tempValue <= 37.0 && tempValue >= 34.99)
-                                    ? 'Normal'
-                                    : (tempValue > 37.0)
-                                        ? 'Sofocación'
-                                        : 'Hipotermia',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color.fromRGBO(40, 108, 145, 1)),
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Icon(
-                                (tempValue <= 37.0 && tempValue >= 35.0)
-                                    ? Icons.album_rounded
-                                    : (tempValue > 37.0)
-                                        ? Icons.thermostat_outlined
-                                        : Icons.air_outlined,
-                                color: (tempValue <= 37.0 && tempValue >= 35.0)
-                                    ? Colors.green[700]
-                                    : (tempValue > 37)
-                                        ? Colors.red[600]
-                                        : Colors.blue[300],
-                              )
-                            ],
+                              ],
+                            )),
+                      ),
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(10), // Esquinas redondeadas
+                        ),
+                        elevation: 0,
+                        child: AnimatedContainer(
+                          decoration: const BoxDecoration(
+                            color: Color.fromRGBO(180, 238, 255, 1),
+                            // Esquinas redondeadas
+                            // border: Border.all(
+                            //     color: Colors.black, width: 2), // Borde opcional
                           ),
-                          Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Icon(
-                                  Icons.water_drop_outlined,
-                                  size: 48,
-                                  color: Color.fromRGBO(0, 0, 255, 1),
-                                ),
-                                Text.rich(
-                                  TextSpan(
-                                    text:
-                                        '${(humidityValue * 10).ceil() / 10}g/m', // Parte principal del texto
-                                    style: TextStyle(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromRGBO(20, 108, 145, 1),
-                                    ),
-                                    children: [
-                                      TextSpan(
-                                        text: '³', // Superíndice
-                                        style: TextStyle(
-                                          fontSize:
-                                              40, // Tamaño más pequeño para el superíndice
-                                          fontWeight: FontWeight
-                                              .normal, // Opcional, puede ser más liviano
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ]),
-                          Center(
-                            child: Text(
-                              textAlign: TextAlign.center,
-                              formattedDate,
-                              style: const TextStyle(
-                                  color: Color.fromRGBO(20, 108, 145, 1)),
-                            ),
-                          )
-                        ])),
+                          duration: const Duration(milliseconds: 250),
+                          // padding: const EdgeInsets.symmetric(
+                          //     vertical: 15, horizontal: 35),
+                          width: screenWidth * 0.45,
+                          height: screenHeight * 0.15,
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${(humidityValue * 10).ceil() / 10}°C',
+                            style: const TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromRGBO(20, 108, 145, 1)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  ChartCard(
+                    widthFactor: 0.4,
+                    // data: List<double>.from(widget.blDataNotifier.ecgDataApp),
+                    data: asd,
+                  ),
+                ],
               ),
-              // ChartCard(
-              //   data: List<double>.from(widget.blDataNotifier.ecgData),
-              // ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 15),
+                width: screenWidth * 0.7,
+                alignment: Alignment.center,
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0.0,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        // side: const BorderSide(width: 0.0), // Borde negro
+                      ),
+                    ),
+                    onPressed: () {},
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(
+                          textAlign: TextAlign.center,
+                          'Exportar Datos',
+                          style: GoogleFonts.lexend(
+                              fontSize: 22,
+                              letterSpacing: 0,
+                              fontWeight: FontWeight.w400,
+                              color: Theme.of(context).colorScheme.tertiary),
+                        ),
+                        Icon(
+                          Icons.ios_share_outlined,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        )
+                      ],
+                    )),
+              )
             ],
           ),
         ));

@@ -59,7 +59,7 @@ class _ProfilePage extends State<ProfilePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+          systemNavigationBarColor: Theme.of(context).primaryColor,
         ));
       }
     });

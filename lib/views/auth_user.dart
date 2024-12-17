@@ -463,7 +463,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
               ? Theme.of(context).colorScheme.secondary
               : Theme.of(context).primaryColor,
           statusBarIconBrightness: Brightness.dark,
-          statusBarColor: Colors.transparent));
+          statusBarColor: Theme.of(context).scaffoldBackgroundColor));
     });
 
     return Scaffold(
@@ -475,7 +475,8 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
               ? const EdgeInsets.only(bottom: 250)
               : const EdgeInsets.only(bottom: 0),
           height: screenHeight,
-          decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+          decoration:
+              BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -485,22 +486,25 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                     'assets/images/ladys_logo.png',
                     width: 200,
                   ),
+                  const SizedBox(
+                    width: 20,
+                  ),
                   Text('Smart Clothing',
-                      style: GoogleFonts.pattaya(
-                          fontSize: 50,
-                          letterSpacing: 3,
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).colorScheme.secondary))
+                      style: GoogleFonts.lexend(
+                          fontSize: 35,
+                          letterSpacing: 0,
+                          fontWeight: FontWeight.w300,
+                          color: Theme.of(context).primaryColor))
                 ],
               ),
               Column(
                 children: [
                   AnimatedContainer(
                     duration: durationAnimation,
-                    width: _showCard ? screenWidth * 0.2 : screenWidth * 0.9,
+                    width: _showCard ? screenWidth * 0.2 : screenWidth * 0.65,
                     height:
                         _showCard ? screenHeight * 0.02 : screenHeight * 0.085,
-                    margin: const EdgeInsets.only(bottom: 10),
+                    // margin: const EdgeInsets.only(bottom: 10),
                     child: ElevatedButton(
                       onPressed: () {
                         setState(() {
@@ -510,8 +514,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0.0,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
+                        backgroundColor: Theme.of(context).primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(radiusBtn),
                           side: BorderSide(width: 0.0), // Borde negro
@@ -523,18 +526,19 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                             alignment: Alignment.center,
                             child: Text(
                               'Ingresar',
-                              style: GoogleFonts.pattaya(
-                                  fontSize: 30,
+                              style: GoogleFonts.lexend(
+                                  fontSize: 25,
                                   letterSpacing: 2,
-                                  fontWeight: FontWeight.w100,
-                                  color: Theme.of(context).primaryColor),
+                                  fontWeight: FontWeight.w300,
+                                  color: Theme.of(context)
+                                      .scaffoldBackgroundColor),
                             ),
                           ),
                         ),
                         Align(
                           alignment: Alignment.centerRight,
                           child: Icon(Icons.login,
-                              color: Theme.of(context).primaryColor),
+                              color: Theme.of(context).scaffoldBackgroundColor),
                         ),
                       ]),
                     ),
@@ -554,7 +558,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                 margin: const EdgeInsets.all(0),
                 elevation: 0.0,
                 // color: Colors.transparent,
-                color: Theme.of(context).colorScheme.secondary,
+                color: Theme.of(context).primaryColor,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
@@ -604,7 +608,8 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                                   borderRadius: BorderRadius.circular(
                                       radiusBtn), // Esquinas redondeadas
                                 ),
-                                backgroundColor: Theme.of(context).primaryColor,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.tertiary,
                                 onPressed: () {
                                   codeSession = '';
                                   password = '';
@@ -617,8 +622,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                                 },
                                 child: Icon(
                                   Icons.arrow_downward_outlined,
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
+                                  color: Theme.of(context).primaryColor,
                                   size: 40,
                                 ),
                               )
@@ -665,11 +669,11 @@ class _LoginForm extends State<LoginForm> {
                 child: Text(
                   'Inicio de Sesión',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.pattaya(
-                      fontSize: 38,
+                  style: GoogleFonts.lexend(
+                      fontSize: 30,
                       letterSpacing: 2,
-                      fontWeight: FontWeight.w800,
-                      color: Theme.of(context).primaryColor),
+                      fontWeight: FontWeight.w300,
+                      color: Theme.of(context).scaffoldBackgroundColor),
                 ),
               ),
               Form(
@@ -690,29 +694,32 @@ class _LoginForm extends State<LoginForm> {
                                 const EdgeInsetsDirectional.only(start: 12.0),
                             child: Icon(
                               Icons.vpn_key_outlined,
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).scaffoldBackgroundColor,
                             ), // myIcon is a 48px-wide widget.
                           ),
                           labelText: 'Código',
-                          labelStyle:
-                              TextStyle(color: Theme.of(context).primaryColor),
-                          suffixStyle:
-                              TextStyle(color: Theme.of(context).primaryColor),
+                          labelStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          suffixStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
                           focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                  color: Colors.blue, width: 2.2),
+                              borderSide: BorderSide(
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  width: 2.2),
                               borderRadius: BorderRadius.circular(radiusFocus)),
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: (loginBtn && codeSession == '')
                                       ? Colors.red
-                                      : Theme.of(context).primaryColor,
+                                      : Theme.of(context)
+                                          .scaffoldBackgroundColor,
                                   width: 2.2),
                               borderRadius:
                                   BorderRadius.circular(radiusNormal)),
                         ),
                         style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).scaffoldBackgroundColor,
                             fontSize: 20),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -737,13 +744,13 @@ class _LoginForm extends State<LoginForm> {
                                 const EdgeInsetsDirectional.only(start: 12.0),
                             child: Icon(Icons.password,
                                 color: Theme.of(context)
-                                    .primaryColor), // myIcon is a 48px-wide widget.
+                                    .scaffoldBackgroundColor), // myIcon is a 48px-wide widget.
                           ),
                           labelText: 'Contraseña',
-                          labelStyle:
-                              TextStyle(color: Theme.of(context).primaryColor),
-                          suffixStyle:
-                              TextStyle(color: Theme.of(context).primaryColor),
+                          labelStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          suffixStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
                           focusedBorder: OutlineInputBorder(
                               borderSide: const BorderSide(
                                   color: Colors.blue, width: 2.2),
@@ -752,7 +759,8 @@ class _LoginForm extends State<LoginForm> {
                               borderSide: BorderSide(
                                   color: (loginBtn && email == '')
                                       ? Colors.red
-                                      : Theme.of(context).primaryColor,
+                                      : Theme.of(context)
+                                          .scaffoldBackgroundColor,
                                   width: 2.2),
                               borderRadius:
                                   BorderRadius.circular(radiusNormal)),
@@ -761,7 +769,7 @@ class _LoginForm extends State<LoginForm> {
                               obsTextConfirm
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).scaffoldBackgroundColor,
                             ),
                             onPressed: () {
                               setState(() {
@@ -771,7 +779,7 @@ class _LoginForm extends State<LoginForm> {
                           ),
                         ),
                         style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).scaffoldBackgroundColor,
                             fontSize: 20),
                         obscureText: !obsTextConfirm,
                         validator: (value) {
@@ -790,7 +798,8 @@ class _LoginForm extends State<LoginForm> {
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(
                                 vertical: 10.0, horizontal: 30.0),
@@ -811,10 +820,10 @@ class _LoginForm extends State<LoginForm> {
                         },
                         child: Text(
                           'Iniciar Sesión',
-                          style: GoogleFonts.pattaya(
+                          style: GoogleFonts.lexend(
                               fontSize: 25,
                               letterSpacing: 2,
-                              fontWeight: FontWeight.w100,
+                              fontWeight: FontWeight.w300,
                               color: Theme.of(context).colorScheme.secondary),
                         ),
                       ),
@@ -830,7 +839,7 @@ class _LoginForm extends State<LoginForm> {
                     fontSize: 19,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
-                    color: Colors.lightBlue,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                   ),
                 ),
               ),
