@@ -3,7 +3,6 @@
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
@@ -14,8 +13,6 @@ import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
-
-import 'package:provider/provider.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 
 String codeSession = '';
@@ -246,7 +243,6 @@ Future<void> signInUser(
         (Route<dynamic> route) => false, // Elimina todas las vistas anteriores
       );
     } else {
-      print('estoy acá');
       print(user);
       await DatabaseHandler.instance.saveOrUpdateUser(user);
       saveLastPage('userLoggedHome');
@@ -517,7 +513,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                         backgroundColor: Theme.of(context).primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(radiusBtn),
-                          side: BorderSide(width: 0.0), // Borde negro
+                          side: const BorderSide(width: 0.0), // Borde negro
                         ),
                       ),
                       child: Row(children: [
@@ -649,8 +645,8 @@ class LoginForm extends StatefulWidget {
 class _LoginForm extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    // double screenWidth = MediaQuery.of(context).size.width;
+    // double screenHeight = MediaQuery.of(context).size.height;
 
     return SingleChildScrollView(
       child: Padding(
@@ -1200,7 +1196,7 @@ class _RegisterQuestions extends State<RegisterQuestions> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    // double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       body: Container(
@@ -1725,7 +1721,7 @@ class _PersonalQuestions extends State<PersonalQuestions> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    // double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       body: Container(

@@ -6,7 +6,6 @@ import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
-import 'package:smartclothingproject/views/bluetooth_ui.dart';
 import 'package:smartclothingproject/views/profile_page.dart';
 import '../handlers/data_base_handler.dart';
 import '../models/user_model.dart';
@@ -65,7 +64,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext dialogContext) {
-          return const BluetoothDialog();
+          return BluetoothDialog(
+            user: users[0],
+          );
         },
       );
     }
@@ -223,20 +224,20 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
               controller: _pageController,
               allowImplicitScrolling: false,
               children: [
-                HomeUserWorker(blDataNotifier: blDataNotifier),
-                BluetoothUI(),
+                HomeUserWorker(blDataNotifier: blDataNotifier, user: users[0]),
+                // BluetoothUI(),
                 // Center(
                 //   child: Text(
                 //     'Página 2: Cachón',
                 //     style: TextStyle(color: Theme.of(context).primaryColor),
                 //   ),
                 // ),
-                Center(
-                  child: Text(
-                    'Página 3: Detalles',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
-                  ),
-                ),
+                // Center(
+                //   child: Text(
+                //     'Página 3: Detalles',
+                //     style: TextStyle(color: Theme.of(context).primaryColor),
+                //   ),
+                // ),
                 users.isNotEmpty
                     ? ProfilePage(user: users[0])
                     : Center(
@@ -289,28 +290,28 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 ),
                 label: 'Inicio',
               ),
-              BottomNavigationBarItem(
-                icon: AnimatedIconContainer(
-                  isSelected: _selectedIndex == 1,
-                  icon: Icons.bluetooth,
-                  gradientColors: [
-                    Theme.of(context).colorScheme.secondary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                ),
-                label: 'Bluetooth',
-              ),
-              BottomNavigationBarItem(
-                icon: AnimatedIconContainer(
-                  isSelected: _selectedIndex == 2,
-                  icon: Icons.deblur,
-                  gradientColors: [
-                    Theme.of(context).colorScheme.secondary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                ),
-                label: 'Detalles',
-              ),
+              // BottomNavigationBarItem(
+              //   icon: AnimatedIconContainer(
+              //     isSelected: _selectedIndex == 1,
+              //     icon: Icons.bluetooth,
+              //     gradientColors: [
+              //       Theme.of(context).colorScheme.secondary,
+              //       Theme.of(context).colorScheme.secondary,
+              //     ],
+              //   ),
+              //   label: 'Bluetooth',
+              // ),
+              // BottomNavigationBarItem(
+              //   icon: AnimatedIconContainer(
+              //     isSelected: _selectedIndex == 2,
+              //     icon: Icons.deblur,
+              //     gradientColors: [
+              //       Theme.of(context).colorScheme.secondary,
+              //       Theme.of(context).colorScheme.secondary,
+              //     ],
+              //   ),
+              //   label: 'Detalles',
+              // ),
               BottomNavigationBarItem(
                 icon: AnimatedIconContainer(
                   isSelected: _selectedIndex == 3,

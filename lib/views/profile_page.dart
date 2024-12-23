@@ -44,7 +44,9 @@ class _ProfilePage extends State<ProfilePage> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext dialogContext) {
-          return const BluetoothDialog();
+          return BluetoothDialog(
+            user: user,
+          );
         },
       );
     }

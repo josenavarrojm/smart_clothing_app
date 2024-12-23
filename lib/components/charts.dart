@@ -1,92 +1,157 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
-class ChartCard extends StatelessWidget {
+class ChartCard extends StatefulWidget {
+  final double time;
+  final double maxY;
+  final double minY;
   final double widthFactor;
   final double heightFactor;
   final List<double> data;
 
   const ChartCard({
     super.key,
-    this.widthFactor = 0.95, // Factor de ancho por defecto
-    this.heightFactor = 0.25, // Factor de altura por defecto
-    this.data = const [1, 2, 5, 4, 12, 3], // Datos por defecto
+    this.time = 0.0,
+    this.maxY = 0.0,
+    this.minY = 0.0,
+    this.widthFactor = 0.95, // Ancho
+    this.heightFactor = 0.25, // Altura
+    this.data = const [1, 2, 5, 4, 12, 3], // Datos de ECG
   });
+
+  @override
+  _ChartCardState createState() => _ChartCardState();
+}
+
+class _ChartCardState extends State<ChartCard> {
+  late TrackballBehavior _trackballBehavior;
+
+  @override
+  void initState() {
+    _trackballBehavior = TrackballBehavior(
+        // Enables the trackball
+        enable: true,
+        activationMode: ActivationMode.longPress,
+        tooltipSettings: InteractiveTooltip(enable: true, color: Colors.red));
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    double maxValue = data.reduce((a, b) => a > b ? a : b);
-    double minValue = data.reduce((a, b) => a < b ? a : b);
+    double maxValue = widget.data.reduce((a, b) => a > b ? a : b);
+    double minValue = widget.data.reduce((a, b) => a < b ? a : b);
 
     return Card(
       color: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        width: screenWidth * widthFactor,
-        height: screenHeight * heightFactor,
-        child: Column(
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  // Etiquetas del eje Y
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(
-                      5, // Número de divisiones en el eje Y
-                      (index) => Text(
-                        '${(((((-maxValue + minValue) / 2) * (index) + maxValue + 0.665) * 100).ceil() / 100)}', // Ejemplo de valores del eje Y
-                        style: TextStyle(fontSize: 10, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Gráfico SparkLine
-                  Expanded(
-                    child: SfSparkLineChart(
-                      data: data,
-                      axisLineColor: Colors.grey,
-                      color: Colors.black,
-                      axisLineDashArray: [5, 5], // Línea discontinua
-                    ),
-                  ),
-                ],
+      child: Center(
+        child: Container(
+          // padding: const EdgeInsets.all(10),
+          width: screenWidth * widget.widthFactor,
+          height: screenHeight * widget.heightFactor,
+          child: SfCartesianChart(
+            trackballBehavior: _trackballBehavior,
+            tooltipBehavior: TooltipBehavior(enable: true),
+            title: ChartTitle(
+                text: 'ECG',
+                textStyle: GoogleFonts.wixMadeforText(
+                    fontSize: 15,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).primaryColor)),
+            primaryXAxis: NumericAxis(
+              minimum: 0,
+              maximum: widget.time,
+              axisLabelFormatter: (AxisLabelRenderDetails details) {
+                // Divide cada valor por 1000 y agrégale 's'
+                return ChartAxisLabel(
+                    '${(details.value / 1000).toStringAsFixed(0)}s',
+                    GoogleFonts.wixMadeforText(
+                      fontSize: 10,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w200,
+                      color: Theme.of(context).primaryColor,
+                    ));
+              },
+              labelStyle: GoogleFonts.wixMadeforText(
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w200,
+                  color: Theme.of(context).primaryColor),
+              title: AxisTitle(
+                text: 'Tiempo',
+                textStyle: GoogleFonts.wixMadeforText(
+                    fontSize: 15,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.w200,
+                    color: Theme.of(context).primaryColor),
               ),
+              majorGridLines: MajorGridLines(
+                dashArray: const [5, 5], // Estilo punteado [longitud, espacio]
+                color: Theme.of(context).primaryColorLight.withOpacity(0.4),
+              ),
+              axisLine: AxisLine(
+                color: Theme.of(context)
+                    .scaffoldBackgroundColor, // Cambia el color del eje X
+                width: 1, // Cambia el grosor de la línea del eje X
+              ),
+              majorTickLines: MajorTickLines(
+                  color: Theme.of(context).scaffoldBackgroundColor),
             ),
-            const SizedBox(height: 10),
-            // Etiquetas del eje X
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(
-                5, // Etiquetas dinámicas basadas en la longitud de los datos
-                (index) => Text(
-                  '$index S', // Ejemplo de etiquetas del eje X
-                  style: TextStyle(fontSize: 10, color: Colors.grey),
+            primaryYAxis: NumericAxis(
+                labelStyle: const TextStyle(
+                  fontSize: 0, // Tamaño de fuente 0 para ocultar etiquetas
+                  color: Colors
+                      .transparent, // Color transparente para asegurarse de que no se muestren
                 ),
+                minimum: widget.minY,
+                maximum: widget.maxY,
+                majorGridLines: MajorGridLines(
+                  dashArray: const [5, 5], // También en el eje Y
+                  color: Theme.of(context).primaryColorLight.withOpacity(0.4),
+                ),
+                axisLine: AxisLine(
+                  color: Theme.of(context)
+                      .scaffoldBackgroundColor, // Cambia el color del eje X
+                  width: 1, // Cambia el grosor de la línea del eje X
+                ),
+                majorTickLines: MajorTickLines(
+                    color: Theme.of(context).scaffoldBackgroundColor)),
+            series: <SplineSeries<double, int>>[
+              SplineSeries<double, int>(
+                animationDuration: 1000,
+                animationDelay: 500,
+                dataSource: widget.data, // Fuente de datos
+                xValueMapper: (double value, int index) =>
+                    ((index / widget.data.length) * widget.time).toInt(),
+                yValueMapper: (double value, _) =>
+                    value, // Valor de la lista como eje Y
+                // markerSettings:
+                //     const MarkerSettings(isVisible: true // Marca los puntos
+                //         ),
+                onCreateShader: (ShaderDetails details) {
+                  return LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.tertiary,
+                      Theme.of(context).primaryColor,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ).createShader(details.rect);
+                },
+                // color: Theme.of(context).colorScheme.tertiary,
+                width: 2, // Grosor de la línea
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-
-// return Card(
-//       child: Container(
-//         padding: const EdgeInsets.all(10),
-//         width: screenWidth * widthFactor,
-//         height: screenHeight * heightFactor,
-//         alignment: Alignment.center,
-//         child: SfSparkLineChart(
-//           data: data,
-//           axisLineColor: Colors.grey,
-//           color: Colors.black,
-//         ),
-//       ),
-//     );

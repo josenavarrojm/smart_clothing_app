@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:smartclothingproject/functions/connected_state_notifier.dart';
+import 'package:smartclothingproject/models/user_model.dart';
 
 String deviceId = '';
 String deviceName = '';
@@ -23,9 +24,8 @@ void showCustomToast(String message) {
 }
 
 class BluetoothDialog extends StatefulWidget {
-  const BluetoothDialog({
-    super.key,
-  });
+  final UserModel user;
+  const BluetoothDialog({super.key, required this.user});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -46,7 +46,7 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
     super.initState();
     requestPermissions();
     startScanningDevices();
-    bleController = BluetoothController(context);
+    bleController = BluetoothController(context, widget.user);
     // Escuchar el estado del escáner
     _subscription = bleController.bleScanner.state.listen((state) {
       if (mounted) {

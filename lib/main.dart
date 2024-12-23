@@ -61,8 +61,8 @@ class MyApp extends StatelessWidget {
                   tertiary: const Color.fromARGB(255, 241, 115, 0)),
             )
           : ThemeData(
-              scaffoldBackgroundColor: Color.fromARGB(255, 238, 238, 238),
-              primaryColor: Color.fromARGB(255, 5, 74, 145),
+              scaffoldBackgroundColor: const Color.fromARGB(255, 238, 238, 238),
+              primaryColor: const Color.fromARGB(255, 5, 74, 145),
               primaryColorLight: const Color.fromARGB(255, 129, 164, 205),
               colorScheme: ColorScheme.fromSwatch().copyWith(
                   secondary: const Color.fromARGB(255, 62, 124, 177),

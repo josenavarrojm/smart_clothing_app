@@ -26,7 +26,7 @@ class _BluetoothUI extends State<BluetoothUI> {
   void initState() {
     super.initState();
     requestPermissions();
-    bleController = BluetoothController(context);
+    // bleController = BluetoothController(context, widget.user);
     // Escuchar el estado del escáner
     _subscription = bleController.bleScanner.state.listen((state) {
       if (mounted) {

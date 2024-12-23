@@ -7,6 +7,7 @@ class BlDataNotifier with ChangeNotifier {
 
   String _user_id = '';
   String _bpmData = '';
+  String _timeData = '';
   String _temperatureAmbData = '';
   String _temperatureCorporalData = '';
   String _humidityData = '';
@@ -16,9 +17,11 @@ class BlDataNotifier with ChangeNotifier {
   String _dateTimeData = '';
   List<double> _ecgData = [];
   List<double> _ecgDataApp = [];
+  List<double> _ecgDataIDApp = [];
 
   String get user_id => _user_id;
   String get bpmData => _bpmData;
+  String get timeData => _timeData;
   String get temperatureAmbData => _temperatureAmbData;
   String get temperatureCorporalData => _temperatureCorporalData;
   String get humidityData => _humidityData;
@@ -28,6 +31,7 @@ class BlDataNotifier with ChangeNotifier {
   String get dateTimeData => _dateTimeData;
   List<double> get ecgData => _ecgData;
   List<double> get ecgDataApp => _ecgDataApp;
+  List<double> get ecgDataIDApp => _ecgDataIDApp;
 
   void updateUserID(String status) {
     _user_id = status;
@@ -36,6 +40,11 @@ class BlDataNotifier with ChangeNotifier {
 
   void updatebpmData(String status) {
     _bpmData = status;
+    notifyListeners();
+  }
+
+  void updatetimeData(String status) {
+    _timeData = status;
     notifyListeners();
   }
 
@@ -76,6 +85,11 @@ class BlDataNotifier with ChangeNotifier {
 
   void updateECGDataApp(List<double> status) {
     _ecgDataApp = status;
+    notifyListeners();
+  }
+
+  void updateECGDataIDApp(List<double> status) {
+    _ecgDataIDApp = status;
     notifyListeners();
   }
 
