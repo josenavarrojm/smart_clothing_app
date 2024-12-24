@@ -6,14 +6,14 @@ class BlDataNotifier with ChangeNotifier {
   BlDataNotifier._internal();
 
   String _user_id = '';
-  String _bpmData = '';
-  String _timeData = '';
-  String _temperatureAmbData = '';
-  String _temperatureCorporalData = '';
-  String _humidityData = '';
-  String _accelerometerXData = '';
-  String _accelerometerYData = '';
-  String _accelerometerZData = '';
+  String _bpmData = '0';
+  String _timeData = '0.0';
+  String _temperatureAmbData = '0.0';
+  String _temperatureCorporalData = '0.0';
+  String _humidityData = '0.0';
+  String _accelerometerXData = '0.0';
+  String _accelerometerYData = '0.0';
+  String _accelerometerZData = '0.0';
   String _dateTimeData = '';
   List<double> _ecgData = [];
   List<double> _ecgDataApp = [];

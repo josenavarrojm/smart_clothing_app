@@ -24,13 +24,13 @@ class BluetoothController {
       : _bleScanner = BleScanner(
           ble: flutterReactiveBle,
           logMessage: (message) {
-            print(message);
+            // print(message);
           },
         ),
         _deviceConnector = BleDeviceConnector(
           ble: flutterReactiveBle,
           logMessage: (message) {
-            print(message);
+            // print(message);
           },
         );
 
@@ -42,7 +42,7 @@ class BluetoothController {
     if (bluetoothState == BluetoothAdapterState.off) {
       FlutterBluePlus.turnOn();
     } else {
-      print("Bluetooth is enabled, starting discovery.");
+      // print("Bluetooth is enabled, starting discovery.");
     }
   }
 
@@ -96,7 +96,7 @@ class BluetoothController {
         // Convertir el fragmento de datos recibido en texto
         final decodedFragment = String.fromCharCodes(data);
 
-        // print("Fragmento decodificado: $decodedFragment");
+        // // print("Fragmento decodificado: $decodedFragment");
 
         // Verificar si el fragmento contiene la palabra 'temperature'
         if (decodedFragment.contains('temperature')) {
@@ -112,7 +112,7 @@ class BluetoothController {
             temperatureData =
                 temperatureValue; // Asignamos el valor a la variable temperatureData
 
-            print("Temperatura: $temperatureData");
+            // print("Temperatura: $temperatureData");
           }
         } else if ((decodedFragment.contains('humidity'))) {
           // Separar la cadena por el delimitador ":"
@@ -126,7 +126,7 @@ class BluetoothController {
             humidityData =
                 humidityValue; // Asignamos el valor a la variable temperatureData
 
-            print("Humedad: $humidityData");
+            // print("Humedad: $humidityData");
           }
         } else if ((decodedFragment.contains('accelx'))) {
           // Separar la cadena por el delimitador ":"
@@ -140,7 +140,7 @@ class BluetoothController {
             accelerometerXData =
                 accelXValue; // Asignamos el valor a la variable temperatureData
 
-            print("Ángulo X: $accelerometerXData");
+            // print("Ángulo X: $accelerometerXData");
           }
         } else if ((decodedFragment.contains('accely'))) {
           // Separar la cadena por el delimitador ":"
@@ -154,7 +154,7 @@ class BluetoothController {
             accelerometerYData =
                 accelYValue; // Asignamos el valor a la variable temperatureData
 
-            print("Ángulo Y: $accelerometerYData");
+            // print("Ángulo Y: $accelerometerYData");
           }
         } else if ((decodedFragment.contains('accelz'))) {
           // Separar la cadena por el delimitador ":"
@@ -168,12 +168,12 @@ class BluetoothController {
             accelerometerZData =
                 accelZValue; // Asignamos el valor a la variable temperatureData
 
-            print("Ángulo Z: $accelerometerZData");
+            // print("Ángulo Z: $accelerometerZData");
           }
         }
       },
       onError: (error) {
-        print("Error de suscripción: $error");
+        // print("Error de suscripción: $error");
       },
     );
 
@@ -202,7 +202,7 @@ class BluetoothController {
       value: valueBytes,
     );
 
-    print("Texto enviado: $value");
+    // print("Texto enviado: $value");
   }
 
   Future<void> dispose() async {

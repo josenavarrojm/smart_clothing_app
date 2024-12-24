@@ -11,9 +11,9 @@ class BluetoothPlusController extends GetxController {
   // Comprueba si el dispositivo soporta Bluetooth
   Future<bool> isSupported() async {
     bool isSupported = await FlutterBluePlus.isSupported;
-    print(isSupported
-        ? "Bluetooth is supported by this device"
-        : "Bluetooth not supported by this device");
+    // print(isSupported
+    // ? "Bluetooth is supported by this device"
+    // : "Bluetooth not supported by this device");
     return isSupported;
   }
 
@@ -37,14 +37,13 @@ class BluetoothPlusController extends GetxController {
             in service.characteristics) {
           if (characteristic.uuid.toString() == characteristicUuid) {
             await characteristic.setNotifyValue(true);
-            print(
-                "Notificaciones activadas para la característica: $characteristicUuid");
+            // print("Notificaciones activadas para la característica: $characteristicUuid");
 
             // Suscribirse a los datos recibidos
             characteristic.lastValueStream.listen((value) {
               String receivedData = utf8.decode(value);
-              Map<String, dynamic> jsonData = json.decode(receivedData);
-              print("Datos recibidos: $jsonData");
+              // Map<String, dynamic> jsonData = json.decode(receivedData);
+              // print("Datos recibidos: $jsonData");
 
               // Emitir datos al stream
               _dataStreamController.add(receivedData);
@@ -54,7 +53,7 @@ class BluetoothPlusController extends GetxController {
         }
       }
     } catch (e) {
-      print("Error al configurar notificaciones: $e");
+      // print("Error al configurar notificaciones: $e");
     }
   }
 
@@ -69,11 +68,11 @@ class BluetoothPlusController extends GetxController {
   Future<void> enableBluetooth() async {
     // Suscripción a cambios en el estado del adaptador Bluetooth
     FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
-      print("Estado del Bluetooth: $state");
+      // print("Estado del Bluetooth: $state");
       if (state == BluetoothAdapterState.on) {
-        print("Bluetooth encendido");
+        // print("Bluetooth encendido");
       } else if (state == BluetoothAdapterState.off) {
-        print("Bluetooth apagado");
+        // print("Bluetooth apagado");
       }
     });
 
@@ -89,7 +88,7 @@ class BluetoothPlusController extends GetxController {
   Future<void> disableBluetooth() async {
     if (Platform.isAndroid) {
       await FlutterBluePlus.stopScan();
-      print("Bluetooth apagado");
+      // print("Bluetooth apagado");
     }
   }
 
@@ -106,12 +105,11 @@ class BluetoothPlusController extends GetxController {
     // Escucha los resultados de escaneo
     var subscription = FlutterBluePlus.onScanResults.listen((results) {
       for (var result in results) {
-        print('Escaneando: ${result.device.remoteId}'); // Debugging line
+        // print('Escaneando: ${result.device.remoteId}'); // Debugging line
         if (!devices.any(
             (device) => (device.device.remoteId == result.device.remoteId))) {
           if (result.advertisementData.connectable) devices.add(result);
-          print(
-              '${result.device.remoteId}: "${result.advertisementData.connectable}" encontrado');
+          // print('${result.device.remoteId}: "${result.advertisementData.connectable}" encontrado');
         }
       }
     }, onError: (e) => print('Error de escaneo: $e'));
@@ -122,8 +120,8 @@ class BluetoothPlusController extends GetxController {
     // Cancela la suscripción para liberar recursos
     await subscription.cancel();
 
-    print("Cantidad: ${devices.length}");
-    print("Devices: $devices");
+    // print("Cantidad: ${devices.length}");
+    // print("Devices: $devices");
     return devices;
   }
 
@@ -133,11 +131,11 @@ class BluetoothPlusController extends GetxController {
       // Escuchar el estado de conexión
       var subscription =
           device.connectionState.listen((BluetoothConnectionState state) {
-        print("Estado de conexión: $state");
+        // print("Estado de conexión: $state");
         if (state == BluetoothConnectionState.connected) {
-          print("Conectado al dispositivo: ${device.remoteId}");
+          // print("Conectado al dispositivo: ${device.remoteId}");
         } else if (state == BluetoothConnectionState.disconnected) {
-          print("Desconectado del dispositivo: ${device.remoteId}");
+          // print("Desconectado del dispositivo: ${device.remoteId}");
           // Aquí puedes manejar reconexiones si lo deseas
         }
       });
@@ -145,9 +143,9 @@ class BluetoothPlusController extends GetxController {
       // Conectar al dispositivo
       try {
         await device.connect();
-        print('Conectado al dispositivo: ${device.remoteId}');
+        // print('Conectado al dispositivo: ${device.remoteId}');
       } catch (e) {
-        print('Error al conectar, reintentando...');
+        // print('Error al conectar, reintentando...');
         await device.disconnect();
         await Future.delayed(const Duration(seconds: 1));
         await device.connect();
@@ -160,7 +158,7 @@ class BluetoothPlusController extends GetxController {
       // List<BluetoothService> services = await device.discoverServices();
       // Manejar los servicios descubiertos...
     } catch (e) {
-      print("Error al conectar al dispositivo: $e");
+      // print("Error al conectar al dispositivo: $e");
     }
   }
 
@@ -185,9 +183,9 @@ class BluetoothPlusController extends GetxController {
 
       // Escribir los datos en la característica
       await characteristic.write(value);
-      print("Datos enviados correctamente.");
+      // print("Datos enviados correctamente.");
     } catch (e) {
-      print("Error al enviar los datos: $e");
+      // print("Error al enviar los datos: $e");
     }
   }
 
@@ -206,20 +204,20 @@ class BluetoothPlusController extends GetxController {
   //           in service.characteristics) {
   //         if (characteristic.properties.write) {
   //           await characteristic.write(dataBytes, withoutResponse: true);
-  //           print("Datos enviados: $jsonData");
+  //           // print("Datos enviados: $jsonData");
   //           return;
   //         } else {
-  //           print("La característica no soporta escritura.");
+  //           // print("La característica no soporta escritura.");
   //         }
   //         if (characteristic.uuid.toString() == characteristicUuid) {
   //           await characteristic.write(dataBytes, withoutResponse: true);
-  //           print("Datos enviados: $jsonData");
+  //           // print("Datos enviados: $jsonData");
   //           return;
   //         }
   //       }
   //     }
   //   } catch (e) {
-  //     print("Error al enviar datos: $e");
+  //     // print("Error al enviar datos: $e");
   //   }
   // }
 
@@ -234,14 +232,14 @@ class BluetoothPlusController extends GetxController {
   //           in service.characteristics) {
   //         if (characteristic.uuid.toString() == characteristicUuid) {
   //           await characteristic.setNotifyValue(true);
-  //           print(
+  //           // print(
   //               "Notificaciones activadas para la característica: $characteristicUuid");
 
   //           // Suscribirse a los datos recibidos
   //           characteristic.value.listen((value) {
   //             String receivedData = utf8.decode(value);
   //             Map<String, dynamic> jsonData = json.decode(receivedData);
-  //             print("Datos recibidos: $jsonData");
+  //             // print("Datos recibidos: $jsonData");
 
   //             // Aquí puedes actualizar la interfaz de usuario o manejar los datos
   //           });
@@ -250,7 +248,7 @@ class BluetoothPlusController extends GetxController {
   //       }
   //     }
   //   } catch (e) {
-  //     print("Error al configurar notificaciones: $e");
+  //     // print("Error al configurar notificaciones: $e");
   //   }
   // }
 }

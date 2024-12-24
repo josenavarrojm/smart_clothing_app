@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
+// import 'dart:convert';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
@@ -30,43 +30,42 @@ class MqttService {
     client!.connectionMessage = connMessage;
 
     try {
-      print('Intentando conectar...');
+      // print('Intentando conectar...');
       connectionState = await client!.connect();
       if (connectionState?.state == MqttConnectionState.connected) {
-        print('Conexión exitosa');
+        // print('Conexión exitosa');
       } else {
-        print('Conexión fallida, estado: ${connectionState?.state}');
+        // print('Conexión fallida, estado: ${connectionState?.state}');
         disconnect();
       }
     } catch (e) {
-      print('Error de conexión: $e');
+      // print('Error de conexión: $e');
       disconnect();
     }
   }
 
   void onConnected() {
-    print('Conexión exitosa');
+    // print('Conexión exitosa');
     subscribe(
         'mqttservices/test'); // Suscribirse a un topic después de conectar
   }
 
   void onDisconnected() {
-    print('Desconectado del broker');
+    // print('Desconectado del broker');
   }
 
   void disconnect() {
-    print('Desconectando...');
+    // print('Desconectando...');
     client?.disconnect();
   }
 
   // Topic subscription
   void subscribe(String topic) {
     if (connectionState?.state == MqttConnectionState.connected) {
-      print('Suscrito al topic $topic');
+      // print('Suscrito al topic $topic');
       client!.subscribe(topic, MqttQos.atMostOnce);
     } else {
-      print(
-          'No se puede suscribir. Estado de conexión: ${connectionState?.state}');
+      // print('No se puede suscribir. Estado de conexión: ${connectionState?.state}');
     }
   }
 
@@ -75,23 +74,23 @@ class MqttService {
     final builder = MqttClientPayloadBuilder();
     builder.addString(message);
 
-    print('Publicando en $topic: $message');
+    // print('Publicando en $topic: $message');
     client!.publishMessage(topic, MqttQos.atMostOnce, builder.payload!);
   }
 
   void listenToMessages() {
     client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
-      final recMessage = messages[0].payload as MqttPublishMessage;
-      final payload =
-          MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
+      // final recMessage = messages[0].payload as MqttPublishMessage;
+      // final payload =
+      // MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
 
-      print('Mensaje recibido: $payload en el topic: ${messages[0].topic}');
+      // print('Mensaje recibido: $payload en el topic: ${messages[0].topic}');
 
       // Convertir el JSON a un objeto Map
-      Map<String, dynamic> jsonMessage = jsonDecode(payload);
+      // Map<String, dynamic> jsonMessage = jsonDecode(payload);
       // Ahora puedes acceder a los valores
-      print('Alerta de temperatura: ${jsonMessage["temp_alert"]}');
-      //print('Alerta de temperatura: ${jsonMessage["temp_alert"] == 1 ? 'Posible Fiebre' : jsonMessage["temp_alert"] == 2 ? 'Posible hipotermia': 'Normal'}');
+      // print('Alerta de temperatura: ${jsonMessage["temp_alert"]}');
+      // print('Alerta de temperatura: ${jsonMessage["temp_alert"] == 1 ? 'Posible Fiebre' : jsonMessage["temp_alert"] == 2 ? 'Posible hipotermia': 'Normal'}');
     });
   }
 }

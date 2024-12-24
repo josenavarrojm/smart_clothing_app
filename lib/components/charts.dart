@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ChartCard extends StatefulWidget {
+  final String titleChart;
   final double time;
   final double maxY;
   final double minY;
@@ -13,6 +13,7 @@ class ChartCard extends StatefulWidget {
 
   const ChartCard({
     super.key,
+    this.titleChart = '',
     this.time = 0.0,
     this.maxY = 0.0,
     this.minY = 0.0,
@@ -44,14 +45,11 @@ class _ChartCardState extends State<ChartCard> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    double maxValue = widget.data.reduce((a, b) => a > b ? a : b);
-    double minValue = widget.data.reduce((a, b) => a < b ? a : b);
-
     return Card(
       color: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       child: Center(
-        child: Container(
+        child: SizedBox(
           // padding: const EdgeInsets.all(10),
           width: screenWidth * widget.widthFactor,
           height: screenHeight * widget.heightFactor,
@@ -59,7 +57,7 @@ class _ChartCardState extends State<ChartCard> {
             trackballBehavior: _trackballBehavior,
             tooltipBehavior: TooltipBehavior(enable: true),
             title: ChartTitle(
-                text: 'ECG',
+                text: widget.titleChart,
                 textStyle: GoogleFonts.wixMadeforText(
                     fontSize: 15,
                     letterSpacing: 2,

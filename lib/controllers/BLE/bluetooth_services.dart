@@ -81,13 +81,13 @@ class BluetoothController {
         _bleScanner = BleScanner(
           ble: flutterReactiveBle,
           logMessage: (message) {
-            print(message);
+            // print(message
           },
         ),
         _deviceConnector = BleDeviceConnector(
           ble: flutterReactiveBle,
           logMessage: (message) {
-            print(message);
+            // print(message);
           },
         ) {
     // Inicialización de userid después de que se asigna `user`
@@ -103,7 +103,7 @@ class BluetoothController {
     if (bluetoothState == BluetoothAdapterState.off) {
       FlutterBluePlus.turnOn();
     } else {
-      print("Bluetooth is enabled, starting discovery.");
+      // print("Bluetooth is enabled, starting discovery.");
     }
   }
 
@@ -139,6 +139,7 @@ class BluetoothController {
 
     // Suscripción al flujo de datos de la característica
     bool dataNoEmpty = false;
+    subscription?.cancel();
     subscription =
         flutterReactiveBle.subscribeToCharacteristic(characteristic).listen(
       (data) async {
@@ -146,11 +147,10 @@ class BluetoothController {
           dataNoEmpty = true;
           ConnectionService().updateSuscriptionStatus(true);
         }
-        await Future.delayed(const Duration(milliseconds: 800));
         Fluttertoast.cancel();
         // Convertir el fragmento de datos recibido en texto
         final decodedFragment = String.fromCharCodes(data);
-        print(decodedFragment);
+        // print(decodedFragment);
         // // Verificar si el fragmento contiene la palabra 'temperature'
         if (decodedFragment.contains('time')) {
           // Separar la cadena por el delimitador ":"
@@ -274,37 +274,41 @@ class BluetoothController {
           }
         } else if (decodedFragment.contains('ECG')) {
           // Limitar la lista a 2500 datos
-          if (BlDataNotifier().ecgData.length < 2500) {
-            // Separar la cadena por el delimitador ":"
-            var parts = decodedFragment.split(':');
+          if (ecgDataIDReceived.length >= 2500) {
+            ecgDataIDReceived.removeRange(0, ecgDataIDReceived.length - 2500);
+          } else if (BlDataNotifier().ecgData.length < 2500) {
+            if (decodedFragment.contains(':')) {
+              var parts = decodedFragment.split(':');
 
-            if (parts.length > 1) {
-              // Asegúrate de que parts[0] tiene datos y es diferente al último leído
-              var prefix = parts[0].split(' ').first;
-              if (!ecgDataIDReceived.contains(double.parse(prefix))) {
-                ecgDataIDReceived.add(double.parse(prefix));
-                print(prefix);
-                // Validar si hay datos dentro de corchetes
-                final match = RegExp(r'\[(.+)\]').firstMatch(parts[1]);
-                if (match != null) {
-                  String cleanData =
-                      match.group(1)!; // Extraer datos dentro de los corchetes
-                  try {
-                    List<double> values = cleanData
-                        .split(",") // Divide los valores por comas
-                        .map((value) =>
-                            double.parse(value.trim())) // Convierte a double
-                        .toList();
+              if (parts.length > 1) {
+                // Asegúrate de que parts[0] tiene datos y es diferente al último leído
+                var prefix = parts[0].split(' ').first;
+                if (!ecgDataIDReceived.contains(double.parse(prefix))) {
+                  ecgDataIDReceived.add(double.parse(prefix));
+                  // Validar si hay datos dentro de corchetes
+                  final match = RegExp(r'\[(.+)\]').firstMatch(parts[1]);
+                  if (match != null) {
+                    String cleanData = match
+                        .group(1)!; // Extraer datos dentro de los corchetes
+                    try {
+                      List<double> values = cleanData
+                          .split(",") // Divide los valores por comas
+                          .map((value) =>
+                              double.parse(value.trim())) // Convierte a double
+                          .toList();
 
-                    // Agregar valores a la lista y notificar
-                    ecgDataReceived.addAll(values);
-                    BlDataNotifier().updateECGData(ecgDataReceived);
-                    BlDataNotifier().updateECGDataIDApp(ecgDataIDReceived);
-                  } catch (e) {
-                    print("Error al parsear los datos: $e");
+                      // Agregar valores a la lista y notificar
+                      ecgDataReceived.addAll(values);
+                      BlDataNotifier().updateECGData(ecgDataReceived);
+                      BlDataNotifier().updateECGDataIDApp(ecgDataIDReceived);
+                    } catch (e) {
+                      print("Error al parsear los datos: $e");
+                    }
                   }
                 }
               }
+            } else {
+              print("Fragmento inválido: $decodedFragment");
             }
           }
         } else if ((decodedFragment.contains('Send'))) {

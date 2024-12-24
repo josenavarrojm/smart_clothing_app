@@ -59,7 +59,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
   bool isDialogVisible = false;
   void showDialogIfNeeded(ConnectionService connectionService) async {
-    if (!connectionService.isSuscripted && mounted) {
+    if (!connectionService.isSuscripted && mounted && users.isNotEmpty) {
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -69,6 +69,8 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           );
         },
       );
+    } else if (users.isEmpty) {
+      print('No users available to show in the dialog.');
     }
   }
 
@@ -162,7 +164,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                       );
                     },
                   ),
-                  _buildNotificationIcon(_selectedIndex)
+                  // _buildNotificationIcon(_selectedIndex)
                 ],
                 IconButton(
                   icon:
@@ -224,7 +226,15 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
               controller: _pageController,
               allowImplicitScrolling: false,
               children: [
-                HomeUserWorker(blDataNotifier: blDataNotifier, user: users[0]),
+                users.isNotEmpty
+                    ? HomeUserWorker(
+                        blDataNotifier: blDataNotifier, user: users[0])
+                    : Center(
+                        child: LoadingAnimationWidget.waveDots(
+                        color: Colors.blueAccent,
+                        size: 50,
+                      )),
+
                 // BluetoothUI(),
                 // Center(
                 //   child: Text(
@@ -251,7 +261,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           },
         ),
         bottomNavigationBar: Container(
-          height: 100,
+          height: 80,
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
@@ -314,7 +324,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
               // ),
               BottomNavigationBarItem(
                 icon: AnimatedIconContainer(
-                  isSelected: _selectedIndex == 3,
+                  isSelected: _selectedIndex == 1,
                   icon: Icons.person_rounded,
                   gradientColors: [
                     Theme.of(context).colorScheme.secondary,
@@ -385,23 +395,23 @@ class AnimatedIconContainer extends StatelessWidget {
   }
 }
 
-Widget _buildNotificationIcon(int selectedIndex) {
-  return IconButton(
-    icon: Badge(
-      alignment: Alignment.topRight,
-      backgroundColor: Colors.red,
-      smallSize: 10.0,
-      largeSize: 20.0,
-      label: Text('$selectedIndex'),
-      child: const AnimatedOpacity(
-        opacity: 1.0,
-        duration: Duration(milliseconds: 300),
-        child: Icon(Icons.notifications),
-      ),
-    ),
-    color: Colors.blueAccent,
-    onPressed: () {
-      // Acción para el botón
-    },
-  );
-}
+// Widget _buildNotificationIcon(int selectedIndex) {
+//   return IconButton(
+//     icon: Badge(
+//       alignment: Alignment.topRight,
+//       backgroundColor: Colors.red,
+//       smallSize: 10.0,
+//       largeSize: 20.0,
+//       label: Text('$selectedIndex'),
+//       child: const AnimatedOpacity(
+//         opacity: 1.0,
+//         duration: Duration(milliseconds: 300),
+//         child: Icon(Icons.notifications),
+//       ),
+//     ),
+//     color: Colors.blueAccent,
+//     onPressed: () {
+//       // Acción para el botón
+//     },
+//   );
+// }

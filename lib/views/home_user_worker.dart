@@ -99,16 +99,6 @@ class _HomeUserWorker extends State<HomeUserWorker> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(0.0),
           color: Theme.of(context).scaffoldBackgroundColor,
-          // gradient: LinearGradient(
-          //   colors: [
-          //     Colors.pink.withOpacity(0.25),
-          //     Colors.purple.withOpacity(0.25),
-          //     const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
-          //     Colors.blue.withOpacity(0.25),
-          //   ],
-          //   begin: Alignment.centerLeft,
-          //   end: Alignment.topRight,
-          // ),
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -126,6 +116,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                 ),
               ),
               ChartCard(
+                titleChart: 'ECG',
                 minY: -3,
                 maxY: 3,
                 time: timeData,
@@ -137,6 +128,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                     : asd, // Lista por defecto si está vacía o null
               ),
               ChartCard(
+                titleChart: 'Etiquetas',
                 minY: 0,
                 maxY: 3000,
                 time: widget.blDataNotifier.ecgDataIDApp.length.toDouble(),
@@ -201,7 +193,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                             textAlign: TextAlign.center,
                             'Temperatura Corporal: ',
                             style: GoogleFonts.lexend(
-                                fontSize: 25,
+                                fontSize: 22,
                                 letterSpacing: 0,
                                 fontWeight: FontWeight.w300,
                                 color: Theme.of(context).primaryColor),
