@@ -4,11 +4,19 @@ import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/loaderLogged.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
+import 'package:smartclothingproject/models/local_notifications_service.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'functions/theme_notifier.dart';
 import 'functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
 import 'functions/persistance_data.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+Future<void> requestNotificationPermission() async {
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +33,9 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  await requestNotificationPermission();
+  await LocalNotificationService.initialize();
 
   // Ejecutar la aplicación
   runApp(

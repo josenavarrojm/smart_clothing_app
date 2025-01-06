@@ -11,7 +11,7 @@ class ChartCardColumn extends StatefulWidget {
     super.key,
     this.widthFactor = 0.95, // Factor de ancho por defecto
     this.heightFactor = 0.25, // Factor de altura por defecto
-    this.data = const [1, 2, 5, 4, 12, 3], // Datos por defecto
+    this.data = const [1, 2, 5, 4, 12, 3, 7], // Datos por defecto
   });
 
   @override
@@ -21,13 +21,15 @@ class ChartCardColumn extends StatefulWidget {
 class _ChartCardColumnState extends State<ChartCardColumn> {
   late TrackballBehavior _trackballBehavior;
 
+  final List<String> daysOfWeek = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
   @override
   void initState() {
     _trackballBehavior = TrackballBehavior(
-        // Enables the trackball
-        enable: true,
-        activationMode: ActivationMode.longPress,
-        tooltipSettings: InteractiveTooltip(enable: true, color: Colors.red));
+      enable: true,
+      activationMode: ActivationMode.longPress,
+      tooltipSettings: InteractiveTooltip(enable: true, color: Colors.red),
+    );
 
     super.initState();
   }
@@ -37,15 +39,11 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    double maxValue = widget.data.reduce((a, b) => a > b ? a : b);
-    double minValue = widget.data.reduce((a, b) => a < b ? a : b);
-
     return Card(
       color: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       child: Center(
         child: Container(
-          // padding: const EdgeInsets.all(10),
           width: screenWidth * widget.widthFactor,
           height: screenHeight * widget.heightFactor,
           child: SfCartesianChart(
@@ -60,10 +58,7 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                 color: Theme.of(context).primaryColor,
               ),
             ),
-            primaryXAxis: NumericAxis(
-              // minimum: 0,
-              // maximum: double.parse(widget.data.length.toString()),
-              labelFormat: '{value}s',
+            primaryXAxis: CategoryAxis(
               labelStyle: GoogleFonts.wixMadeforText(
                 fontSize: 10,
                 letterSpacing: 2,
@@ -71,7 +66,7 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                 color: Theme.of(context).primaryColor,
               ),
               title: AxisTitle(
-                text: 'Dia',
+                text: 'Día',
                 textStyle: GoogleFonts.wixMadeforText(
                   fontSize: 10,
                   letterSpacing: 2,
@@ -80,7 +75,7 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                 ),
               ),
               majorGridLines: MajorGridLines(
-                dashArray: const [5, 5], // Estilo punteado [longitud, espacio]
+                dashArray: const [5, 5],
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
               axisLine: AxisLine(
@@ -92,14 +87,14 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
               ),
             ),
             primaryYAxis: NumericAxis(
-              minimum: 20,
+              minimum: 0,
               maximum: 50,
               labelStyle: const TextStyle(
-                fontSize: 0,
-                color: Colors.transparent,
+                fontSize: 10,
+                color: Colors.black,
               ),
               majorGridLines: MajorGridLines(
-                dashArray: const [5, 5], // Estilo do [longitud, espacio]
+                dashArray: const [5, 5],
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
               axisLine: AxisLine(
@@ -110,11 +105,11 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
             ),
-            series: <ColumnSeries<double, int>>[
-              ColumnSeries<double, int>(
+            series: <ColumnSeries<double, String>>[
+              ColumnSeries<double, String>(
                 animationDuration: 250,
                 dataSource: widget.data,
-                xValueMapper: (double value, int index) => index,
+                xValueMapper: (double value, int index) => daysOfWeek[index],
                 yValueMapper: (double value, _) => value,
                 gradient: LinearGradient(
                   colors: [
@@ -124,9 +119,8 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
-
                 dataLabelSettings: DataLabelSettings(
-                  isVisible: true, // Hace visibles las etiquetas
+                  isVisible: true,
                   textStyle: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.w300,
@@ -134,8 +128,7 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                   ),
                   labelAlignment: ChartDataLabelAlignment.outer,
                 ),
-
-                width: 0.6, // Ancho de las columnas
+                width: 0.6,
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(15)),
               ),
