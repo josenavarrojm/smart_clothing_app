@@ -11,7 +11,7 @@ import 'package:smartclothingproject/models/user_model.dart';
 
 // final mqttService = MqttService();
 String tempAlert = '';
-List<double> asdTem = [36, 35, 38, 39, 40, 36, 37];
+List<double> asdTem = [35, 38, 39, 40, 36, 35, 37];
 List<double> asd = [
   34,
   2,
@@ -163,7 +163,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                 // widthFactor: 0.4,
                 heightFactor: 0.35,
                 // data: List<double>.from(widget.blDataNotifier.ecgDataApp),
-                // data: asdTem,
+                data: asdTem,
               ),
               Center(
                 child: Card(

@@ -19,8 +19,24 @@ class LocalNotificationService {
     // Inicialización del plugin
     await _notificationsPlugin.initialize(
       settings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        debugPrint("Notificación seleccionada: ${response.payload}");
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        if (response.payload != null) {
+          // Agregar depuración
+          print(
+              'Notification ID: ${response.id}'); // Verifica si el ID es correcto
+          print(
+              'Action pressed: ${response.actionId}'); // Verifica la acción presionada
+
+          // Verifica si se presionó la acción de "Descartar"
+          if (response.actionId == 'Discard') {
+            print("Notification discarded"); // Agregar depuración
+            // Cancelar la notificación solo si el ID no es nulo
+            if (response.id != null) {
+              await _notificationsPlugin.cancel(
+                  response.id!); // Usamos '!' para asegurar que no sea nulo
+            }
+          }
+        }
       },
     );
 
@@ -31,12 +47,13 @@ class LocalNotificationService {
   /// Crear un canal de notificaciones (Android 8.0 o superior)
   static Future<void> _createNotificationChannel() async {
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'channel_id', // ID único del canal
-      'Default Notifications', // Nombre del canal
+      'channel_id',
+      'Default Notifications', // Nombre que aparecerá en las configuraciones del sistema
       description: 'Este canal se utiliza para notificaciones básicas.',
-      importance: Importance.high, // Importancia del canal
+      importance: Importance.high,
     );
 
+    // Crear el canal en el dispositivo Android
     await _notificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
@@ -51,11 +68,25 @@ class LocalNotificationService {
   }) async {
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'channel_id', // Debe coincidir con el ID del canal
+      'channel_id', // Este ID debe coincidir con el ID del canal
       'Default Notifications',
       channelDescription: 'Este canal se utiliza para notificaciones básicas.',
       importance: Importance.max,
       priority: Priority.high,
+      playSound: true, // Para asegurarte de que suene
+      enableVibration: true, // Para habilitar la vibración
+      actions: <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          'Accept',
+          'Aceptar',
+          showsUserInterface: true,
+        ),
+        AndroidNotificationAction(
+          'Discard',
+          'Descartar',
+          showsUserInterface: true,
+        ),
+      ],
     );
 
     const NotificationDetails details = NotificationDetails(
@@ -64,8 +95,8 @@ class LocalNotificationService {
 
     await _notificationsPlugin.show(
       id, // ID único para cada notificación
-      title,
-      body,
+      title.isNotEmpty ? title : 'Default Title', // Título de la notificación
+      body.isNotEmpty ? body : 'Default Body', // Cuerpo de la notificación
       details,
     );
   }

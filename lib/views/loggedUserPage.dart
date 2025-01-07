@@ -9,6 +9,7 @@ import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/models/local_notifications_service.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
+import 'package:smartclothingproject/views/notification_panel.dart';
 import 'package:smartclothingproject/views/profile_page.dart';
 import '../handlers/data_base_handler.dart';
 import '../models/user_model.dart';
@@ -108,8 +109,8 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           onPressed: () async {
             await LocalNotificationService.showNotification(
               id: Random().nextInt(100000),
-              title: 'INCREÍBLE',
-              body: 'Esta es una notificación local.',
+              title: 'Test',
+              body: 'Aquí va el mensaje de alerta.',
             );
           },
           child: Icon(
@@ -122,7 +123,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(110),
           child: AnimatedContainer(
-            height: _selectedIndex == 3 ? 110 : 90,
+            height: _selectedIndex == 1 ? 95 : 90,
             curve: Curves.ease,
             duration: const Duration(milliseconds: 600),
             child: AppBar(
@@ -131,11 +132,10 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                   borderRadius:
                       BorderRadius.vertical(bottom: Radius.circular(0.0))),
               elevation: 0,
-              toolbarHeight: _selectedIndex == 3 ? 110 : 90,
-              toolbarOpacity: 0.8,
-              centerTitle: _selectedIndex == 3,
+              toolbarHeight: _selectedIndex == 1 ? 110 : 90,
+              centerTitle: _selectedIndex == 1,
               title: Text(
-                _selectedIndex != 3 ? "Smart Clothing" : "Mi Perfil",
+                _selectedIndex != 1 ? "Smart Clothing" : "Mi Perfil",
                 style: TextStyle(
                     color: Theme.of(context).primaryColorLight,
                     fontSize: _selectedIndex != 3 ? 25 : 30,
@@ -152,7 +152,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 //     setState(() {});
                 //   },
                 // ),
-                if (_selectedIndex != 3) ...[
+                if (_selectedIndex != 1) ...[
                   Consumer<ConnectionService>(
                     builder: (context, connectionService, child) {
                       return IconButton(
@@ -187,14 +187,16 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                       );
                     },
                   ),
-                  // _buildNotificationIcon(_selectedIndex)
+                  _buildNotificationIcon(context, _selectedIndex)
                 ],
                 IconButton(
                   icon:
-                      Icon(_selectedIndex != 3 ? Icons.logout : Icons.settings),
-                  color: Colors.blueAccent,
+                      Icon(_selectedIndex != 1 ? Icons.logout : Icons.settings),
+                  color: _selectedIndex == 1
+                      ? Theme.of(context).primaryColorLight
+                      : Theme.of(context).colorScheme.tertiary,
                   onPressed: () async {
-                    if (_selectedIndex != 3) {
+                    if (_selectedIndex != 1) {
                       await DatabaseHandler.instance.deleteUser();
                       saveLastPage('AuthSwitch');
                       Navigator.pushAndRemoveUntil(
@@ -418,23 +420,58 @@ class AnimatedIconContainer extends StatelessWidget {
   }
 }
 
-// Widget _buildNotificationIcon(int selectedIndex) {
-//   return IconButton(
-//     icon: Badge(
-//       alignment: Alignment.topRight,
-//       backgroundColor: Colors.red,
-//       smallSize: 10.0,
-//       largeSize: 20.0,
-//       label: Text('$selectedIndex'),
-//       child: const AnimatedOpacity(
-//         opacity: 1.0,
-//         duration: Duration(milliseconds: 300),
-//         child: Icon(Icons.notifications),
-//       ),
-//     ),
-//     color: Colors.blueAccent,
-//     onPressed: () {
-//       // Acción para el botón
-//     },
-//   );
-// }
+Widget _buildNotificationIcon(BuildContext context, int selectedIndex) {
+  return IconButton(
+    icon: Badge(
+      alignment: Alignment.topRight,
+      backgroundColor: Colors.red,
+      smallSize: 10.0,
+      largeSize: 20.0,
+      label: Text('$selectedIndex'),
+      child: const AnimatedOpacity(
+        opacity: 1.0,
+        duration: Duration(milliseconds: 300),
+        child: Icon(Icons.notifications),
+      ),
+    ),
+    color: Theme.of(context).colorScheme.tertiary,
+    onPressed: () {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              NotificationPanel(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const beginOffset = Offset(0.0, -1.0); // Desde arriba hacia abajo
+            const endOffset = Offset.zero; // Termina en el centro
+            const reverseBeginOffset =
+                Offset(0.0, -1.0); // Comienza en el centro
+            const reverseEndOffset = Offset.zero; // Hacia abajo para salida
+            const curve = Curves.easeOut;
+
+            var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                .chain(CurveTween(curve: curve));
+            var reverseTween =
+                Tween(begin: reverseBeginOffset, end: reverseEndOffset)
+                    .chain(CurveTween(curve: curve));
+
+            var opacityTween = Tween<double>(begin: 0.8, end: 1.0)
+                .chain(CurveTween(curve: curve));
+
+            return SlideTransition(
+              position: animation.status == AnimationStatus.reverse
+                  ? animation.drive(reverseTween)
+                  : animation.drive(offsetTween),
+              child: FadeTransition(
+                opacity: animation.drive(opacityTween),
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 250),
+          reverseTransitionDuration: const Duration(milliseconds: 250),
+        ),
+      );
+    },
+  );
+}

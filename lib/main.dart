@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/loaderLogged.dart';
@@ -10,7 +11,6 @@ import 'functions/theme_notifier.dart';
 import 'functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/views/loggedUserPage.dart';
 import 'functions/persistance_data.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 Future<void> requestNotificationPermission() async {
   if (await Permission.notification.isDenied) {
@@ -20,6 +20,8 @@ Future<void> requestNotificationPermission() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  requestNotificationPermission();
+  await LocalNotificationService.initialize();
 
   // Crear instancia del servicio MongoDB
   final mongoService = MongoService();
@@ -33,9 +35,6 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  await requestNotificationPermission();
-  await LocalNotificationService.initialize();
 
   // Ejecutar la aplicación
   runApp(
