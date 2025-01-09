@@ -2,8 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:smartclothingproject/functions/alerts_notifier.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/connected_state_notifier.dart';
 import 'package:smartclothingproject/models/local_notifications_service.dart';
@@ -168,7 +170,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                                     connectionService.lostConnection &&
                                     !isDialogVisible) ||
                                 (!connectionService.isConnected))
-                            ? Colors.red
+                            ? Theme.of(context).colorScheme.tertiary
                             : Colors.blueAccent,
                         onPressed: () async {
                           if ((!connectionService.isConnected &&
@@ -187,7 +189,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                       );
                     },
                   ),
-                  _buildNotificationIcon(context, _selectedIndex)
+                  _buildNotificationBadge(context)
                 ],
                 IconButton(
                   icon:
@@ -420,58 +422,86 @@ class AnimatedIconContainer extends StatelessWidget {
   }
 }
 
-Widget _buildNotificationIcon(BuildContext context, int selectedIndex) {
-  return IconButton(
-    icon: Badge(
-      alignment: Alignment.topRight,
-      backgroundColor: Colors.red,
-      smallSize: 10.0,
-      largeSize: 20.0,
-      label: Text('$selectedIndex'),
-      child: const AnimatedOpacity(
-        opacity: 1.0,
-        duration: Duration(milliseconds: 300),
-        child: Icon(Icons.notifications),
-      ),
-    ),
-    color: Theme.of(context).colorScheme.tertiary,
-    onPressed: () {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              NotificationPanel(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const beginOffset = Offset(0.0, -1.0); // Desde arriba hacia abajo
-            const endOffset = Offset.zero; // Termina en el centro
-            const reverseBeginOffset =
-                Offset(0.0, -1.0); // Comienza en el centro
-            const reverseEndOffset = Offset.zero; // Hacia abajo para salida
-            const curve = Curves.easeOut;
+Widget _buildNotificationBadge(BuildContext context) {
+  return Consumer<AlertsNotifier>(builder: (context, alertsNotifier, child) {
+    return FutureBuilder<String?>(
+      future: getAlerts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Mostrar el Badge mientras carga
+          return Badge(
+            alignment: Alignment.topRight,
+            backgroundColor: Colors.red,
+            smallSize: 0.0,
+            largeSize: 20.0,
+            label: null, // No muestra nada mientras carga
+            child: AnimatedOpacity(
+              opacity: 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: Icon(Icons.notifications_outlined,
+                  size: 30, color: Theme.of(context).colorScheme.tertiary),
+            ),
+          );
+        }
 
-            var offsetTween = Tween(begin: beginOffset, end: endOffset)
-                .chain(CurveTween(curve: curve));
-            var reverseTween =
-                Tween(begin: reverseBeginOffset, end: reverseEndOffset)
-                    .chain(CurveTween(curve: curve));
+        // Cuando el valor ya está cargado
+        final alertsSaved = snapshot.data ?? '';
+        if (alertsNotifier.newAlerts.isEmpty && alertsSaved.isNotEmpty) {
+          alertsNotifier.updateNewAlerts(alertsSaved);
+        }
 
-            var opacityTween = Tween<double>(begin: 0.8, end: 1.0)
-                .chain(CurveTween(curve: curve));
+        return GestureDetector(
+          onTap: () {
+            saveAlerts('');
+            alertsNotifier.updateNewAlerts('');
+            FlutterLocalNotificationsPlugin().cancelAll();
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    NotificationPanel(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const beginOffset =
+                      Offset(1.0, 0.0); // Desde arriba hacia abajo
+                  const endOffset = Offset.zero; // Termina en el centro
+                  const curve = Curves.easeOut;
 
-            return SlideTransition(
-              position: animation.status == AnimationStatus.reverse
-                  ? animation.drive(reverseTween)
-                  : animation.drive(offsetTween),
-              child: FadeTransition(
-                opacity: animation.drive(opacityTween),
-                child: child,
+                  var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                      .chain(CurveTween(curve: curve));
+                  var opacityTween = Tween<double>(begin: 0.8, end: 1.0)
+                      .chain(CurveTween(curve: curve));
+
+                  return SlideTransition(
+                    position: animation.drive(offsetTween),
+                    child: FadeTransition(
+                      opacity: animation.drive(opacityTween),
+                      child: child,
+                    ),
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 250),
+                reverseTransitionDuration: const Duration(milliseconds: 250),
               ),
             );
           },
-          transitionDuration: const Duration(milliseconds: 250),
-          reverseTransitionDuration: const Duration(milliseconds: 250),
-        ),
-      );
-    },
-  );
+          child: Badge(
+            alignment: Alignment.topRight,
+            backgroundColor: Colors.red,
+            smallSize: 0.0,
+            largeSize: 20.0,
+            label: alertsNotifier.newAlerts.isEmpty
+                ? null
+                : Text(alertsNotifier.newAlerts),
+            child: AnimatedOpacity(
+              opacity: 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: Icon(Icons.notifications_outlined,
+                  size: 30, color: Theme.of(context).colorScheme.tertiary),
+            ),
+          ),
+        );
+      },
+    );
+  });
 }

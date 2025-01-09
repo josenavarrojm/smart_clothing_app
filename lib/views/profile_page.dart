@@ -344,6 +344,250 @@ class _ProfilePage extends State<ProfilePage> {
               bottom: 0,
             ),
             child: const Text(
+              'Información De Salud',
+              style: TextStyle(
+                  color: Colors.grey,
+                  // color: Theme.of(context).primaryColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.normal),
+            )),
+        SizedBox(
+          width: screenWidth * 0.92,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 15, top: 10),
+            padding:
+                const EdgeInsets.only(bottom: 20, top: 20, left: 10, right: 10),
+            decoration: BoxDecoration(
+              // color: Theme.of(context).scaffoldBackgroundColor,
+              color: themeNotifier.isLightTheme
+                  ? const Color.fromRGBO(230, 230, 230, 1)
+                  : const Color.fromRGBO(30, 30, 30, 1),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context)
+                      .primaryColor
+                      .withOpacity(0.5), // Color de la sombra
+                  spreadRadius: 0.1, // Cuánto se extiende la sombra
+                  blurRadius: 0.1, // Qué tan difusa es la sombra
+                  offset: const Offset(0, 0), // Ángulo de la sombra (x, y)
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: themeNotifier.isLightTheme
+                                ? Colors.white
+                                : Colors.black,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.5), // Color de la sombra
+                                spreadRadius:
+                                    0.1, // Cuánto se extiende la sombra
+                                blurRadius: 0.1, // Qué tan difusa es la sombra
+                                offset: const Offset(
+                                    0, 0), // Ángulo de la sombra (x, y)
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.bloodtype_outlined,
+                            color: Theme.of(context).primaryColor,
+                            size: 25,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Flexible(
+                          child: Text(
+                            user.bloodType,
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w300,
+                                letterSpacing: 1.1),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
+                      ],
+                    )),
+                Divider(
+                  color: Theme.of(context)
+                      .primaryColor
+                      .withOpacity(0.5), // Color del divisor
+                  thickness: 0.2, // Grosor del borde
+                ),
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: themeNotifier.isLightTheme
+                                ? Colors.white
+                                : Colors.black,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.5), // Color de la sombra
+                                spreadRadius:
+                                    0.1, // Cuánto se extiende la sombra
+                                blurRadius: 0.1, // Qué tan difusa es la sombra
+                                offset: const Offset(
+                                    0, 0), // Ángulo de la sombra (x, y)
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.dashboard_customize_outlined,
+                            color: Theme.of(context).primaryColor,
+                            size: 25,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Flexible(
+                            child: Text(
+                          user.eps,
+                          style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w300,
+                              letterSpacing: 1.1),
+                          overflow: TextOverflow.ellipsis,
+                        ))
+                      ],
+                    )),
+                Divider(
+                  color: Theme.of(context)
+                      .primaryColor
+                      .withOpacity(0.5), // Color del divisor
+                  thickness: 0.2, // Grosor del borde
+                ),
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: themeNotifier.isLightTheme
+                                ? Colors.white
+                                : Colors.black,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.5), // Color de la sombra
+                                spreadRadius:
+                                    0.1, // Cuánto se extiende la sombra
+                                blurRadius: 0.1, // Qué tan difusa es la sombra
+                                offset: const Offset(
+                                    0, 0), // Ángulo de la sombra (x, y)
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.biotech_outlined,
+                            color: Theme.of(context).primaryColor,
+                            size: 25,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Flexible(
+                            child: Text(user.arl,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.w300,
+                                    letterSpacing: 1.1),
+                                overflow: TextOverflow.ellipsis))
+                      ],
+                    )),
+                Divider(
+                  color: Theme.of(context)
+                      .primaryColor
+                      .withOpacity(0.5), // Color del divisor
+                  thickness: 0.2, // Grosor del borde
+                ),
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: themeNotifier.isLightTheme
+                                ? Colors.white
+                                : Colors.black,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.5), // Color de la sombra
+                                spreadRadius:
+                                    0.1, // Cuánto se extiende la sombra
+                                blurRadius: 0.1, // Qué tan difusa es la sombra
+                                offset: const Offset(
+                                    0, 0), // Ángulo de la sombra (x, y)
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.file_open_outlined,
+                            color: Theme.of(context).primaryColor,
+                            size: 25,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Flexible(
+                            child: Text(user.pensionFondo,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.w300,
+                                    letterSpacing: 1.1),
+                                overflow: TextOverflow.ellipsis))
+                      ],
+                    )),
+              ],
+            ),
+          ),
+        ),
+        Container(
+            alignment: Alignment.centerLeft,
+            margin: const EdgeInsets.only(
+              left: 25,
+              bottom: 0,
+            ),
+            child: const Text(
               'Preferencias',
               style: TextStyle(
                   color: Colors.grey,

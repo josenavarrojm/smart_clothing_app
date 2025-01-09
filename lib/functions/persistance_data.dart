@@ -9,3 +9,13 @@ Future<String?> getLastPage() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getString('last_page'); // Obtiene el nombre de la vista
 }
+
+Future<void> saveAlerts(String alerts) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('alerts', alerts); // Guarda las alertas
+}
+
+Future<String?> getAlerts() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('alerts'); // Obtiene las alertas
+}

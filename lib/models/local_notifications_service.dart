@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/material.dart';
+import 'package:smartclothingproject/functions/alerts_notifier.dart';
+import 'package:smartclothingproject/functions/persistance_data.dart';
 
 class LocalNotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -99,5 +100,15 @@ class LocalNotificationService {
       body.isNotEmpty ? body : 'Default Body', // Cuerpo de la notificación
       details,
     );
+
+    String newAlertsValue = AlertsNotifier().newAlerts;
+    if (newAlertsValue.isNotEmpty && int.tryParse(newAlertsValue) != null) {
+      int newAlertsInt = int.parse(newAlertsValue);
+      AlertsNotifier().updateNewAlerts('${newAlertsInt + 1}');
+      saveAlerts(AlertsNotifier().newAlerts);
+    } else {
+      saveAlerts('1');
+      AlertsNotifier().updateNewAlerts('1'); // O cualquier valor inicial
+    }
   }
 }

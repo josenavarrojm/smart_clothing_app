@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:smartclothingproject/functions/alerts_notifier.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/loaderLogged.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
@@ -44,6 +45,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => ThemeNotifier()),
         ChangeNotifierProvider(create: (context) => ConnectionService()),
         ChangeNotifierProvider(create: (context) => BlDataNotifier()),
+        ChangeNotifierProvider(create: (context) => AlertsNotifier()),
         ChangeNotifierProvider(create: (context) => AuthState()),
       ],
       child: MyApp(lastPage: lastPage),
@@ -71,7 +73,7 @@ class MyApp extends StatelessWidget {
                   tertiary: const Color.fromARGB(255, 241, 115, 0)),
             )
           : ThemeData(
-              scaffoldBackgroundColor: const Color.fromARGB(255, 238, 238, 238),
+              scaffoldBackgroundColor: const Color.fromARGB(255, 67, 67, 67),
               primaryColor: const Color.fromARGB(255, 5, 74, 145),
               primaryColorLight: const Color.fromARGB(255, 129, 164, 205),
               colorScheme: ColorScheme.fromSwatch().copyWith(
