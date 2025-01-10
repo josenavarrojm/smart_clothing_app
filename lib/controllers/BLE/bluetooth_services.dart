@@ -317,12 +317,10 @@ class BluetoothController {
             readData = parts[0];
             dataReceived["_id"] = ObjectId();
             dataReceived["ecg"] = BlDataNotifier().ecgData;
-            print("Longitud: ${BlDataNotifier().ecgData.length}");
             await initializeDateFormatting('es_ES', null);
             Intl.defaultLocale = 'es_ES';
             dataReceived["created_at"] =
                 DateFormat('EEE, MMM d, yyyy - hh:mm a').format(DateTime.now());
-            print(dataReceived["created_at"]);
             if (BlDataNotifier().ecgData.isNotEmpty) {
               try {
                 await mongoService.insertDocument(dataReceived, "data");

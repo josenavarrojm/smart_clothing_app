@@ -101,26 +101,26 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
     return Consumer<BlDataNotifier>(builder: (context, blDataNotifier, child) {
       return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          elevation: 0.0,
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(radiusBtn), // Esquinas redondeadas
-          ),
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
-          onPressed: () async {
-            await LocalNotificationService.showNotification(
-              id: Random().nextInt(100000),
-              title: 'Test',
-              body: 'Aquí va el mensaje de alerta.',
-            );
-          },
-          child: Icon(
-            Icons.notification_add,
-            color: Theme.of(context).primaryColor,
-            size: 40,
-          ),
-        ),
+        // floatingActionButton: FloatingActionButton(
+        //   elevation: 0.0,
+        //   shape: RoundedRectangleBorder(
+        //     borderRadius:
+        //         BorderRadius.circular(radiusBtn), // Esquinas redondeadas
+        //   ),
+        //   backgroundColor: Theme.of(context).colorScheme.tertiary,
+        //   onPressed: () async {
+        //     await LocalNotificationService.showNotification(
+        //       id: Random().nextInt(100000),
+        //       title: 'Peligro 😔😔',
+        //       body: 'Ten cuidado, eres muy sexi 😏😏',
+        //     );
+        //   },
+        //   child: Icon(
+        //     Icons.notification_add,
+        //     color: Theme.of(context).primaryColor,
+        //     size: 40,
+        //   ),
+        // ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(110),
@@ -155,40 +155,40 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 //   },
                 // ),
                 if (_selectedIndex != 1) ...[
-                  Consumer<ConnectionService>(
-                    builder: (context, connectionService, child) {
-                      return IconButton(
-                        icon: Icon(
-                          ((!connectionService.isConnected &&
-                                      connectionService.lostConnection &&
-                                      !isDialogVisible) ||
-                                  (!connectionService.isConnected))
-                              ? Icons.bluetooth_disabled
-                              : Icons.bluetooth_connected,
-                        ),
-                        color: ((!connectionService.isConnected &&
-                                    connectionService.lostConnection &&
-                                    !isDialogVisible) ||
-                                (!connectionService.isConnected))
-                            ? Theme.of(context).colorScheme.tertiary
-                            : Colors.blueAccent,
-                        onPressed: () async {
-                          if ((!connectionService.isConnected &&
-                                  connectionService.lostConnection &&
-                                  !isDialogVisible) ||
-                              (!connectionService.isConnected)) {
-                            isDialogVisible = true;
-                            // Llamar a showDialogIfNeeded solo cuando sea necesario
-                            Future.delayed(Duration.zero, () {
-                              showDialogIfNeeded(connectionService);
-                            });
-                          }
-                          setState(
-                              () {}); // Este setState ahora debería funcionar correctamente.
-                        },
-                      );
-                    },
-                  ),
+                  // Consumer<ConnectionService>(
+                  //   builder: (context, connectionService, child) {
+                  //     return IconButton(
+                  //       icon: Icon(
+                  //         ((!connectionService.isConnected &&
+                  //                     connectionService.lostConnection &&
+                  //                     !isDialogVisible) ||
+                  //                 (!connectionService.isConnected))
+                  //             ? Icons.bluetooth_disabled
+                  //             : Icons.bluetooth_connected,
+                  //       ),
+                  //       color: ((!connectionService.isConnected &&
+                  //                   connectionService.lostConnection &&
+                  //                   !isDialogVisible) ||
+                  //               (!connectionService.isConnected))
+                  //           ? Theme.of(context).colorScheme.tertiary
+                  //           : Colors.blueAccent,
+                  //       onPressed: () async {
+                  //         if ((!connectionService.isConnected &&
+                  //                 connectionService.lostConnection &&
+                  //                 !isDialogVisible) ||
+                  //             (!connectionService.isConnected)) {
+                  //           isDialogVisible = true;
+                  //           // Llamar a showDialogIfNeeded solo cuando sea necesario
+                  //           Future.delayed(Duration.zero, () {
+                  //             showDialogIfNeeded(connectionService);
+                  //           });
+                  //         }
+                  //         setState(
+                  //             () {}); // Este setState ahora debería funcionar correctamente.
+                  //       },
+                  //     );
+                  //   },
+                  // ),
                   _buildNotificationBadge(context)
                 ],
                 IconButton(
@@ -429,19 +429,21 @@ Widget _buildNotificationBadge(BuildContext context) {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Mostrar el Badge mientras carga
-          return Badge(
-            alignment: Alignment.topRight,
-            backgroundColor: Colors.red,
-            smallSize: 0.0,
-            largeSize: 20.0,
-            label: null, // No muestra nada mientras carga
-            child: AnimatedOpacity(
-              opacity: 1.0,
-              duration: const Duration(milliseconds: 300),
-              child: Icon(Icons.notifications_outlined,
-                  size: 30, color: Theme.of(context).colorScheme.tertiary),
-            ),
-          );
+          return Container(
+              margin: const EdgeInsets.only(right: 10),
+              child: Badge(
+                alignment: Alignment.topRight,
+                backgroundColor: Colors.red,
+                smallSize: 0.0,
+                largeSize: 20.0,
+                label: null, // No muestra nada mientras carga
+                child: AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(Icons.notifications_outlined,
+                      size: 30, color: Theme.of(context).colorScheme.tertiary),
+                ),
+              ));
         }
 
         // Cuando el valor ya está cargado
@@ -485,21 +487,23 @@ Widget _buildNotificationBadge(BuildContext context) {
               ),
             );
           },
-          child: Badge(
-            alignment: Alignment.topRight,
-            backgroundColor: Colors.red,
-            smallSize: 0.0,
-            largeSize: 20.0,
-            label: alertsNotifier.newAlerts.isEmpty
-                ? null
-                : Text(alertsNotifier.newAlerts),
-            child: AnimatedOpacity(
-              opacity: 1.0,
-              duration: const Duration(milliseconds: 300),
-              child: Icon(Icons.notifications_outlined,
-                  size: 30, color: Theme.of(context).colorScheme.tertiary),
-            ),
-          ),
+          child: Container(
+              margin: const EdgeInsets.only(right: 10),
+              child: Badge(
+                alignment: Alignment.topRight,
+                backgroundColor: Colors.red,
+                smallSize: 0.0,
+                largeSize: 20.0,
+                label: alertsNotifier.newAlerts.isEmpty
+                    ? null
+                    : Text(alertsNotifier.newAlerts),
+                child: AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(Icons.notifications_outlined,
+                      size: 30, color: Theme.of(context).colorScheme.tertiary),
+                ),
+              )),
         );
       },
     );

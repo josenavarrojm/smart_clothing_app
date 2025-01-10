@@ -1,6 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:smartclothingproject/functions/alerts_notifier.dart';
+import 'package:smartclothingproject/functions/get_date_now.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
+import 'package:smartclothingproject/handlers/data_base_handler.dart';
 
 class LocalNotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -97,9 +99,29 @@ class LocalNotificationService {
     await _notificationsPlugin.show(
       id, // ID único para cada notificación
       title.isNotEmpty ? title : 'Default Title', // Título de la notificación
-      body.isNotEmpty ? body : 'Default Body', // Cuerpo de la notificación
+      body.isNotEmpty ? body : 'Default Body', // Cuerpo dse la notificación
       details,
     );
+
+    // await DatabaseHandler.instance.deleteAlert();
+
+    Map<String, dynamic> currentDate = await dateNow();
+
+    final dbHandler = DatabaseHandler.instance;
+
+    Map<String, dynamic> newAlert = {
+      'title': title,
+      'description': body,
+      'minute': currentDate['minute'] ?? '0',
+      'hour': currentDate['hour'] ?? '0',
+      'day': currentDate['day'] ?? '0',
+      'month': currentDate['month'] ?? '0',
+      'year': currentDate['year'] ?? '0',
+    };
+
+    await dbHandler.saveAlert(newAlert);
+    print(newAlert);
+    print('Alerta guardada!');
 
     String newAlertsValue = AlertsNotifier().newAlerts;
     if (newAlertsValue.isNotEmpty && int.tryParse(newAlertsValue) != null) {
