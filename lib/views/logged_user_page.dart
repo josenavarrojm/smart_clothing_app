@@ -101,26 +101,26 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
     return Consumer<BlDataNotifier>(builder: (context, blDataNotifier, child) {
       return Scaffold(
-        // floatingActionButton: FloatingActionButton(
-        //   elevation: 0.0,
-        //   shape: RoundedRectangleBorder(
-        //     borderRadius:
-        //         BorderRadius.circular(radiusBtn), // Esquinas redondeadas
-        //   ),
-        //   backgroundColor: Theme.of(context).colorScheme.tertiary,
-        //   onPressed: () async {
-        //     await LocalNotificationService.showNotification(
-        //       id: Random().nextInt(100000),
-        //       title: 'Peligro 😔😔',
-        //       body: 'Ten cuidado, eres muy sexi 😏😏',
-        //     );
-        //   },
-        //   child: Icon(
-        //     Icons.notification_add,
-        //     color: Theme.of(context).primaryColor,
-        //     size: 40,
-        //   ),
-        // ),
+        floatingActionButton: FloatingActionButton(
+          elevation: 0.0,
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(radiusBtn), // 0squinas redondeadas
+          ),
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          onPressed: () async {
+            await LocalNotificationService.showNotification(
+              id: Random().nextInt(100000),
+              title: 'Peligro 😔😔',
+              body: 'Estás muy caliente 🥵🔥',
+            );
+          },
+          child: Icon(
+            Icons.notification_add,
+            color: Theme.of(context).primaryColor,
+            size: 40,
+          ),
+        ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(110),
@@ -206,7 +206,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                         PageRouteBuilder(
                           pageBuilder:
                               (context, animation, secondaryAnimation) =>
-                                  AuthSwitcher(),
+                                  const AuthSwitcher(),
                           transitionsBuilder:
                               (context, animation, secondaryAnimation, child) {
                             const begin = Offset(
@@ -461,7 +461,7 @@ Widget _buildNotificationBadge(BuildContext context) {
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    NotificationPanel(),
+                    const NotificationPanel(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
                   const beginOffset =

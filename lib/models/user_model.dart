@@ -1,5 +1,6 @@
 class UserModel {
   final String? id;
+  // ignore: non_constant_identifier_names
   final String user_id;
   final String name;
   final String surname;
@@ -32,6 +33,7 @@ class UserModel {
 
   const UserModel({
     this.id,
+    // ignore: non_constant_identifier_names
     required this.user_id,
     required this.name,
     required this.surname,

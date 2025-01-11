@@ -4,13 +4,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/alerts_notifier.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
-import 'package:smartclothingproject/functions/loaderLogged.dart';
+import 'package:smartclothingproject/functions/loader_logged.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/models/local_notifications_service.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'functions/theme_notifier.dart';
 import 'functions/connected_state_notifier.dart';
-import 'package:smartclothingproject/views/loggedUserPage.dart';
+import 'package:smartclothingproject/views/logged_user_page.dart';
 import 'functions/persistance_data.dart';
 
 Future<void> requestNotificationPermission() async {
@@ -65,8 +65,8 @@ class MyApp extends StatelessWidget {
       title: 'SmartClothing App',
       theme: themeNotifier.isLightTheme
           ? ThemeData(
-              scaffoldBackgroundColor: Color.fromARGB(255, 238, 238, 238),
-              primaryColor: Color.fromARGB(255, 5, 74, 145),
+              scaffoldBackgroundColor: const Color.fromARGB(255, 238, 238, 238),
+              primaryColor: const Color.fromARGB(255, 5, 74, 145),
               primaryColorLight: const Color.fromARGB(255, 129, 164, 205),
               colorScheme: ColorScheme.fromSwatch().copyWith(
                   secondary: const Color.fromARGB(255, 62, 124, 177),

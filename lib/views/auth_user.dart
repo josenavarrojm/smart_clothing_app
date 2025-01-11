@@ -7,10 +7,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
-import 'package:smartclothingproject/functions/loaderLogged.dart';
+import 'package:smartclothingproject/functions/loader_logged.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
-import 'package:smartclothingproject/views/loggedUserPage.dart';
+import 'package:smartclothingproject/views/logged_user_page.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
@@ -52,7 +52,7 @@ final _formKey00 = GlobalKey<FormState>();
 final _formKey0 = GlobalKey<FormState>();
 final _formKey = GlobalKey<FormState>();
 final _formKey1 = GlobalKey<FormState>();
-final _formKey2 = GlobalKey<FormState>();
+// final _formKey2 = GlobalKey<FormState>();
 final _formKey3 = GlobalKey<FormState>();
 final _formKey4 = GlobalKey<FormState>();
 
@@ -362,6 +362,7 @@ void registerPage(context) {
 //               LoginForm())); // Muestra el formulario de inicio de sesión
 // }
 
+// ignore: non_constant_identifier_names
 void loggedUser(context, bool DataCompleted) {
   email = '';
   codeSession = '';
@@ -1543,7 +1544,8 @@ class _RegisterQuestions extends State<RegisterQuestions> {
                               ),
                               spaceSizedBox,
                               DropdownButtonFormField<String>(
-                                icon: Icon(Icons.keyboard_arrow_down_outlined),
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_down_outlined),
                                 dropdownColor: Theme.of(context).primaryColor,
                                 style: TextStyle(
                                     color: Theme.of(context)

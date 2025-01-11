@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/components/charts.dart';
-import 'package:smartclothingproject/components/chartsColumn.dart';
+import 'package:smartclothingproject/components/charts_column.dart';
 // import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
-import 'package:smartclothingproject/functions/loadCSVData.dart';
+import 'package:smartclothingproject/functions/load_csv_data.dart';
 import 'package:smartclothingproject/models/user_model.dart';
 // import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 

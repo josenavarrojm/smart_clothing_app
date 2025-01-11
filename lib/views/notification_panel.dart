@@ -6,6 +6,8 @@ import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/models/alert_model.dart';
 
 class NotificationPanel extends StatefulWidget {
+  const NotificationPanel({super.key});
+
   @override
   _NotificationPanelState createState() => _NotificationPanelState();
 }

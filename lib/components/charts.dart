@@ -35,7 +35,8 @@ class _ChartCardState extends State<ChartCard> {
         // Enables the trackball
         enable: true,
         activationMode: ActivationMode.longPress,
-        tooltipSettings: InteractiveTooltip(enable: true, color: Colors.red));
+        tooltipSettings:
+            const InteractiveTooltip(enable: true, color: Colors.red));
 
     super.initState();
   }

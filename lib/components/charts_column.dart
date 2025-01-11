@@ -28,7 +28,8 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
     _trackballBehavior = TrackballBehavior(
       enable: true,
       activationMode: ActivationMode.longPress,
-      tooltipSettings: InteractiveTooltip(enable: true, color: Colors.red),
+      tooltipSettings:
+          const InteractiveTooltip(enable: true, color: Colors.red),
     );
 
     super.initState();

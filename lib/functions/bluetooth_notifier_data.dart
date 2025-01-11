@@ -5,6 +5,7 @@ class BlDataNotifier with ChangeNotifier {
   factory BlDataNotifier() => _instance;
   BlDataNotifier._internal();
 
+  // ignore: non_constant_identifier_names
   String _user_id = '';
   String _bpmData = '0';
   String _timeData = '0.0';
@@ -19,6 +20,7 @@ class BlDataNotifier with ChangeNotifier {
   List<double> _ecgDataApp = [];
   List<double> _ecgDataIDApp = [];
 
+  // ignore: non_constant_identifier_names
   String get user_id => _user_id;
   String get bpmData => _bpmData;
   String get timeData => _timeData;
