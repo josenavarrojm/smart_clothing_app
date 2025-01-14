@@ -165,8 +165,6 @@ class BluetoothController {
             timeData = double.parse(valueReceived).toInt();
 
             dataReceived["time"] = timeData;
-            print(dataReceived["time"]);
-            // print("bpm: ${BlDataNotifier().bpmData}");
           }
         } else if (decodedFragment.contains('BPM')) {
           // Separar la cadena por el delimitador ":"
@@ -326,6 +324,7 @@ class BluetoothController {
               try {
                 await mongoService.connect();
                 await mongoService.insertDocument(dataReceived, "data");
+
                 dataMongoDB = await mongoService.getDocuments("data");
                 BlDataNotifier()
                     .updatebpmData(dataMongoDB.last["bpm"].toString());
@@ -346,10 +345,10 @@ class BluetoothController {
                 BlDataNotifier()
                     .updateDateTimeData(dataMongoDB.last["created_at"]);
                 readData = '';
-                BlDataNotifier().updateHistoricoTempCorp(
-                    double.parse(dataMongoDB.last["tempCorp"]));
                 BlDataNotifier()
-                    .updateHistoricoBPM(double.parse(dataMongoDB.last["bpm"]));
+                    .updateHistoricoTempCorp(dataMongoDB.last["tempCorp"]);
+                BlDataNotifier()
+                    .updateHistoricoBPM(dataMongoDB.last["bpm"].toDouble());
 
                 // Convierte "ecg" en List<double>
                 final ecgData = (dataMongoDB.last["ecg"] as List<dynamic>)

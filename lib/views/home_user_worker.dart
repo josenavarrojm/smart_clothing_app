@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/components/charts.dart';
+import 'package:smartclothingproject/components/historic_chart_card.dart';
 // import 'package:smartclothingproject/components/charts_column.dart';
 // import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
@@ -421,30 +422,31 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               const SizedBox(
                 height: 15,
               ),
-              ChartCard(
+              HistoricChartCard(
                 titleChart: 'Temperatura Corporal',
-                // minY: 0,
-                // maxY: 50,
+                minY: 20,
+                maxY: 40,
+                unitChart: 'Grados °C',
                 time: 3,
                 heightFactor: 0.35,
-                data:
-                    //  !(widget.blDataNotifier.historicoTempCorp.isNotEmpty)
-                    //     ? widget.blDataNotifier.historicoTempCorp
-                    //         .map((e) => e.toDouble())
-                    //         .toList()
-                    //     :
-                    [
-                  50,
-                  10,
-                  20,
-                  50,
-                  50,
-                  40,
-                  80
-                ], // Lista por defecto si está vacía o null
+                data: (widget.blDataNotifier.historicoTempCorp.isNotEmpty)
+                    ? widget.blDataNotifier.historicoTempCorp
+                        .map((e) => e.toDouble())
+                        .toList()
+                    : [
+                        33.5,
+                        36.4,
+                        35.4,
+                        37.2,
+                        38.9,
+                        39.0,
+                        37.4,
+                        35.9
+                      ], // Lista por defecto si está vacía o null
               ),
-              ChartCard(
+              HistoricChartCard(
                 titleChart: 'BPM',
+                unitChart: 'Pulsaciones por minuto',
                 minY: 0,
                 maxY: 130,
                 // time: timeData,
@@ -453,7 +455,16 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                     ? widget.blDataNotifier.historicoBPM
                         .map((e) => e.toDouble())
                         .toList()
-                    : [], // Lista por defecto si está vacía o null
+                    : [
+                        103.5,
+                        96.4,
+                        65.4,
+                        77.2,
+                        78.9,
+                        89.0,
+                        97.4,
+                        85.9
+                      ], // Lista por defecto si está vacía o null
               ),
               ChartCard(
                 titleChart: 'ECG',
