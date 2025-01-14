@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/components/charts.dart';
-import 'package:smartclothingproject/components/charts_column.dart';
+// import 'package:smartclothingproject/components/charts_column.dart';
 // import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/load_csv_data.dart';
@@ -105,67 +105,6 @@ class _HomeUserWorker extends State<HomeUserWorker> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Center(
-                child: Text(
-                  textAlign: TextAlign.center,
-                  'Última medición: $formattedDate',
-                  style: GoogleFonts.lexend(
-                      fontSize: 14,
-                      letterSpacing: 0,
-                      fontWeight: FontWeight.w300,
-                      color: Theme.of(context).primaryColor),
-                ),
-              ),
-              ChartCard(
-                titleChart: 'ECG',
-                minY: -3,
-                maxY: 3,
-                time: timeData,
-                heightFactor: 0.35,
-                data: (widget.blDataNotifier.ecgDataApp.isNotEmpty)
-                    ? widget.blDataNotifier.ecgDataApp
-                        .map((e) => e.toDouble())
-                        .toList()
-                    : asd, // Lista por defecto si está vacía o null
-              ),
-              ChartCard(
-                titleChart: 'Etiquetas',
-                minY: 0,
-                maxY: 3000,
-                time: widget.blDataNotifier.ecgDataIDApp.length.toDouble(),
-                heightFactor: 0.35,
-                data: (widget.blDataNotifier.ecgDataIDApp.isNotEmpty)
-                    ? widget.blDataNotifier.ecgDataIDApp
-                        .map((e) => e.toDouble())
-                        .toList()
-                    : asd, // Lista por defecto si está vacía o null
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                Text(
-                  'BPM:',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lexend(
-                      fontSize: 25,
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.w300,
-                      color: Theme.of(context).primaryColor),
-                ),
-                Text(
-                  '$bpmData',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lexend(
-                      fontSize: 25,
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).primaryColor),
-                )
-              ]),
-              ChartCardColumn(
-                // widthFactor: 0.4,
-                heightFactor: 0.35,
-                // data: List<double>.from(widget.blDataNotifier.ecgDataApp),
-                data: asdTem,
-              ),
-              Center(
                 child: Card(
                   shape: RoundedRectangleBorder(
                     borderRadius:
@@ -177,38 +116,53 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                         color: Theme.of(context).scaffoldBackgroundColor,
                         // Esquinas redondeadas
                         // border: Border.all(
-                        //     color: Colors.black,
-                        //     width: 0), // Borde opcional
+                        //     color: Colors.black, width: 2), // Borde opcional
                       ),
                       duration: const Duration(milliseconds: 250),
                       // padding: const EdgeInsets.symmetric(
                       //     vertical: 15, horizontal: 35),
-                      // width: screenWidth * 0.95,
-                      // height: screenHeight * 0.2,
+                      // width: screenWidth * 0.6,
+                      height: screenHeight * 0.12,
                       alignment: Alignment.center,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Text(
-                            textAlign: TextAlign.center,
-                            'Temperatura Corporal: ',
+                            'Buena Posición',
                             style: GoogleFonts.lexend(
-                                fontSize: 22,
+                                fontSize: 24,
                                 letterSpacing: 0,
-                                fontWeight: FontWeight.w300,
+                                fontWeight: FontWeight.w600,
                                 color: Theme.of(context).primaryColor),
                           ),
-                          Text(
-                            '${(tempCorpValue * 10).ceil() / 10}°C',
-                            style: GoogleFonts.lexend(
-                                fontSize: 25,
-                                letterSpacing: 0,
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).primaryColor),
+                          const Icon(
+                            Icons.check_circle_outline,
+                            size: 50,
+                            color: Colors.green,
+                            // color: Theme.of(context).colorScheme.secondary,
                           ),
                         ],
                       )),
                 ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Center(
+                child: Text(
+                  'Variables Ambientales',
+                  style: GoogleFonts.wixMadeforText(
+                      color: Theme.of(context).primaryColorLight,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w400,
+                      wordSpacing: 0),
+                ),
+              ),
+              Divider(
+                color: Theme.of(context).primaryColorLight, // Color de la línea
+                thickness: 0.35, // Grosor de la línea
+                indent: 80.0, // Espaciado desde el lado izquierdo
+                endIndent: 80.0, // Espaciado desde el lado derecho
               ),
               Center(
                 child: Row(
@@ -232,7 +186,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                           // padding: const EdgeInsets.symmetric(
                           //     vertical: 15, horizontal: 35),
                           // width: screenWidth * 0.4,
-                          height: screenHeight * 0.2,
+                          height: screenHeight * 0.1,
                           alignment: Alignment.center,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -243,7 +197,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                                 style: GoogleFonts.lexend(
                                     fontSize: 14,
                                     letterSpacing: 0,
-                                    fontWeight: FontWeight.w200,
+                                    fontWeight: FontWeight.w300,
                                     color: Theme.of(context).primaryColor),
                               ),
                               Text(
@@ -285,7 +239,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                                 style: GoogleFonts.lexend(
                                     fontSize: 14,
                                     letterSpacing: 0,
-                                    fontWeight: FontWeight.w200,
+                                    fontWeight: FontWeight.w300,
                                     color: Theme.of(context).primaryColor),
                               ),
                               Text(
@@ -302,47 +256,244 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                   ],
                 ),
               ),
+              const SizedBox(
+                height: 15,
+              ),
               Center(
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Esquinas redondeadas
-                  ),
-                  elevation: 0,
-                  child: AnimatedContainer(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        // Esquinas redondeadas
-                        // border: Border.all(
-                        //     color: Colors.black, width: 2), // Borde opcional
-                      ),
-                      duration: const Duration(milliseconds: 250),
-                      // padding: const EdgeInsets.symmetric(
-                      //     vertical: 15, horizontal: 35),
-                      // width: screenWidth * 0.6,
-                      height: screenHeight * 0.15,
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(
-                            'Buena Posición',
-                            style: GoogleFonts.lexend(
-                                fontSize: 24,
-                                letterSpacing: 0,
-                                fontWeight: FontWeight.w200,
-                                color: Theme.of(context).primaryColor),
-                          ),
-                          const Icon(
-                            Icons.check_circle_outline,
-                            size: 50,
-                            color: Colors.green,
-                            // color: Theme.of(context).colorScheme.secondary,
-                          )
-                        ],
-                      )),
+                child: Text(
+                  'Variables Corporales',
+                  style: GoogleFonts.wixMadeforText(
+                      color: Theme.of(context).primaryColorLight,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w400,
+                      wordSpacing: 0),
                 ),
               ),
+              Divider(
+                color: Theme.of(context).primaryColorLight, // Color de la línea
+                thickness: 0.35, // Grosor de la línea
+                indent: 80.0, // Espaciado desde el lado izquierdo
+                endIndent: 80.0, // Espaciado desde el lado derecho
+              ),
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Esquinas redondeadas
+                      ),
+                      elevation: 0,
+                      child: AnimatedContainer(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            // Esquinas redondeadas
+                            // border: Border.all(
+                            //     color: Colors.black, width: 2), // Borde opcional
+                          ),
+                          duration: const Duration(milliseconds: 250),
+                          // padding: const EdgeInsets.symmetric(
+                          //     vertical: 15, horizontal: 35),
+                          // width: screenWidth * 0.4,
+                          height: screenHeight * 0.1,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                textAlign: TextAlign.center,
+                                'Temperatura Corporal: ',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 14,
+                                    letterSpacing: 0,
+                                    fontWeight: FontWeight.w300,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              Text(
+                                '${(tempCorpValue * 10).ceil() / 10}°C',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 40,
+                                    letterSpacing: 0,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ],
+                          )),
+                    ),
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // Esquinas redondeadas
+                      ),
+                      elevation: 0,
+                      child: AnimatedContainer(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            // Esquinas redondeadas
+                            // border: Border.all(
+                            //     color: Colors.black, width: 2), // Borde opcional
+                          ),
+                          duration: const Duration(milliseconds: 250),
+                          // padding: const EdgeInsets.symmetric(
+                          //     vertical: 15, horizontal: 35),
+                          // width: screenWidth * 0.45,
+                          height: screenHeight * 0.15,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'BPM:',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.lexend(
+                                    fontSize: 14,
+                                    letterSpacing: 0,
+                                    fontWeight: FontWeight.w300,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '$bpmData',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.lexend(
+                                        fontSize: 40,
+                                        letterSpacing: 0,
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                  const Icon(
+                                    Icons.favorite,
+                                    color: Colors.red,
+                                    size: 35,
+                                  )
+                                ],
+                              )
+                            ],
+                          )),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              // ChartCard(
+              //   titleChart: 'Etiquetas',
+              //   minY: 0,
+              //   maxY: 3000,
+              //   time: widget.blDataNotifier.ecgDataIDApp.length.toDouble(),
+              //   heightFactor: 0.35,
+              //   data: (widget.blDataNotifier.ecgDataIDApp.isNotEmpty)
+              //       ? widget.blDataNotifier.ecgDataIDApp
+              //           .map((e) => e.toDouble())
+              //           .toList()
+              //       : asd, // Lista por defecto si está vacía o null
+              // ),
+
+              // ChartCardColumn(
+              //   // widthFactor: 0.4,
+              //   heightFactor: 0.35,
+              //   // data: List<double>.from(widget.blDataNotifier.ecgDataApp),
+              //   data: asdTem,
+              // ),
+              Center(
+                child: Text(
+                  'Histórico de Variables Corporales',
+                  style: GoogleFonts.wixMadeforText(
+                      color: Theme.of(context).primaryColorLight,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w400,
+                      wordSpacing: 0),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.visible,
+                  softWrap: true,
+                ),
+              ),
+              Divider(
+                color: Theme.of(context).primaryColorLight, // Color de la línea
+                thickness: 0.35, // Grosor de la línea
+                indent: 80.0, // Espaciado desde el lado izquierdo
+                endIndent: 80.0, // Espaciado desde el lado derecho
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              // ChartCard(
+              //   titleChart: 'Temperatura Corporal',
+              //   minY: 0,
+              //   maxY: 50,
+              //   time: timeData,
+              //   heightFactor: 0.35,
+              //   data: (widget.blDataNotifier.ecgDataApp.isNotEmpty)
+              //       ? widget.blDataNotifier.ecgDataApp
+              //           .map((e) => e.toDouble())
+              //           .toList()
+              //       : [], // Lista por defecto si está vacía o null
+              // ),
+              // ChartCard(
+              //   titleChart: 'BPM',
+              //   minY: 0,
+              //   maxY: 130,
+              //   time: timeData,
+              //   heightFactor: 0.35,
+              //   data: (widget.blDataNotifier.ecgDataApp.isNotEmpty)
+              //       ? widget.blDataNotifier.ecgDataApp
+              //           .map((e) => e.toDouble())
+              //           .toList()
+              //       : [], // Lista por defecto si está vacía o null
+              // ),
+              ChartCard(
+                titleChart: 'ECG',
+                minY: -3,
+                maxY: 3,
+                time: timeData,
+                heightFactor: 0.35,
+                data: (widget.blDataNotifier.ecgDataApp.isNotEmpty)
+                    ? widget.blDataNotifier.ecgDataApp
+                        .map((e) => e.toDouble())
+                        .toList()
+                    : [], // Lista por defecto si está vacía o null
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+
+              Center(
+                child: Text(
+                  textAlign: TextAlign.center,
+                  'lun, dic 23, 2024 - 09:04 a. m.',
+                  // '$formattedDate',
+                  style: GoogleFonts.lexend(
+                      fontSize: 22,
+                      letterSpacing: 0,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).primaryColor),
+                ),
+              ),
+              Center(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.watch_later_outlined,
+                    color: Theme.of(context).primaryColor,
+                    size: 18,
+                  ),
+                  Text(
+                    textAlign: TextAlign.center,
+                    'Última medición $formattedDate',
+                    style: GoogleFonts.lexend(
+                        fontSize: 18,
+                        letterSpacing: 0,
+                        fontWeight: FontWeight.w300,
+                        color: Theme.of(context).primaryColor),
+                  ),
+                ],
+              )),
+
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 15),
                 width: screenWidth * 0.7,
@@ -382,78 +533,3 @@ class _HomeUserWorker extends State<HomeUserWorker> {
         ));
   }
 }
-
-
-
-// AnimatedContainer(
-//                     decoration: BoxDecoration(
-//                       color: Color.fromRGBO(0, 88, 105, 1),
-//                       borderRadius:
-//                           BorderRadius.circular(50), // Esquinas redondeadas
-//                       // border: Border.all(
-//                       //     color: Colors.black, width: 2), // Borde opcional
-//                     ),
-//                     duration: Duration(milliseconds: 250),
-//                     padding: EdgeInsets.symmetric(vertical: 15, horizontal: 35),
-//                     width: screenWidth * 0.95,
-//                     height: screenHeight * 0.2,
-//                     alignment: Alignment.center,
-//                     child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           Row(
-//                             crossAxisAlignment: CrossAxisAlignment.center,
-//                             mainAxisAlignment: MainAxisAlignment.start,
-//                             children: [
-//                               Text(
-//                                 (tempValue <= 37.0 && tempValue >= 35.0)
-//                                     ? 'Normal'
-//                                     : (tempValue > 37.0)
-//                                         ? 'Sofocación'
-//                                         : 'Hipotermia',
-//                                 style: TextStyle(
-//                                     fontSize: 18,
-//                                     fontWeight: FontWeight.w600,
-//                                     color: Color.fromRGBO(40, 208, 245, 1)),
-//                               ),
-//                               SizedBox(
-//                                 width: 5,
-//                               ),
-//                               Icon(
-//                                 (tempValue <= 37.0 && tempValue >= 35.0)
-//                                     ? Icons.album_rounded
-//                                     : (tempValue > 37.0)
-//                                         ? Icons.thermostat_outlined
-//                                         : Icons.air_outlined,
-//                                 color: (tempValue <= 37.0 && tempValue >= 35.0)
-//                                     ? Colors.green[700]
-//                                     : (tempValue > 37)
-//                                         ? Colors.red[600]
-//                                         : Colors.blue[300],
-//                               )
-//                             ],
-//                           ),
-//                           Row(
-//                               crossAxisAlignment: CrossAxisAlignment.center,
-//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Icon(
-//                                   Icons.thermostat_outlined,
-//                                   size: 48,
-//                                   color: Color.fromRGBO(245, 208, 0, 1),
-//                                 ),
-//                                 Text(
-//                                   '${(tempValue * 10).ceil() / 10}°C',
-//                                   style: TextStyle(
-//                                       fontSize: 50,
-//                                       fontWeight: FontWeight.bold,
-//                                       color: Color.fromRGBO(40, 208, 245, 1)),
-//                                 ),
-//                               ]),
-//                           Text(
-//                             '${formattedDate}',
-//                             style: TextStyle(
-//                                 color: Color.fromRGBO(40, 208, 245, 1)),
-//                           )
-//                         ])),

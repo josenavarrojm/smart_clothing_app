@@ -44,7 +44,7 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
       color: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: screenWidth * widget.widthFactor,
           height: screenHeight * widget.heightFactor,
           child: SfCartesianChart(

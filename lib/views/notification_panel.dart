@@ -70,11 +70,13 @@ class _NotificationPanelState extends State<NotificationPanel> {
         child: AppBar(
           elevation: 0,
           toolbarHeight: 110,
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          // backgroundColor: Theme.of(context).primaryColor,
           title: Text(
             'Alertas',
             style: TextStyle(
-              color: Theme.of(context).primaryColorLight,
+              color: Theme.of(context).primaryColor,
+              // color: Theme.of(context).primaryColorLight,
               fontSize: 30,
               fontWeight: FontWeight.w700,
             ),
@@ -85,7 +87,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
               icon: Icon(
                 Icons.close_rounded,
                 size: 30,
-                color: Theme.of(context).colorScheme.tertiary,
+                color: Theme.of(context).primaryColor,
               ),
               onPressed: () {
                 Navigator.pop(context);

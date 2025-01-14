@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:smartclothingproject/functions/connected_state_notifier.dart';
+import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
@@ -33,13 +33,13 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   bool isDialogVisible = false;
-  void showDialogIfNeeded(ConnectionService connectionService) async {
+  void showDialogIfNeeded(BleConnectionService BleConnectionService) async {
     var bluetoothState = await FlutterBluePlus.adapterState.first;
 
     if (bluetoothState == BluetoothAdapterState.off) {
       FlutterBluePlus.turnOn();
     }
-    if (!connectionService.isSuscripted && mounted) {
+    if (!BleConnectionService.isSuscripted && mounted) {
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -581,110 +581,110 @@ class _ProfilePage extends State<ProfilePage> {
             ),
           ),
         ),
-        Container(
-            alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(
-              left: 25,
-              bottom: 0,
-            ),
-            child: const Text(
-              'Preferencias',
-              style: TextStyle(
-                  color: Colors.grey,
-                  // color: Theme.of(context).primaryColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.normal),
-            )),
-        SizedBox(
-          width: screenWidth * 0.92,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 15, top: 10),
-            padding:
-                const EdgeInsets.only(bottom: 20, top: 20, left: 10, right: 10),
-            decoration: BoxDecoration(
-              // color: Theme.of(context).scaffoldBackgroundColor,
-              color: themeNotifier.isLightTheme
-                  ? const Color.fromRGBO(230, 230, 230, 1)
-                  : const Color.fromRGBO(30, 30, 30, 1),
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context)
-                      .primaryColor
-                      .withOpacity(0.5), // Color de la sombra
-                  spreadRadius: 0.1, // Cuánto se extiende la sombra
-                  blurRadius: 0.1, // Qué tan difusa es la sombra
-                  offset: const Offset(0, 0), // Ángulo de la sombra (x, y)
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: themeNotifier.isLightTheme
-                                    ? Colors.white
-                                    : Colors.black,
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(10)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.5), // Color de la sombra
-                                    spreadRadius:
-                                        0.1, // Cuánto se extiende la sombra
-                                    blurRadius:
-                                        0.1, // Qué tan difusa es la sombra
-                                    offset: const Offset(
-                                        0, 0), // Ángulo de la sombra (x, y)
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                themeNotifier.isLightTheme
-                                    ? Icons.light_mode_outlined
-                                    : Icons.dark_mode_outlined,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              'Tema oscuro',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: 1.1),
-                            ),
-                          ],
-                        ),
-                        Switch(
-                          activeColor: Colors.blue,
-                          activeTrackColor: Colors.black,
-                          inactiveTrackColor: Colors.grey,
-                          value: !(themeNotifier.isLightTheme),
-                          onChanged: (value) {
-                            themeNotifier.toggleTheme(!value);
-                          },
-                        ),
-                      ],
-                    )),
-              ],
-            ),
-          ),
-        ),
+        // Container(
+        //     alignment: Alignment.centerLeft,
+        //     margin: const EdgeInsets.only(
+        //       left: 25,
+        //       bottom: 0,
+        //     ),
+        //     child: const Text(
+        //       'Preferencias',
+        //       style: TextStyle(
+        //           color: Colors.grey,
+        //           // color: Theme.of(context).primaryColor,
+        //           fontSize: 15,
+        //           fontWeight: FontWeight.normal),
+        //     )),
+        // SizedBox(
+        //   width: screenWidth * 0.92,
+        //   child: Container(
+        //     margin: const EdgeInsets.only(bottom: 15, top: 10),
+        //     padding:
+        //         const EdgeInsets.only(bottom: 20, top: 20, left: 10, right: 10),
+        //     decoration: BoxDecoration(
+        //       // color: Theme.of(context).scaffoldBackgroundColor,
+        //       color: themeNotifier.isLightTheme
+        //           ? const Color.fromRGBO(230, 230, 230, 1)
+        //           : const Color.fromRGBO(30, 30, 30, 1),
+        //       borderRadius: BorderRadius.circular(30),
+        //       boxShadow: [
+        //         BoxShadow(
+        //           color: Theme.of(context)
+        //               .primaryColor
+        //               .withOpacity(0.5), // Color de la sombra
+        //           spreadRadius: 0.1, // Cuánto se extiende la sombra
+        //           blurRadius: 0.1, // Qué tan difusa es la sombra
+        //           offset: const Offset(0, 0), // Ángulo de la sombra (x, y)
+        //         ),
+        //       ],
+        //     ),
+        //     child: Column(
+        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //       children: [
+        //         Container(
+        //             margin: const EdgeInsets.symmetric(horizontal: 10),
+        //             child: Row(
+        //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //               children: [
+        //                 Row(
+        //                   children: [
+        //                     Container(
+        //                       padding: const EdgeInsets.all(5),
+        //                       decoration: BoxDecoration(
+        //                         color: themeNotifier.isLightTheme
+        //                             ? Colors.white
+        //                             : Colors.black,
+        //                         borderRadius:
+        //                             const BorderRadius.all(Radius.circular(10)),
+        //                         boxShadow: [
+        //                           BoxShadow(
+        //                             color: Theme.of(context)
+        //                                 .primaryColor
+        //                                 .withOpacity(0.5), // Color de la sombra
+        //                             spreadRadius:
+        //                                 0.1, // Cuánto se extiende la sombra
+        //                             blurRadius:
+        //                                 0.1, // Qué tan difusa es la sombra
+        //                             offset: const Offset(
+        //                                 0, 0), // Ángulo de la sombra (x, y)
+        //                           ),
+        //                         ],
+        //                       ),
+        //                       child: Icon(
+        //                         themeNotifier.isLightTheme
+        //                             ? Icons.light_mode_outlined
+        //                             : Icons.dark_mode_outlined,
+        //                         color: Theme.of(context).primaryColor,
+        //                       ),
+        //                     ),
+        //                     const SizedBox(
+        //                       width: 10,
+        //                     ),
+        //                     Text(
+        //                       'Tema oscuro',
+        //                       style: TextStyle(
+        //                           color: Theme.of(context).primaryColor,
+        //                           fontSize: 18,
+        //                           fontWeight: FontWeight.w300,
+        //                           letterSpacing: 1.1),
+        //                     ),
+        //                   ],
+        //                 ),
+        //                 Switch(
+        //                   activeColor: Colors.blue,
+        //                   activeTrackColor: Colors.black,
+        //                   inactiveTrackColor: Colors.grey,
+        //                   value: !(themeNotifier.isLightTheme),
+        //                   onChanged: (value) {
+        //                     themeNotifier.toggleTheme(!value);
+        //                   },
+        //                 ),
+        //               ],
+        //             )),
+        //       ],
+        //     ),
+        //   ),
+        // ),
         Container(
             alignment: Alignment.centerLeft,
             margin: const EdgeInsets.only(
@@ -727,8 +727,8 @@ class _ProfilePage extends State<ProfilePage> {
               children: [
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 0),
-                  child: Consumer<ConnectionService>(
-                    builder: (context, connectionService, child) {
+                  child: Consumer<BleConnectionService>(
+                    builder: (context, BleConnectionService, child) {
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -755,21 +755,23 @@ class _ProfilePage extends State<ProfilePage> {
                                   ],
                                 ),
                                 child: Icon(
-                                  ((!connectionService.isConnected &&
-                                              connectionService
+                                  ((!BleConnectionService.isConnected &&
+                                              BleConnectionService
                                                   .lostConnection &&
                                               !isDialogVisible) ||
-                                          (!connectionService.isConnected))
+                                          (!BleConnectionService.isConnected))
                                       ? Icons.bluetooth_disabled
                                       : Icons.bluetooth_connected,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                ((!connectionService.isConnected &&
-                                            connectionService.lostConnection &&
+                                ((!BleConnectionService.isConnected &&
+                                            BleConnectionService
+                                                .lostConnection &&
                                             !isDialogVisible) ||
-                                        (!connectionService.isConnected))
+                                        (!BleConnectionService.isConnected))
                                     ? 'Conectar dispositivo'
                                     : 'Desconectar dispositivo',
                                 style: TextStyle(
@@ -787,19 +789,19 @@ class _ProfilePage extends State<ProfilePage> {
                             activeTrackColor:
                                 const Color.fromRGBO(100, 140, 220, 1.0),
                             inactiveTrackColor: Colors.grey,
-                            value: !((!connectionService.isConnected &&
-                                    connectionService.lostConnection &&
+                            value: !((!BleConnectionService.isConnected &&
+                                    BleConnectionService.lostConnection &&
                                     !isDialogVisible) ||
-                                (!connectionService.isConnected)),
+                                (!BleConnectionService.isConnected)),
                             onChanged: (value) async {
-                              if ((!connectionService.isConnected &&
-                                      connectionService.lostConnection &&
+                              if ((!BleConnectionService.isConnected &&
+                                      BleConnectionService.lostConnection &&
                                       !isDialogVisible) ||
-                                  (!connectionService.isConnected)) {
+                                  (!BleConnectionService.isConnected)) {
                                 isDialogVisible = true;
                                 // Llamar a showDialogIfNeeded solo cuando sea necesario
                                 Future.delayed(Duration.zero, () {
-                                  showDialogIfNeeded(connectionService);
+                                  showDialogIfNeeded(BleConnectionService);
                                 });
                               }
                               setState(() {});

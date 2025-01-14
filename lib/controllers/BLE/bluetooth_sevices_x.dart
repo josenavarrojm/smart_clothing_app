@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:smartclothingproject/functions/connected_state_notifier.dart';
+import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'reactive_state.dart';
 import 'package:meta/meta.dart';
@@ -88,7 +88,7 @@ class BluetoothController {
       (data) async {
         if (data.isNotEmpty && !dataNoEmpty) {
           dataNoEmpty = true;
-          ConnectionService().updateSuscriptionStatus(true);
+          BleConnectionService().updateSuscriptionStatus(true);
           showCustomToast('Conexión exitosa');
         }
         await Future.delayed(const Duration(milliseconds: 800));
@@ -101,7 +101,7 @@ class BluetoothController {
         // Verificar si el fragmento contiene la palabra 'temperature'
         if (decodedFragment.contains('temperature')) {
           // Separar la cadena por el delimitador ":"
-          if (!ConnectionService().isSuscripted) {}
+          if (!BleConnectionService().isSuscripted) {}
           var parts = decodedFragment.split(':');
 
           // Asegurarnos de que hay al menos dos partes (la variable y el valor)
@@ -310,7 +310,7 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
         _deviceConnectionController.add(update);
         if (update.connectionState == DeviceConnectionState.connected) {
           showCustomToast('Dispositivo conectado');
-          ConnectionService().updateConnectionStatus(true);
+          BleConnectionService().updateConnectionStatus(true);
         }
       },
       onError: (Object e) =>
@@ -334,8 +334,8 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
       );
       connected = false;
       if (connected) showCustomToast('Dispositivo desconectado');
-      ConnectionService().updateSuscriptionStatus(false);
-      ConnectionService().updateConnectionStatus(false);
+      BleConnectionService().updateSuscriptionStatus(false);
+      BleConnectionService().updateConnectionStatus(false);
     }
   }
 

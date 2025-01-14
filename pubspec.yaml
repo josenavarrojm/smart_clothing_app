@@ -38,6 +38,7 @@ dependencies:
   google_fonts: ^6.2.1
   mongo_dart: ^0.10.3
   flutter_local_notifications: ^18.0.1
+  connectivity_plus: ^6.1.1
 
 dev_dependencies:
   flutter_test:

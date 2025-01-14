@@ -9,7 +9,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
-import 'package:smartclothingproject/functions/connected_state_notifier.dart';
+import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/models/user_model.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
@@ -145,7 +145,7 @@ class BluetoothController {
       (data) async {
         if (data.isNotEmpty && !dataNoEmpty) {
           dataNoEmpty = true;
-          ConnectionService().updateSuscriptionStatus(true);
+          BleConnectionService().updateSuscriptionStatus(true);
         }
         Fluttertoast.cancel();
         // Convertir el fragmento de datos recibido en texto
@@ -154,7 +154,7 @@ class BluetoothController {
         // // Verificar si el fragmento contiene la palabra 'temperature'
         if (decodedFragment.contains('time')) {
           // Separar la cadena por el delimitador ":"
-          if (!ConnectionService().isSuscripted) {}
+          if (!BleConnectionService().isSuscripted) {}
           var parts = decodedFragment.split(':');
 
           // Asegurarnos de que hay al menos dos partes (la variable y el valor)
@@ -169,7 +169,7 @@ class BluetoothController {
           }
         } else if (decodedFragment.contains('BPM')) {
           // Separar la cadena por el delimitador ":"
-          if (!ConnectionService().isSuscripted) {}
+          if (!BleConnectionService().isSuscripted) {}
           var parts = decodedFragment.split(':');
 
           // Asegurarnos de que hay al menos dos partes (la variable y el valor)
@@ -184,7 +184,7 @@ class BluetoothController {
           }
         } else if (decodedFragment.contains('tempAmb')) {
           // Separar la cadena por el delimitador ":"
-          if (!ConnectionService().isSuscripted) {}
+          if (!BleConnectionService().isSuscripted) {}
           var parts = decodedFragment.split(':');
 
           // Asegurarnos de que hay al menos dos partes (la variable y el valor)
@@ -199,7 +199,7 @@ class BluetoothController {
           }
         } else if (decodedFragment.contains('tempCorp')) {
           // Separar la cadena por el delimitador ":"
-          if (!ConnectionService().isSuscripted) {}
+          if (!BleConnectionService().isSuscripted) {}
           var parts = decodedFragment.split(':');
 
           // Asegurarnos de que hay al menos dos partes (la variable y el valor)
@@ -217,7 +217,7 @@ class BluetoothController {
           }
         } else if (decodedFragment.contains('hum')) {
           // Separar la cadena por el delimitador ":"
-          if (!ConnectionService().isSuscripted) {}
+          if (!BleConnectionService().isSuscripted) {}
           var parts = decodedFragment.split(':');
 
           // Asegurarnos de que hay al menos dos partes (la variable y el valor)
@@ -430,7 +430,7 @@ class BleScanner implements ReactiveState<BleScannerState> {
           _devices[knownDeviceIndex] = device;
         } else {
           _devices.add(device);
-          ConnectionService().updateDeviceStatus(true);
+          BleConnectionService().updateDeviceStatus(true);
         }
         _pushState();
       },
@@ -512,8 +512,8 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
             _logMessage('Error al negociar el MTU: $e');
           }
 
-          ConnectionService().updateConnectionStatus(true);
-          ConnectionService().updateLostConnection(false);
+          BleConnectionService().updateConnectionStatus(true);
+          BleConnectionService().updateLostConnection(false);
           connected = true;
           completer.complete(); // Completa la conexión cuando está conectado.
         }
@@ -521,9 +521,9 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
         if (update.connectionState == DeviceConnectionState.disconnected &&
             connected) {
           connected = false;
-          ConnectionService().updateConnectionStatus(false);
-          ConnectionService().updateSuscriptionStatus(false);
-          ConnectionService().updateLostConnection(true);
+          BleConnectionService().updateConnectionStatus(false);
+          BleConnectionService().updateSuscriptionStatus(false);
+          BleConnectionService().updateLostConnection(true);
           await _cancelSubscription(subscription);
         }
       },
@@ -564,8 +564,8 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
       );
       connected = false;
       if (connected) showCustomToast('Dispositivo desconectado');
-      ConnectionService().updateSuscriptionStatus(false);
-      ConnectionService().updateConnectionStatus(false);
+      BleConnectionService().updateSuscriptionStatus(false);
+      BleConnectionService().updateConnectionStatus(false);
     }
   }
 

@@ -4,12 +4,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/alerts_notifier.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
+import 'package:smartclothingproject/functions/internet_connection_state_notifier.dart';
 import 'package:smartclothingproject/functions/loader_logged.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
+import 'package:smartclothingproject/models/conectivity_detector.dart';
 import 'package:smartclothingproject/models/local_notifications_service.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'functions/theme_notifier.dart';
-import 'functions/connected_state_notifier.dart';
+import 'functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/views/logged_user_page.dart';
 import 'functions/persistance_data.dart';
 
@@ -21,7 +23,11 @@ Future<void> requestNotificationPermission() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  requestNotificationPermission();
+
+  // Solicitar permiso de notificaciones
+  await requestNotificationPermission();
+
+  // Inicializar el servicio de notificaciones locales
   await LocalNotificationService.initialize();
 
   // Crear instancia del servicio MongoDB
@@ -37,15 +43,21 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Crear instancia del servicio de conectividad
+  final connectivityService = ConnectivityService();
+  connectivityService.startMonitoringConnectivity();
+
   // Ejecutar la aplicación
   runApp(
     MultiProvider(
       providers: [
         Provider<MongoService>.value(value: mongoService),
         ChangeNotifierProvider(create: (context) => ThemeNotifier()),
-        ChangeNotifierProvider(create: (context) => ConnectionService()),
+        ChangeNotifierProvider(create: (context) => BleConnectionService()),
         ChangeNotifierProvider(create: (context) => BlDataNotifier()),
         ChangeNotifierProvider(create: (context) => AlertsNotifier()),
+        ChangeNotifierProvider(
+            create: (context) => InternetConnectionNotifier()),
         ChangeNotifierProvider(create: (context) => AuthState()),
       ],
       child: MyApp(lastPage: lastPage),
@@ -61,6 +73,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
+
     return MaterialApp(
       title: 'SmartClothing App',
       theme: themeNotifier.isLightTheme
@@ -81,11 +94,9 @@ class MyApp extends StatelessWidget {
                   tertiary: const Color.fromARGB(255, 241, 115, 0)),
             ),
       debugShowCheckedModeBanner: false,
-      // Selección de página inicial según la última visitada
       home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
-          : const AuthSwitcher(), // Cambia a AuthSwitcher si es necesario
-      // home: const AuthSwitcher(), // Cambia a AuthSwitcher si es necesario
+          : const AuthSwitcher(),
     );
   }
 }

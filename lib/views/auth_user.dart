@@ -804,16 +804,31 @@ class _LoginForm extends State<LoginForm> {
                                 borderRadius:
                                     BorderRadius.circular(radiusBtn))),
                         onPressed: () {
+                          // bool isConnected =
+                          //     Provider.of<InternetConnectionNotifier>(context,
+                          //             listen: false)
+                          //         .internetConnectionState;
+
                           final authState =
                               Provider.of<AuthState>(context, listen: false);
                           authState.setLoginBtn(true); // Cambia el estado
-
                           if (authState.loginBtn &&
                               codeSession != '' &&
                               password != '') {
                             signInUser(context, codeSession, password);
                             authState.setLoginBtn(false);
                           }
+                          // try {
+                          //   if (isConnected) {
+                          //     print(isConnected);
+                          //     print('estoy dentro');
+                          //   } else {
+                          //     showToast(
+                          //         message: 'No tienes conexión a internet');
+                          //   }
+                          // } catch (e) {
+                          //   print('Error: $e');
+                          // }
                         },
                         child: Text(
                           'Iniciar Sesión',

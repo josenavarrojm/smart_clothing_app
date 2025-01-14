@@ -5,7 +5,7 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:smartclothingproject/functions/connected_state_notifier.dart';
+import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/models/user_model.dart';
 
 String deviceId = '';
@@ -50,24 +50,24 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
     _subscription = bleController.bleScanner.state.listen((state) {
       if (mounted) {
         setState(() {
-          if (!ConnectionService().isConnected &&
-              !ConnectionService().isSuscripted) {
+          if (!BleConnectionService().isConnected &&
+              !BleConnectionService().isSuscripted) {
             discoveredDevices = state.discoveredDevices
                 .where((device) => ["Esp", "ESP32", "esp", "Esp32", "ESp32"]
                     .any((keyword) => device.name.contains(keyword)))
                 .toList();
             // .where((device) => device.connectable == Connectable.available)
             if (discoveredDevices.isNotEmpty) {
-              if (ConnectionService().deviceFound) {
+              if (BleConnectionService().deviceFound) {
                 setConnection();
               }
-              // if (ConnectionService().isConnected) {
+              // if (BleConnectionService().isConnected) {
               //   setSuscription();
               // }
             }
             scanned = state.scanIsInProgress; // Actualiza el estado del escaneo
-          } else if (!ConnectionService().isConnected &&
-              ConnectionService().isSuscripted) {
+          } else if (!BleConnectionService().isConnected &&
+              BleConnectionService().isSuscripted) {
             bleController.disconnectFromDevice(deviceId);
           }
         });
@@ -102,21 +102,21 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
   }
 
   Future<void> setConnection() async {
-    if (!ConnectionService().isConnected) {
+    if (!BleConnectionService().isConnected) {
       setState(() {
         deviceId = discoveredDevices.first.id;
       });
       await Future.delayed(const Duration(milliseconds: 1500));
       await bleController.connectToDevice(deviceId);
       scanned = false;
-      ConnectionService().updateDeviceStatus(false);
+      BleConnectionService().updateDeviceStatus(false);
       Fluttertoast.cancel();
       bleController.subscribeToCharacteristic(
         deviceId: deviceId,
         serviceId: Uuid.parse("6E400001-B5A3-F393-E0A9-E50E24DCCA9E"),
         characteristicId: Uuid.parse("6E400003-B5A3-F393-E0A9-E50E24DCCA9E"),
       );
-      ConnectionService().updateSuscriptionStatus(true);
+      BleConnectionService().updateSuscriptionStatus(true);
       bleController.stopScanning();
     }
   }
@@ -126,16 +126,17 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
     return AlertDialog(
       title: Text(
         textAlign: TextAlign.center,
-        ConnectionService().isSuscripted || ConnectionService().isConnected
+        BleConnectionService().isSuscripted ||
+                BleConnectionService().isConnected
             ? 'Dispositivo conectado'
             : scanned
                 ? ''
                 : 'Buscando Dispositivo',
         style: TextStyle(
             fontSize: scanned ? 0 : 25,
-            color: ConnectionService().isConnected
+            color: BleConnectionService().isConnected
                 ? Colors.deepOrangeAccent
-                : ConnectionService().isSuscripted
+                : BleConnectionService().isSuscripted
                     ? Colors.green
                     : Colors.blueAccent),
       ),
@@ -146,8 +147,8 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ConnectionService().isConnected &&
-                      !ConnectionService().isSuscripted
+              BleConnectionService().isConnected &&
+                      !BleConnectionService().isSuscripted
                   ? Center(
                       child: ListTile(
                       title: Text(
@@ -155,8 +156,8 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
                         style: TextStyle(color: Theme.of(context).primaryColor),
                       ),
                     ))
-                  : ConnectionService().isConnected &&
-                          ConnectionService().isSuscripted
+                  : BleConnectionService().isConnected &&
+                          BleConnectionService().isSuscripted
                       ? Center(
                           child: Icon(
                             Icons.check_box,
@@ -204,7 +205,7 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
                               ),
                             ),
               if (discoveredDevices.isNotEmpty) ...[
-                if (ConnectionService().isConnected)
+                if (BleConnectionService().isConnected)
                   const Text('Conexión exitosa!',
                       style: TextStyle(fontSize: 12))
               ],
@@ -213,10 +214,10 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
         ),
       ),
       actions: [
-        ConnectionService().isSuscripted
+        BleConnectionService().isSuscripted
             ? TextButton(
                 onPressed: () {
-                  if (ConnectionService().isSuscripted) {
+                  if (BleConnectionService().isSuscripted) {
                     Navigator.pop(context);
                     bleController.stopScanning();
                   }
@@ -229,11 +230,11 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
                       fontSize: 18),
                 ),
               )
-            : (ConnectionService().lostConnection &&
-                    ConnectionService().isSuscripted)
+            : (BleConnectionService().lostConnection &&
+                    BleConnectionService().isSuscripted)
                 ? TextButton(
                     onPressed: () {
-                      if (ConnectionService().isSuscripted) {
+                      if (BleConnectionService().isSuscripted) {
                         bleController.stopScanning();
                       }
                     },

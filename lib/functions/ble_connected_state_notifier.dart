@@ -2,10 +2,11 @@
 import 'package:flutter/material.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
-class ConnectionService with ChangeNotifier {
-  static final ConnectionService _instance = ConnectionService._internal();
-  factory ConnectionService() => _instance;
-  ConnectionService._internal();
+class BleConnectionService with ChangeNotifier {
+  static final BleConnectionService _instance =
+      BleConnectionService._internal();
+  factory BleConnectionService() => _instance;
+  BleConnectionService._internal();
   //  {
   //   _loadSuscriptionState();
   // }
