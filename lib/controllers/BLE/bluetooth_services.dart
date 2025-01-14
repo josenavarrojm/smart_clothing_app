@@ -165,6 +165,7 @@ class BluetoothController {
             timeData = double.parse(valueReceived).toInt();
 
             dataReceived["time"] = timeData;
+            print(dataReceived["time"]);
             // print("bpm: ${BlDataNotifier().bpmData}");
           }
         } else if (decodedFragment.contains('BPM')) {
@@ -323,6 +324,7 @@ class BluetoothController {
                 DateFormat('EEE, MMM d, yyyy - hh:mm a').format(DateTime.now());
             if (BlDataNotifier().ecgData.isNotEmpty) {
               try {
+                await mongoService.connect();
                 await mongoService.insertDocument(dataReceived, "data");
                 dataMongoDB = await mongoService.getDocuments("data");
                 BlDataNotifier()
@@ -344,6 +346,10 @@ class BluetoothController {
                 BlDataNotifier()
                     .updateDateTimeData(dataMongoDB.last["created_at"]);
                 readData = '';
+                BlDataNotifier().updateHistoricoTempCorp(
+                    double.parse(dataMongoDB.last["tempCorp"]));
+                BlDataNotifier()
+                    .updateHistoricoBPM(double.parse(dataMongoDB.last["bpm"]));
 
                 // Convierte "ecg" en List<double>
                 final ecgData = (dataMongoDB.last["ecg"] as List<dynamic>)
@@ -352,6 +358,7 @@ class BluetoothController {
                         : double.tryParse(value.toString()) ?? 0.0)
                     .toList();
                 BlDataNotifier().updateECGDataApp(ecgData);
+                await mongoService.disconnect();
               } catch (e) {
                 print("Error al insertar documento: $e");
               }

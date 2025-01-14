@@ -145,7 +145,7 @@ class _ChartCardState extends State<ChartCard> {
                   ).createShader(details.rect);
                 },
                 // color: Theme.of(context).colorScheme.tertiary,
-                width: 2, // Grosor de la línea
+                width: 1.2, // Grosor de la línea
               ),
             ],
           ),

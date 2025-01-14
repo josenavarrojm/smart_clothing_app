@@ -32,7 +32,6 @@ Future<void> main() async {
 
   // Crear instancia del servicio MongoDB
   final mongoService = MongoService();
-  await mongoService.connect();
 
   // Obtener la última página visitada
   String? lastPage = await getLastPage();

@@ -19,6 +19,8 @@ class BlDataNotifier with ChangeNotifier {
   List<double> _ecgData = [];
   List<double> _ecgDataApp = [];
   List<double> _ecgDataIDApp = [];
+  List<double> _historicoTempCorp = [];
+  List<double> _historicoBPM = [];
 
   // ignore: non_constant_identifier_names
   String get user_id => _user_id;
@@ -34,6 +36,8 @@ class BlDataNotifier with ChangeNotifier {
   List<double> get ecgData => _ecgData;
   List<double> get ecgDataApp => _ecgDataApp;
   List<double> get ecgDataIDApp => _ecgDataIDApp;
+  List<double> get historicoTempCorp => _historicoTempCorp;
+  List<double> get historicoBPM => _historicoBPM;
 
   void updateUserID(String status) {
     _user_id = status;
@@ -97,6 +101,16 @@ class BlDataNotifier with ChangeNotifier {
 
   void updateDateTimeData(String status) {
     _dateTimeData = status;
+    notifyListeners();
+  }
+
+  void updateHistoricoTempCorp(double status) {
+    _historicoTempCorp.add(status);
+    notifyListeners();
+  }
+
+  void updateHistoricoBPM(double status) {
+    _historicoBPM.add(status);
     notifyListeners();
   }
 }

@@ -453,7 +453,7 @@ Widget _buildNotificationBadge(BuildContext context) {
                   opacity: 1.0,
                   duration: const Duration(milliseconds: 300),
                   child: Icon(Icons.notifications_outlined,
-                      size: 30, color: Theme.of(context).primaryColor),
+                      size: 28, color: Theme.of(context).primaryColor),
                   // size: 30, color: Theme.of(context).colorScheme.tertiary),
                 ),
               ));

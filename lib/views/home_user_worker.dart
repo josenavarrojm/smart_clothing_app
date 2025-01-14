@@ -421,30 +421,40 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               const SizedBox(
                 height: 15,
               ),
-              // ChartCard(
-              //   titleChart: 'Temperatura Corporal',
-              //   minY: 0,
-              //   maxY: 50,
-              //   time: timeData,
-              //   heightFactor: 0.35,
-              //   data: (widget.blDataNotifier.ecgDataApp.isNotEmpty)
-              //       ? widget.blDataNotifier.ecgDataApp
-              //           .map((e) => e.toDouble())
-              //           .toList()
-              //       : [], // Lista por defecto si está vacía o null
-              // ),
-              // ChartCard(
-              //   titleChart: 'BPM',
-              //   minY: 0,
-              //   maxY: 130,
-              //   time: timeData,
-              //   heightFactor: 0.35,
-              //   data: (widget.blDataNotifier.ecgDataApp.isNotEmpty)
-              //       ? widget.blDataNotifier.ecgDataApp
-              //           .map((e) => e.toDouble())
-              //           .toList()
-              //       : [], // Lista por defecto si está vacía o null
-              // ),
+              ChartCard(
+                titleChart: 'Temperatura Corporal',
+                // minY: 0,
+                // maxY: 50,
+                time: 3,
+                heightFactor: 0.35,
+                data:
+                    //  !(widget.blDataNotifier.historicoTempCorp.isNotEmpty)
+                    //     ? widget.blDataNotifier.historicoTempCorp
+                    //         .map((e) => e.toDouble())
+                    //         .toList()
+                    //     :
+                    [
+                  50,
+                  10,
+                  20,
+                  50,
+                  50,
+                  40,
+                  80
+                ], // Lista por defecto si está vacía o null
+              ),
+              ChartCard(
+                titleChart: 'BPM',
+                minY: 0,
+                maxY: 130,
+                // time: timeData,
+                heightFactor: 0.35,
+                data: (widget.blDataNotifier.historicoBPM.isNotEmpty)
+                    ? widget.blDataNotifier.historicoBPM
+                        .map((e) => e.toDouble())
+                        .toList()
+                    : [], // Lista por defecto si está vacía o null
+              ),
               ChartCard(
                 titleChart: 'ECG',
                 minY: -3,
@@ -460,12 +470,11 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               const SizedBox(
                 height: 20,
               ),
-
               Center(
                 child: Text(
                   textAlign: TextAlign.center,
-                  'lun, dic 23, 2024 - 09:04 a. m.',
-                  // '$formattedDate',
+                  // 'lun, dic 23, 2024 - 09:04 a. m.',
+                  formattedDate,
                   style: GoogleFonts.lexend(
                       fontSize: 22,
                       letterSpacing: 0,
@@ -484,7 +493,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                   ),
                   Text(
                     textAlign: TextAlign.center,
-                    'Última medición $formattedDate',
+                    'Última medición',
                     style: GoogleFonts.lexend(
                         fontSize: 18,
                         letterSpacing: 0,

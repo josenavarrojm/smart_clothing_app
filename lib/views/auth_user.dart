@@ -7,8 +7,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
+import 'package:smartclothingproject/functions/internet_connection_state_notifier.dart';
 import 'package:smartclothingproject/functions/loader_logged.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
+import 'package:smartclothingproject/functions/show_toast.dart';
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/views/logged_user_page.dart';
 import '../models/user_model.dart';
@@ -207,6 +209,7 @@ void saveDemographicProfileOnMongo(BuildContext context) async {
 Future<void> signInUser(
     BuildContext context, String codeSession, String password) async {
   final mongoService = Provider.of<MongoService>(context, listen: false);
+  await mongoService.connect();
   // Filtro para buscar el usuario con el `user_id` especificado
   BlDataNotifier().updateUserID(codeSession);
   final filter = {"user_id": codeSession};
@@ -215,6 +218,7 @@ Future<void> signInUser(
   if (users.isNotEmpty) {
     final user = users.first;
     user.remove('_id');
+    await mongoService.disconnect();
     if (user.length <= 3) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -804,31 +808,31 @@ class _LoginForm extends State<LoginForm> {
                                 borderRadius:
                                     BorderRadius.circular(radiusBtn))),
                         onPressed: () {
-                          // bool isConnected =
-                          //     Provider.of<InternetConnectionNotifier>(context,
-                          //             listen: false)
-                          //         .internetConnectionState;
+                          bool isConnected =
+                              Provider.of<InternetConnectionNotifier>(context,
+                                      listen: false)
+                                  .internetConnectionState;
 
                           final authState =
                               Provider.of<AuthState>(context, listen: false);
-                          authState.setLoginBtn(true); // Cambia el estado
-                          if (authState.loginBtn &&
-                              codeSession != '' &&
-                              password != '') {
-                            signInUser(context, codeSession, password);
-                            authState.setLoginBtn(false);
+                          try {
+                            if (isConnected) {
+                              authState.setLoginBtn(true); // Cambia el estado
+                              if (authState.loginBtn &&
+                                  codeSession != '' &&
+                                  password != '') {
+                                signInUser(context, codeSession, password);
+                                authState.setLoginBtn(false);
+                              }
+                              print(isConnected);
+                              print('estoy dentro');
+                            } else {
+                              showToast(
+                                  message: 'No tienes conexión a internet');
+                            }
+                          } catch (e) {
+                            print('Error: $e');
                           }
-                          // try {
-                          //   if (isConnected) {
-                          //     print(isConnected);
-                          //     print('estoy dentro');
-                          //   } else {
-                          //     showToast(
-                          //         message: 'No tienes conexión a internet');
-                          //   }
-                          // } catch (e) {
-                          //   print('Error: $e');
-                          // }
                         },
                         child: Text(
                           'Iniciar Sesión',
