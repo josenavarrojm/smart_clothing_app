@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -33,13 +35,21 @@ class BluetoothDialog extends StatefulWidget {
 }
 
 class _BluetoothDialogState extends State<BluetoothDialog> {
-  bool scanned = false;
   List<DiscoveredDevice> discoveredDevices = [];
   DiscoveredDevice? connectedDevice;
   final TextEditingController jsonController = TextEditingController();
   String receivedData = '';
   StreamSubscription? _subscription;
   late BluetoothController bleController;
+
+  void checkBleState() async {
+    var bluetoothState = await FlutterBluePlus.adapterState.first;
+    if (bluetoothState == BluetoothAdapterState.off) {
+      BleConnectionService().updateBleStatus(true);
+    } else {
+      BleConnectionService().updateBleStatus(false);
+    }
+  }
 
   @override
   void initState() {
@@ -49,6 +59,9 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
         systemNavigationBarColor: Theme.of(context).primaryColor,
       ));
     });
+
+    checkBleState();
+
     requestPermissions();
     startScanningDevices();
     bleController = BluetoothController(context, widget.user);
@@ -64,6 +77,7 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
                 .toList();
             // .where((device) => device.connectable == Connectable.available)
             if (discoveredDevices.isNotEmpty) {
+              BleConnectionService().updateDeviceStatus(true);
               if (BleConnectionService().deviceFound) {
                 setConnection();
               }
@@ -71,7 +85,8 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
               //   setSuscription();
               // }
             }
-            scanned = state.scanIsInProgress; // Actualiza el estado del escaneo
+            BleConnectionService().updateScanned(
+                state.scanIsInProgress); // Actualiza el estado del escaneo
           } else if (!BleConnectionService().isConnected &&
               BleConnectionService().isSuscripted) {
             bleController.disconnectFromDevice(deviceId);
@@ -88,15 +103,17 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
   }
 
   Future<void> requestPermissions() async {
-    if (await Permission.bluetoothScan.request().isGranted) {
-      print("Bluetooth permission is granted");
-      if (await Permission.bluetoothConnect.request().isGranted) {
-        print("Bluetooth Connection permission is granted");
+    if (!BleConnectionService().bleStatus) {
+      if (await Permission.bluetoothScan.request().isGranted) {
+        print("Bluetooth permission is granted");
+        if (await Permission.bluetoothConnect.request().isGranted) {
+          print("Bluetooth Connection permission is granted");
+        } else {
+          print("Bluetooth permission is not granted");
+        }
       } else {
         print("Bluetooth permission is not granted");
       }
-    } else {
-      print("Bluetooth permission is not granted");
     }
   }
 
@@ -114,7 +131,7 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
       });
       await Future.delayed(const Duration(milliseconds: 1500));
       await bleController.connectToDevice(deviceId);
-      scanned = false;
+      BleConnectionService().updateScanned(false);
       BleConnectionService().updateDeviceStatus(false);
       Fluttertoast.cancel();
       bleController.subscribeToCharacteristic(
@@ -129,131 +146,150 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        textAlign: TextAlign.center,
-        BleConnectionService().isSuscripted ||
-                BleConnectionService().isConnected
-            ? 'Dispositivo conectado'
-            : scanned
-                ? ''
-                : 'Buscando Dispositivo',
-        style: TextStyle(
-            fontSize: scanned ? 0 : 25,
-            color: BleConnectionService().isConnected
-                ? Colors.deepOrangeAccent
-                : BleConnectionService().isSuscripted
-                    ? Colors.green
-                    : Colors.blueAccent),
-      ),
-      content: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              BleConnectionService().isConnected &&
-                      !BleConnectionService().isSuscripted
-                  ? Center(
-                      child: ListTile(
-                      title: Text(
-                        discoveredDevices.first.name,
-                        style: TextStyle(color: Theme.of(context).primaryColor),
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: Theme.of(context).primaryColor,
+        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+      ));
+    });
+
+    return Scaffold(
+      floatingActionButton: !BleConnectionService().isConnected
+          ? null
+          : FloatingActionButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              elevation: 0.0,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              shape: const CircleBorder(),
+              child: Icon(
+                Icons.arrow_downward_rounded,
+                color: Theme.of(context).colorScheme.tertiary,
+                size: 45,
+              ),
+            ),
+      body: Container(
+        color: Theme.of(context).primaryColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!BleConnectionService().bleStatus &&
+                !BleConnectionService().deviceFound &&
+                !BleConnectionService().scanned &&
+                !BleConnectionService().isConnected &&
+                !BleConnectionService().isSuscripted)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 180,
+                    child: Center(
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        size: 70,
                       ),
-                    ))
-                  : BleConnectionService().isConnected &&
-                          BleConnectionService().isSuscripted
-                      ? Center(
-                          child: Icon(
-                            Icons.check_box,
-                            color: Theme.of(context).primaryColor,
-                            size: 58,
-                          ),
-                          // child: LoadingAnimationWidget.flickr(
-                          //   leftDotColor: Colors.orange,
-                          //   rightDotColor: Colors.blueAccent,
-                          //   size: 50,
-                          // ),
-                        )
-                      : scanned
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Escaneando Dispositivo',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blueAccent),
-                                ),
-                                const Text(
-                                  'Estableciendo conexión',
-                                  style: TextStyle(
-                                      fontSize: 18, color: Colors.blueAccent),
-                                ),
-                                SizedBox(
-                                  height: 150,
-                                  child: Center(
-                                    child:
-                                        LoadingAnimationWidget.fourRotatingDots(
-                                      color: Colors.blueAccent,
-                                      size: 50,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Center(
-                              child: LoadingAnimationWidget.threeArchedCircle(
-                                color: Colors.blueAccent,
-                                size: 50,
-                              ),
-                            ),
-              if (discoveredDevices.isNotEmpty) ...[
-                if (BleConnectionService().isConnected)
-                  const Text('Conexión exitosa!',
-                      style: TextStyle(fontSize: 12))
-              ],
-            ],
-          ),
+                    ),
+                  ),
+                  Text(
+                    'Encendiendo Bluetooth...',
+                    style: GoogleFonts.wixMadeforText(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).scaffoldBackgroundColor),
+                  ),
+                ],
+              )
+            else if (BleConnectionService().bleStatus &&
+                !BleConnectionService().deviceFound &&
+                BleConnectionService().scanned &&
+                !BleConnectionService().isConnected &&
+                !BleConnectionService().isSuscripted)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 180,
+                    child: Center(
+                      child: LoadingAnimationWidget.fourRotatingDots(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        size: 70,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Buscando Dispositivo',
+                    style: GoogleFonts.wixMadeforText(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).scaffoldBackgroundColor),
+                  ),
+                ],
+              )
+            else if (BleConnectionService().bleStatus &&
+                BleConnectionService().deviceFound &&
+                !BleConnectionService().isConnected &&
+                !BleConnectionService().isSuscripted)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 180,
+                    child: Center(
+                      child: LoadingAnimationWidget.fourRotatingDots(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        size: 70,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Dispositivo Encontrado',
+                    style: GoogleFonts.wixMadeforText(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).scaffoldBackgroundColor),
+                  ),
+                  Text(
+                    'Estableciendo conexión',
+                    style: GoogleFonts.wixMadeforText(
+                        fontSize: 18,
+                        color: Theme.of(context)
+                            .scaffoldBackgroundColor
+                            .withOpacity(0.9)),
+                  ),
+                ],
+              )
+            else if (BleConnectionService().bleStatus &&
+                !BleConnectionService().deviceFound &&
+                BleConnectionService().isConnected &&
+                BleConnectionService().isSuscripted)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    height: 80,
+                    child: Center(
+                      child: Icon(
+                        Icons.bluetooth_connected_rounded,
+                        color: Colors.green,
+                        size: 50,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Dispositivo Conectado',
+                    style: GoogleFonts.wixMadeforText(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).scaffoldBackgroundColor),
+                  ),
+                ],
+              )
+          ],
         ),
       ),
-      actions: [
-        BleConnectionService().isSuscripted
-            ? TextButton(
-                onPressed: () {
-                  if (BleConnectionService().isSuscripted) {
-                    Navigator.pop(context);
-                    bleController.stopScanning();
-                  }
-                },
-                child: const Text(
-                  'Cerrar',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                      fontSize: 18),
-                ),
-              )
-            : (BleConnectionService().lostConnection &&
-                    BleConnectionService().isSuscripted)
-                ? TextButton(
-                    onPressed: () {
-                      if (BleConnectionService().isSuscripted) {
-                        bleController.stopScanning();
-                      }
-                    },
-                    child: const Text(
-                      'Reconectar',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                          fontSize: 18),
-                    ),
-                  )
-                : const Text('')
-      ],
     );
   }
 }

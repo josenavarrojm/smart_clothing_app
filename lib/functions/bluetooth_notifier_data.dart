@@ -19,8 +19,8 @@ class BlDataNotifier with ChangeNotifier {
   List<double> _ecgData = [];
   List<double> _ecgDataApp = [];
   List<double> _ecgDataIDApp = [];
-  List<double> _historicoTempCorp = [];
-  List<double> _historicoBPM = [];
+  final List<double> _historicoTempCorp = [];
+  final List<double> _historicoBPM = [];
 
   // ignore: non_constant_identifier_names
   String get user_id => _user_id;

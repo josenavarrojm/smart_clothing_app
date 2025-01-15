@@ -43,9 +43,11 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   }
 
   @override
+  @override
   void initState() {
     super.initState();
     loadUser();
+
     _pageController.addListener(() {
       final index = _pageController.page!.round();
       if (index != _selectedIndex) {
@@ -54,27 +56,54 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
         });
       }
     });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final connectionService =
-          Provider.of<BleConnectionService>(context, listen: false);
-      if (!connectionService.isSuscripted) {
-        showDialogIfNeeded(connectionService);
-      }
+      // final connectionService =
+      //     Provider.of<BleConnectionService>(context, listen: false);
+
+      // // if ((!connectionService.isConnected || !connectionService.isSuscripted) &&
+      // //     !isDialogVisible &&
+      // //     users.isNotEmpty) {
+      // //   isDialogVisible = true;
+      // //   showDialogIfNeeded(connectionService);
+      // // }
     });
   }
 
   bool isDialogVisible = false;
   void showDialogIfNeeded(BleConnectionService connectionService) async {
-    if (!connectionService.isSuscripted && mounted && users.isNotEmpty) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext dialogContext) {
-          return BluetoothDialog(
+    if (mounted && users.isNotEmpty) {
+      await Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              BluetoothDialog(
             user: users[0],
-          );
-        },
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const beginOffset = Offset(0.0, 1.0); // Desde arriba hacia abajo
+            const endOffset = Offset.zero; // Termina en el centro
+            const curve = Curves.easeOut;
+
+            var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                .chain(CurveTween(curve: curve));
+            var opacityTween = Tween<double>(begin: 0.8, end: 1.0)
+                .chain(CurveTween(curve: curve));
+
+            return SlideTransition(
+              position: animation.drive(offsetTween),
+              child: FadeTransition(
+                opacity: animation.drive(opacityTween),
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 350),
+          reverseTransitionDuration: const Duration(milliseconds: 350),
+        ),
       );
+      isDialogVisible =
+          false; // Restablecer el estado después de cerrar el diálogo
     } else if (users.isEmpty) {
       print('No users available to show in the dialog.');
     }
@@ -148,16 +177,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                     //     ),
                     ),
                 actions: [
-                  // IconButton(
-                  //   icon: const Icon(Icons.bluetooth_searching),
-                  //   color: Colors.blueAccent,
-                  //   onPressed: () {
-                  //     if (BleConnectionService().lostConnection) {
-                  //       showDialogIfNeeded(BleConnectionService());
-                  //     }
-                  //     setState(() {});
-                  //   },
-                  // ),
                   if (_selectedIndex != 1) ...[
                     Consumer<BleConnectionService>(
                       builder: (context, connectionService, child) {
@@ -176,7 +195,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                                       !isDialogVisible) ||
                                   (!connectionService.isConnected))
                               // ? Theme.of(context).colorScheme.tertiary
-                              ? Colors.red
+                              ? Colors.redAccent
                               : Theme.of(context).primaryColor,
                           onPressed: () async {
                             if ((!connectionService.isConnected &&

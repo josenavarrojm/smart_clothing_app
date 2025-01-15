@@ -62,7 +62,7 @@ class MongoService {
     if (!db.isConnected) await connect(); // Ensure db is connected
     collection = db.collection(collectionName);
     await collection.insert(data);
-    print("Documento insertado: $data");
+    // print("Documento insertado: $data");
   }
 
   // Obtener documentos

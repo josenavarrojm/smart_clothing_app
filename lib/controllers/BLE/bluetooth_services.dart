@@ -99,15 +99,18 @@ class BluetoothController {
 
   Future<void> requestBluetoothActivation() async {
     var bluetoothState = await FlutterBluePlus.adapterState.first;
+    if (bluetoothState == BluetoothAdapterState.on) {
+      BleConnectionService().updateBleStatus(true);
+    }
 
     if (bluetoothState == BluetoothAdapterState.off) {
-      FlutterBluePlus.turnOn();
-    } else {
-      // print("Bluetooth is enabled, starting discovery.");
+      await FlutterBluePlus.turnOn();
+      BleConnectionService().updateBleStatus(true);
     }
   }
 
   void startScanning(List<Uuid> serviceIds) {
+    BleConnectionService().updateScanned(true);
     _bleScanner.startScan(serviceIds);
   }
 
@@ -345,8 +348,8 @@ class BluetoothController {
                 BlDataNotifier()
                     .updateDateTimeData(dataMongoDB.last["created_at"]);
                 readData = '';
-                BlDataNotifier()
-                    .updateHistoricoTempCorp(dataMongoDB.last["tempCorp"]);
+                BlDataNotifier().updateHistoricoTempCorp(
+                    dataMongoDB.last["tempCorp"].toDouble());
                 BlDataNotifier()
                     .updateHistoricoBPM(dataMongoDB.last["bpm"].toDouble());
 
@@ -436,7 +439,6 @@ class BleScanner implements ReactiveState<BleScannerState> {
           _devices[knownDeviceIndex] = device;
         } else {
           _devices.add(device);
-          BleConnectionService().updateDeviceStatus(true);
         }
         _pushState();
       },

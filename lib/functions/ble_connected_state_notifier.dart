@@ -15,10 +15,14 @@ class BleConnectionService with ChangeNotifier {
   bool _isSuscripted = false;
   bool _deviceFound = false;
   bool _lostConnection = false;
+  bool _scanned = false;
+  bool _bleStatus = false;
 
   bool get isConnected => _isConnected;
   bool get deviceFound => _deviceFound;
   bool get lostConnection => _lostConnection;
+  bool get scanned => _scanned;
+  bool get bleStatus => _bleStatus;
 
   void updateConnectionStatus(bool status) {
     _isConnected = status;
@@ -42,6 +46,16 @@ class BleConnectionService with ChangeNotifier {
     notifyListeners();
     // SharedPreferences prefs = await SharedPreferences.getInstance();
     // await prefs.setBool('suscriptedDevice', status);
+  }
+
+  void updateScanned(bool status) {
+    _scanned = status;
+    notifyListeners();
+  }
+
+  void updateBleStatus(bool status) {
+    _bleStatus = status;
+    notifyListeners();
   }
 
   // _loadSuscriptionState() async {

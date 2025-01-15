@@ -8,34 +8,8 @@ import 'package:smartclothingproject/components/historic_chart_card.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/load_csv_data.dart';
 import 'package:smartclothingproject/models/user_model.dart';
-// import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 
 // final mqttService = MqttService();
-String tempAlert = '';
-List<double> asdTem = [35, 38, 39, 40, 36, 35, 37];
-List<double> asd = [
-  34,
-  2,
-  9,
-  8,
-  17,
-  9,
-  10,
-  8,
-  7,
-  6,
-  7,
-  65,
-  30,
-  3,
-  4,
-  34,
-  5,
-  2,
-  56,
-  8,
-  87,
-];
 // void mqttProcess() async {
 //   await mqttService.connect(
 //       '192.168.88.253', 1883, 'mqttx_App', 'pasante', '1234');
@@ -366,7 +340,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                                         color: Theme.of(context).primaryColor),
                                   ),
                                   const Icon(
-                                    Icons.favorite,
+                                    Icons.favorite_rounded,
                                     color: Colors.red,
                                     size: 35,
                                   )
@@ -433,38 +407,20 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                     ? widget.blDataNotifier.historicoTempCorp
                         .map((e) => e.toDouble())
                         .toList()
-                    : [
-                        33.5,
-                        36.4,
-                        35.4,
-                        37.2,
-                        38.9,
-                        39.0,
-                        37.4,
-                        35.9
-                      ], // Lista por defecto si está vacía o null
+                    : [], // Lista por defecto si está vacía o null
               ),
               HistoricChartCard(
                 titleChart: 'BPM',
                 unitChart: 'Pulsaciones por minuto',
-                minY: 0,
-                maxY: 130,
+                minY: 40,
+                maxY: 150,
                 // time: timeData,
                 heightFactor: 0.35,
                 data: (widget.blDataNotifier.historicoBPM.isNotEmpty)
                     ? widget.blDataNotifier.historicoBPM
                         .map((e) => e.toDouble())
                         .toList()
-                    : [
-                        103.5,
-                        96.4,
-                        65.4,
-                        77.2,
-                        78.9,
-                        89.0,
-                        97.4,
-                        85.9
-                      ], // Lista por defecto si está vacía o null
+                    : [], // Lista por defecto si está vacía o null
               ),
               ChartCard(
                 titleChart: 'ECG',
