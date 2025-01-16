@@ -3,32 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/components/charts.dart';
 import 'package:smartclothingproject/components/historic_chart_card.dart';
-// import 'package:smartclothingproject/components/charts_column.dart';
-// import 'package:smartclothingproject/controllers/BLE/bluetooth_services.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/load_csv_data.dart';
 import 'package:smartclothingproject/models/user_model.dart';
-
-// final mqttService = MqttService();
-// void mqttProcess() async {
-//   await mqttService.connect(
-//       '192.168.88.253', 1883, 'mqttx_App', 'pasante', '1234');
-//   mqttService.subscribe('esp32/test');
-//   mqttService.listenToMessages();
-//   mqttService.publishMessage('esp32/test', 'Hello ESP32!');
-// }
 
 class HomeUserWorker extends StatefulWidget {
   final UserModel user;
   final BlDataNotifier blDataNotifier;
   const HomeUserWorker(
-      {super.key, required this.blDataNotifier, required this.user
-      /*required this.isSelected,
-    required this.icon,
-    this.duration = const Duration(milliseconds: 200),
-    this.gradientColors = const [Colors.transparent, Colors.transparent],
-    this.padding = const EdgeInsets.symmetric(horizontal: 0.0, vertical: 3.0),*/
-      });
+      {super.key, required this.blDataNotifier, required this.user});
 
   @override
   _HomeUserWorker createState() => _HomeUserWorker();
@@ -53,6 +36,9 @@ class _HomeUserWorker extends State<HomeUserWorker> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double variablesTextSize = screenWidth * 0.046;
+    double dataTextSize = screenWidth * 0.11;
+    double subtitleSize = screenWidth * 0.065;
 
     final double tempCorpValue =
         double.tryParse(widget.blDataNotifier.temperatureCorporalData) ?? 0.0;
@@ -63,6 +49,8 @@ class _HomeUserWorker extends State<HomeUserWorker> {
     final double timeData =
         double.tryParse(widget.blDataNotifier.timeData) ?? 0.0;
     final int bpmData = int.tryParse(widget.blDataNotifier.bpmData) ?? 0;
+    final double anglePosition =
+        double.tryParse(widget.blDataNotifier.accelerometerXData) ?? 0.0;
 
     // Formatea la fecha y hora (puedes personalizar el formato)
     String formattedDate = widget.blDataNotifier.dateTimeData;
@@ -98,23 +86,41 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                       //     vertical: 15, horizontal: 35),
                       // width: screenWidth * 0.6,
                       height: screenHeight * 0.12,
+                      width: screenWidth * 0.7,
                       alignment: Alignment.center,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
+                          (double.tryParse(BlDataNotifier()
+                                          .accelerometerXData)! <=
+                                      45.0 &&
+                                  double.tryParse(BlDataNotifier()
+                                          .accelerometerXData)! >=
+                                      0.0)
+                              ? const Icon(
+                                  Icons.check_circle_outline,
+                                  size: 50,
+                                  color: Colors.green,
+                                )
+                              : Icon(
+                                  Icons.warning_rounded,
+                                  size: 50,
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                ),
                           Text(
-                            'Buena Posición',
+                            (double.tryParse(BlDataNotifier()
+                                            .accelerometerXData)! <=
+                                        45.0 &&
+                                    double.tryParse(BlDataNotifier()
+                                            .accelerometerXData)! >=
+                                        0.0)
+                                ? 'Buena Postura'
+                                : 'Mala Postura',
                             style: GoogleFonts.lexend(
-                                fontSize: 24,
+                                fontSize: 28,
                                 letterSpacing: 0,
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).primaryColor),
-                          ),
-                          const Icon(
-                            Icons.check_circle_outline,
-                            size: 50,
-                            color: Colors.green,
-                            // color: Theme.of(context).colorScheme.secondary,
                           ),
                         ],
                       )),
@@ -128,7 +134,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                   'Variables Ambientales',
                   style: GoogleFonts.wixMadeforText(
                       color: Theme.of(context).primaryColorLight,
-                      fontSize: 22,
+                      fontSize: subtitleSize,
                       fontWeight: FontWeight.w400,
                       wordSpacing: 0),
                 ),
@@ -170,7 +176,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                                 textAlign: TextAlign.center,
                                 'Temperatura Ambiental',
                                 style: GoogleFonts.lexend(
-                                    fontSize: 14,
+                                    fontSize: variablesTextSize,
                                     letterSpacing: 0,
                                     fontWeight: FontWeight.w300,
                                     color: Theme.of(context).primaryColor),
@@ -178,7 +184,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                               Text(
                                 '${(tempAmbValue * 10).ceil() / 10}°C',
                                 style: GoogleFonts.lexend(
-                                    fontSize: 40,
+                                    fontSize: dataTextSize,
                                     letterSpacing: 0,
                                     fontWeight: FontWeight.w600,
                                     color: Theme.of(context).primaryColor),
@@ -212,7 +218,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                                 textAlign: TextAlign.center,
                                 'Humedad',
                                 style: GoogleFonts.lexend(
-                                    fontSize: 14,
+                                    fontSize: variablesTextSize,
                                     letterSpacing: 0,
                                     fontWeight: FontWeight.w300,
                                     color: Theme.of(context).primaryColor),
@@ -220,7 +226,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                               Text(
                                 '${(humidityValue * 10).ceil() / 10}%',
                                 style: GoogleFonts.lexend(
-                                    fontSize: 40,
+                                    fontSize: dataTextSize,
                                     letterSpacing: 0,
                                     fontWeight: FontWeight.w600,
                                     color: Theme.of(context).primaryColor),
@@ -239,7 +245,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                   'Variables Corporales',
                   style: GoogleFonts.wixMadeforText(
                       color: Theme.of(context).primaryColorLight,
-                      fontSize: 22,
+                      fontSize: subtitleSize,
                       fontWeight: FontWeight.w400,
                       wordSpacing: 0),
                 ),
@@ -279,9 +285,9 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                             children: [
                               Text(
                                 textAlign: TextAlign.center,
-                                'Temperatura Corporal: ',
+                                'Temperatura  Corporal',
                                 style: GoogleFonts.lexend(
-                                    fontSize: 14,
+                                    fontSize: variablesTextSize,
                                     letterSpacing: 0,
                                     fontWeight: FontWeight.w300,
                                     color: Theme.of(context).primaryColor),
@@ -289,7 +295,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                               Text(
                                 '${(tempCorpValue * 10).ceil() / 10}°C',
                                 style: GoogleFonts.lexend(
-                                    fontSize: 40,
+                                    fontSize: dataTextSize,
                                     letterSpacing: 0,
                                     fontWeight: FontWeight.w600,
                                     color: Theme.of(context).primaryColor),
@@ -320,10 +326,10 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'BPM:',
+                                'BPM',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.lexend(
-                                    fontSize: 14,
+                                    fontSize: variablesTextSize,
                                     letterSpacing: 0,
                                     fontWeight: FontWeight.w300,
                                     color: Theme.of(context).primaryColor),
@@ -334,7 +340,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                                     '$bpmData',
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lexend(
-                                        fontSize: 40,
+                                        fontSize: dataTextSize,
                                         letterSpacing: 0,
                                         fontWeight: FontWeight.w600,
                                         color: Theme.of(context).primaryColor),
@@ -351,6 +357,55 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                     ),
                   ],
                 ),
+              ),
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(10), // Esquinas redondeadas
+                ),
+                elevation: 0,
+                child: AnimatedContainer(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      // Esquinas redondeadas
+                      // border: Border.all(
+                      //     color: Colors.black, width: 2), // Borde opcional
+                    ),
+                    duration: const Duration(milliseconds: 250),
+                    // padding: const EdgeInsets.symmetric(
+                    //     vertical: 15, horizontal: 35),
+                    // width: screenWidth * 0.4,
+                    height: screenHeight * 0.1,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          textAlign: TextAlign.center,
+                          'Inclinación',
+                          style: GoogleFonts.lexend(
+                              fontSize: variablesTextSize,
+                              letterSpacing: 0,
+                              fontWeight: FontWeight.w300,
+                              color: Theme.of(context).primaryColor),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${(anglePosition * 10).ceil() / 10}°',
+                              style: GoogleFonts.lexend(
+                                  fontSize: dataTextSize,
+                                  letterSpacing: 0,
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            Icon(Icons.personal_injury_outlined,
+                                color: Theme.of(context).primaryColor, size: 35)
+                          ],
+                        )
+                      ],
+                    )),
               ),
               const SizedBox(
                 height: 15,
@@ -379,7 +434,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                   'Histórico de Variables Corporales',
                   style: GoogleFonts.wixMadeforText(
                       color: Theme.of(context).primaryColorLight,
-                      fontSize: 22,
+                      fontSize: subtitleSize,
                       fontWeight: FontWeight.w400,
                       wordSpacing: 0),
                   textAlign: TextAlign.center,

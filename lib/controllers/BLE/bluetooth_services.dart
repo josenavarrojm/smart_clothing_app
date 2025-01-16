@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -11,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
+import 'package:smartclothingproject/models/local_notifications_service.dart';
 import 'package:smartclothingproject/models/user_model.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'reactive_state.dart';
@@ -359,7 +361,14 @@ class BluetoothController {
                         ? value
                         : double.tryParse(value.toString()) ?? 0.0)
                     .toList();
+
                 BlDataNotifier().updateECGDataApp(ecgData);
+
+                // Activar alertas
+                activateTemperatureCorporalAlert();
+                activateBPMAlert();
+                activatePositionAlert();
+
                 await mongoService.disconnect();
               } catch (e) {
                 print("Error al insertar documento: $e");
@@ -376,6 +385,66 @@ class BluetoothController {
     );
 
     return subscription; // Retorna la suscripción para poder cancelarla después
+  }
+
+  void activateTemperatureCorporalAlert() async {
+    final double tempCorpMonitor =
+        double.tryParse(BlDataNotifier().temperatureCorporalData)!;
+
+    if (tempCorpMonitor > 37.5) {
+      await LocalNotificationService.showNotification(
+        id: Random().nextInt(100000),
+        title: 'Alerta de temperatura corporal alta',
+        body:
+            'Tu temperatura corporal es alta (${tempCorpMonitor.toStringAsFixed(1)}°C). Esto podría ser un signo de fiebre. Considera consultar a un médico si persiste.',
+      );
+    } else if (tempCorpMonitor < 35.0) {
+      await LocalNotificationService.showNotification(
+        id: Random().nextInt(100000),
+        title: 'Alerta de temperatura corporal baja',
+        body:
+            'Tu temperatura corporal es baja (${tempCorpMonitor.toStringAsFixed(1)}°C). Esto podría ser un signo de hipotermia. Busca abrigo y atención médica si es necesario.',
+      );
+    } else {
+      // No mostrar notificaciones si la temperatura está dentro del rango normal.
+    }
+  }
+
+  void activateBPMAlert() async {
+    final double bpmMonitor = double.tryParse(BlDataNotifier().bpmData)!;
+
+    if (bpmMonitor > 100.0) {
+      await LocalNotificationService.showNotification(
+        id: Random().nextInt(100000),
+        title: 'Alerta de ritmo cardíaco alto',
+        body:
+            'Su ritmo cardíaco es alto (${bpmMonitor.toStringAsFixed(1)} BPM). Esto podría ser un signo de taquicardia. Consulte a un médico si persiste.',
+      );
+    } else if (bpmMonitor < 60.0) {
+      await LocalNotificationService.showNotification(
+        id: Random().nextInt(100000),
+        title: 'Alerta de ritmo cardíaco bajo',
+        body:
+            'Su ritmo cardíaco es bajo (${bpmMonitor.toStringAsFixed(1)} BPM). Esto podría ser un signo de bradicardia. Consulte a un médico si persiste.',
+      );
+    } else {
+      // No mostrar notificaciones si el BPM está dentro del rango normal.
+    }
+  }
+
+  void activatePositionAlert() async {
+    final double positionMonitor =
+        double.tryParse(BlDataNotifier().accelerometerXData)!;
+
+    if (positionMonitor <= 45.0 && positionMonitor >= 0.0) {
+      // No mostrar notificaciones si el BPM está dentro del rango normal.
+    } else {
+      await LocalNotificationService.showNotification(
+        id: Random().nextInt(100000),
+        title: 'Alerta de postura incorrecta',
+        body: 'Corrija su postura, su posición actual no es la adecuada.',
+      );
+    }
   }
 
   // Método para enviar datos a una característica

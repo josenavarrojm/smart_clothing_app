@@ -174,7 +174,7 @@ class _NotificationPanelState extends State<NotificationPanel> {
                       ),
                       child: ListTile(
                         leading: Text(
-                          "${alerts[index].hour}:${alerts[index].minute}",
+                          "${alerts[index].hour}:${int.parse(alerts[index].minute) < 10 ? '0${alerts[index].minute}' : alerts[index].minute}",
                           style: GoogleFonts.lexend(
                               fontSize: 16,
                               letterSpacing: 0,

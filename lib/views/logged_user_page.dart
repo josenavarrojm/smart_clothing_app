@@ -130,26 +130,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
     return Consumer<BlDataNotifier>(builder: (context, blDataNotifier, child) {
       return Scaffold(
-          // floatingActionButton: FloatingActionButton(
-          //   elevation: 0.0,
-          //   shape: RoundedRectangleBorder(
-          //     borderRadius:
-          //         BorderRadius.circular(radiusBtn), // 0squinas redondeadas
-          //   ),
-          //   backgroundColor: Theme.of(context).colorScheme.tertiary,
-          //   onPressed: () async {
-          //     await LocalNotificationService.showNotification(
-          //       id: Random().nextInt(100000),
-          //       title: 'Peligro 😔😔',
-          //       body: 'Estás muy caliente 🥵🔥',
-          //     );
-          //   },
-          //   child: Icon(
-          //     Icons.notification_add,
-          //     color: Theme.of(context).primaryColor,
-          //     size: 40,
-          //   ),
-          // ),
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(110),
@@ -264,15 +244,15 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
           body: Consumer<BleConnectionService>(
             builder: (context, connectionService, child) {
               // Mostrar el dialog si la conexión se ha perdido
-              if (!connectionService.isConnected &&
-                  connectionService.lostConnection &&
-                  !isDialogVisible) {
-                isDialogVisible = true;
-                // Llamar a showDialogIfNeeded solo cuando sea necesario
-                Future.delayed(Duration.zero, () {
-                  showDialogIfNeeded(connectionService);
-                });
-              }
+              // if (!connectionService.isConnected &&
+              //     connectionService.lostConnection &&
+              //     !isDialogVisible) {
+              //   isDialogVisible = true;
+              //   // Llamar a showDialogIfNeeded solo cuando sea necesario
+              //   Future.delayed(Duration.zero, () {
+              //     showDialogIfNeeded(connectionService);
+              //   });
+              // }
               if (BleConnectionService().isConnected &&
                   BleConnectionService().isSuscripted) isDialogVisible = false;
 
@@ -481,7 +461,9 @@ Widget _buildNotificationBadge(BuildContext context) {
         // Cuando el valor ya está cargado
         final alertsSaved = snapshot.data ?? '';
         if (alertsNotifier.newAlerts.isEmpty && alertsSaved.isNotEmpty) {
-          alertsNotifier.updateNewAlerts(alertsSaved);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            alertsNotifier.updateNewAlerts(alertsSaved);
+          });
         }
 
         return GestureDetector(
