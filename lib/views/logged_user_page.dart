@@ -9,7 +9,6 @@ import 'package:smartclothingproject/functions/alerts_notifier.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/functions/update_notifiers_sensor_data.dart';
-// import 'package:smartclothingproject/models/local_notifications_service.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'package:smartclothingproject/views/notification_panel.dart';
@@ -165,11 +164,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                     style: GoogleFonts.wixMadeforText(
                         color: Theme.of(context).primaryColor,
                         fontSize: _selectedIndex != 1 ? 25 : 30,
-                        fontWeight: FontWeight.w700)
-                    // TextStyle(
-                    //     // color: Theme.of(context).primaryColorLight,
-                    //     ),
-                    ),
+                        fontWeight: FontWeight.w700)),
                 actions: [
                   if (_selectedIndex != 1) ...[
                     Consumer<BleConnectionService>(
@@ -284,20 +279,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                           color: Colors.blueAccent,
                           size: 50,
                         )),
-
-                  // BluetoothUI(),
-                  // Center(
-                  //   child: Text(
-                  //     'Página 2: Cachón',
-                  //     style: TextStyle(color: Theme.of(context).primaryColor),
-                  //   ),
-                  // ),
-                  // Center(
-                  //   child: Text(
-                  //     'Página 3: Detalles',
-                  //     style: TextStyle(color: Theme.of(context).primaryColor),
-                  //   ),
-                  // ),
                   users.isNotEmpty
                       ? ProfilePage(user: users[0])
                       : Center(
@@ -351,28 +332,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                     ),
                     label: 'Inicio',
                   ),
-                  // BottomNavigationBarItem(
-                  //   icon: AnimatedIconContainer(
-                  //     isSelected: _selectedIndex == 1,
-                  //     icon: Icons.bluetooth,
-                  //     gradientColors: [
-                  //       Theme.of(context).colorScheme.secondary,
-                  //       Theme.of(context).colorScheme.secondary,
-                  //     ],
-                  //   ),
-                  //   label: 'Bluetooth',
-                  // ),
-                  // BottomNavigationBarItem(
-                  //   icon: AnimatedIconContainer(
-                  //     isSelected: _selectedIndex == 2,
-                  //     icon: Icons.deblur,
-                  //     gradientColors: [
-                  //       Theme.of(context).colorScheme.secondary,
-                  //       Theme.of(context).colorScheme.secondary,
-                  //     ],
-                  //   ),
-                  //   label: 'Detalles',
-                  // ),
                   BottomNavigationBarItem(
                     icon: AnimatedIconContainer(
                       isSelected: _selectedIndex == 1,

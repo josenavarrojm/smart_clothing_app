@@ -140,8 +140,8 @@ class _HistoricChartCardState extends State<HistoricChartCard> {
                   ),
                   series: <SplineSeries<double, int>>[
                     SplineSeries<double, int>(
-                      animationDuration: 1000,
-                      animationDelay: 500,
+                      animationDuration: 0,
+                      animationDelay: 0,
                       dataSource: widget.data, // Fuente de datos
                       xValueMapper: (double value, int index) => index + 1,
                       yValueMapper: (double value, _) => value,
