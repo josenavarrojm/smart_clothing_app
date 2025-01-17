@@ -59,6 +59,20 @@ class _HomeUserWorker extends State<HomeUserWorker> {
             children: [
               Center(
                 child: Card(
+                  elevation: 0,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Text(
+                    BlDataNotifier().deviceName != ''
+                        ? 'Dispositivo conectado: ${BlDataNotifier().deviceName}'
+                        : 'No hay Dispositivo conectado',
+                    style: GoogleFonts.lexend(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.secondary),
+                  ),
+                ),
+              ),
+              Center(
+                child: Card(
                   shape: RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.circular(10), // Esquinas redondeadas

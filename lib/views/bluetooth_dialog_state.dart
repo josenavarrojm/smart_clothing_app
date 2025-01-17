@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
+import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/models/user_model.dart';
 
 String deviceId = '';
@@ -128,6 +129,7 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
     if (!BleConnectionService().isConnected) {
       setState(() {
         deviceId = discoveredDevices.first.id;
+        BlDataNotifier().updateDeviceName(discoveredDevices.first.name);
       });
       await Future.delayed(const Duration(milliseconds: 1500));
       await bleController.connectToDevice(deviceId);
@@ -252,12 +254,15 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
                         color: Theme.of(context).scaffoldBackgroundColor),
                   ),
                   Text(
-                    'Estableciendo conexión',
+                    'Estableciendo conexión con "${BlDataNotifier().deviceName}"',
                     style: GoogleFonts.wixMadeforText(
                         fontSize: 18,
                         color: Theme.of(context)
                             .scaffoldBackgroundColor
                             .withOpacity(0.9)),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
                   ),
                 ],
               )
@@ -282,6 +287,13 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
                     'Dispositivo Conectado',
                     style: GoogleFonts.wixMadeforText(
                         fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).scaffoldBackgroundColor),
+                  ),
+                  Text(
+                    BlDataNotifier().deviceName,
+                    style: GoogleFonts.wixMadeforText(
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).scaffoldBackgroundColor),
                   ),

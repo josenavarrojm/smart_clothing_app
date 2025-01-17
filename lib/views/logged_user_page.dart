@@ -439,7 +439,6 @@ Widget _buildNotificationBadge(BuildContext context) {
             alertsNotifier.updateNewAlerts(alertsSaved);
           });
         }
-
         return GestureDetector(
           onTap: () {
             saveAlerts('');

@@ -7,6 +7,7 @@ class BlDataNotifier with ChangeNotifier {
 
   // ignore: non_constant_identifier_names
   String _user_id = '';
+  String _deviceName = '';
   String _bpmData = '0';
   String _timeData = '0.0';
   String _temperatureAmbData = '0.0';
@@ -24,6 +25,7 @@ class BlDataNotifier with ChangeNotifier {
 
   // ignore: non_constant_identifier_names
   String get user_id => _user_id;
+  String get deviceName => _deviceName;
   String get bpmData => _bpmData;
   String get timeData => _timeData;
   String get temperatureAmbData => _temperatureAmbData;
@@ -41,6 +43,11 @@ class BlDataNotifier with ChangeNotifier {
 
   void updateUserID(String status) {
     _user_id = status;
+    notifyListeners();
+  }
+
+  void updateDeviceName(String status) {
+    _deviceName = status;
     notifyListeners();
   }
 
