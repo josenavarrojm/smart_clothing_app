@@ -19,7 +19,6 @@ class _NotificationPanelState extends State<NotificationPanel> {
   void initState() {
     super.initState();
     loadAlerts();
-    print(alerts.length);
   }
 
   Future<void> loadAlerts() async {

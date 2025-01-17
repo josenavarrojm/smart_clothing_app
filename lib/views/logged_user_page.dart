@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/alerts_notifier.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
+import 'package:smartclothingproject/functions/update_notifiers_sensor_data.dart';
 // import 'package:smartclothingproject/models/local_notifications_service.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
@@ -34,6 +35,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
   List<UserModel> users = [];
+  List<Map<String, dynamic>> allSensorData = [];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -47,6 +49,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   void initState() {
     super.initState();
     loadUser();
+    loadLastData();
 
     _pageController.addListener(() {
       final index = _pageController.page!.round();
@@ -113,6 +116,17 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
     // Llama a getAllUsers y guarda los datos en el arreglo users
     users = await DatabaseHandler.instance.getAllUsers();
     // await DatabaseHandler.instance.getAllUsers();
+
+    setState(() {});
+  }
+
+  Future<void> loadLastData() async {
+    // Llama a getAllUsers y guarda los datos en el arreglo users
+    allSensorData = await DatabaseHandler.instance.getAllSensorData();
+
+    if (allSensorData.isNotEmpty) {
+      updateNotifiersSensorData(allSensorData.last);
+    }
 
     setState(() {});
   }
@@ -263,7 +277,8 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                 children: [
                   users.isNotEmpty
                       ? HomeUserWorker(
-                          blDataNotifier: blDataNotifier, user: users[0])
+                          blDataNotifier: blDataNotifier,
+                        )
                       : Center(
                           child: LoadingAnimationWidget.waveDots(
                           color: Colors.blueAccent,

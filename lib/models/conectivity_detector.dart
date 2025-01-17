@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:smartclothingproject/functions/internet_connection_state_notifier.dart';
-// import 'package:smartclothingproject/functions/show_toast.dart';
+import 'package:smartclothingproject/functions/show_toast.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 
 class ConnectivityService {
@@ -15,12 +15,10 @@ class ConnectivityService {
         .onConnectivityChanged
         .listen((List<ConnectivityResult> results) async {
       if (results.contains(ConnectivityResult.none)) {
-        // showToast(message: "No hay conexión a Internet.");
-        // await mongoService.disconnect();
+        showToast(message: "No hay conexión a Internet.");
         InternetConnectionNotifier().updateInternetConnectionState(false);
       } else {
         // showToast(message: "Conexión a Internet restaurada.");
-        // await mongoService.reconnect();
         InternetConnectionNotifier().updateInternetConnectionState(true);
       }
     });

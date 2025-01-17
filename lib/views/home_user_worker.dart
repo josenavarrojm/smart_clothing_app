@@ -4,27 +4,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smartclothingproject/components/charts.dart';
 import 'package:smartclothingproject/components/historic_chart_card.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
-import 'package:smartclothingproject/functions/load_csv_data.dart';
-import 'package:smartclothingproject/models/user_model.dart';
 
 class HomeUserWorker extends StatefulWidget {
-  final UserModel user;
   final BlDataNotifier blDataNotifier;
-  const HomeUserWorker(
-      {super.key, required this.blDataNotifier, required this.user});
+  const HomeUserWorker({super.key, required this.blDataNotifier});
 
   @override
   _HomeUserWorker createState() => _HomeUserWorker();
 }
 
 class _HomeUserWorker extends State<HomeUserWorker> {
-  late Future<Map<String, List>> csvData;
-
   @override
   void initState() {
     super.initState();
-    // Cargar el CSV
-    csvData = loadCsvData('assets/data/data.csv');
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Theme.of(context).primaryColor,
@@ -91,31 +84,45 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          (double.tryParse(BlDataNotifier()
-                                          .accelerometerXData)! <=
-                                      45.0 &&
-                                  double.tryParse(BlDataNotifier()
-                                          .accelerometerXData)! >=
-                                      0.0)
-                              ? const Icon(
-                                  Icons.check_circle_outline,
-                                  size: 50,
-                                  color: Colors.green,
-                                )
+                          !(double.tryParse(
+                                      BlDataNotifier().accelerometerXData) ==
+                                  null)
+                              ? (double.tryParse(BlDataNotifier()
+                                              .accelerometerXData)! <=
+                                          45.0 &&
+                                      double.tryParse(BlDataNotifier()
+                                              .accelerometerXData)! >=
+                                          0.0)
+                                  ? const Icon(
+                                      Icons.check_circle_outline,
+                                      size: 50,
+                                      color: Colors.green,
+                                    )
+                                  : Icon(
+                                      Icons.warning_rounded,
+                                      size: 50,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .tertiary,
+                                    )
                               : Icon(
-                                  Icons.warning_rounded,
+                                  Icons.question_mark,
                                   size: 50,
-                                  color: Theme.of(context).colorScheme.tertiary,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                           Text(
-                            (double.tryParse(BlDataNotifier()
-                                            .accelerometerXData)! <=
-                                        45.0 &&
-                                    double.tryParse(BlDataNotifier()
-                                            .accelerometerXData)! >=
-                                        0.0)
-                                ? 'Buena Postura'
-                                : 'Mala Postura',
+                            !(double.tryParse(
+                                        BlDataNotifier().accelerometerXData) ==
+                                    null)
+                                ? (double.tryParse(BlDataNotifier()
+                                                .accelerometerXData)! <=
+                                            45.0 &&
+                                        double.tryParse(BlDataNotifier()
+                                                .accelerometerXData)! >=
+                                            0.0)
+                                    ? 'Buena Postura'
+                                    : 'Mala Postura'
+                                : 'Postura Desconocida',
                             style: GoogleFonts.lexend(
                                 fontSize: 28,
                                 letterSpacing: 0,
