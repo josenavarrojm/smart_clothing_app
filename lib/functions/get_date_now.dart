@@ -1,22 +1,26 @@
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
+/// Obtiene la fecha y hora actuales en el formato de la región `es_ES`.
+///
+/// Devuelve un mapa con los valores de minuto, hora, día, mes y año.
+/// Los valores de minuto y hora están formateados con dos dígitos para mayor consistencia.
 Future<Map<String, dynamic>> dateNow() async {
-  // Asegúrate de inicializar el formato de fecha
+  // Inicializa el formato de fecha para el idioma español (España).
   await initializeDateFormatting('es_ES', null);
   Intl.defaultLocale = 'es_ES';
 
-  // Obtén la fecha y hora actuales
+  // Obtiene la fecha y hora actuales.
   DateTime now = DateTime.now();
 
-  // Extrae los valores de minuto, hora, día, mes y año
-  String minute = now.minute.toString();
-  String hour = now.hour.toString();
-  String day = now.day.toString();
-  String month = now.month.toString();
+  // Extrae y formatea los componentes de la fecha y hora.
+  String minute = now.minute.toString().padLeft(2, '0'); // Asegura 2 dígitos.
+  String hour = now.hour.toString().padLeft(2, '0'); // Asegura 2 dígitos.
+  String day = now.day.toString().padLeft(2, '0');
+  String month = now.month.toString().padLeft(2, '0');
   String year = now.year.toString();
 
-  // Devuelve los valores en un mapa
+  // Retorna los valores como un mapa.
   return {
     'minute': minute,
     'hour': hour,

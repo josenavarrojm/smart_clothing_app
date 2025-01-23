@@ -158,7 +158,6 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                   ],
                 ),
               ),
-
               DataCard(
                 title: 'Inclinación',
                 value: '${(anglePosition * 10).ceil() / 10}°',
@@ -169,25 +168,6 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               const SizedBox(
                 height: 20,
               ),
-              // ChartCard(
-              //   titleChart: 'Etiquetas',
-              //   minY: 0,
-              //   maxY: 3000,
-              //   time: widget.blDataNotifier.ecgDataIDApp.length.toDouble(),
-              //   heightFactor: 0.35,
-              //   data: (widget.blDataNotifier.ecgDataIDApp.isNotEmpty)
-              //       ? widget.blDataNotifier.ecgDataIDApp
-              //           .map((e) => e.toDouble())
-              //           .toList()
-              //       : asd, // Lista por defecto si está vacía o null
-              // ),
-
-              // ChartCardColumn(
-              //   // widthFactor: 0.4,
-              //   heightFactor: 0.35,
-              //   // data: List<double>.from(widget.blDataNotifier.ecgDataApp),
-              //   data: asdTem,
-              // ),
               const SectionHeader(title: 'Histórico de Variables Corporales'),
               const SizedBox(
                 height: 15,
@@ -265,7 +245,6 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                   ),
                 ],
               )),
-
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 15),
                 width: screenWidth * 0.7,

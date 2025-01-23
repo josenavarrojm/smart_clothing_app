@@ -45,6 +45,7 @@ class _ChartCardState extends State<ChartCard> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // Estilos reutilizables
     final defaultTextStyle = GoogleFonts.wixMadeforText(
       fontSize: 15,
       letterSpacing: 2,
@@ -60,9 +61,10 @@ class _ChartCardState extends State<ChartCard> {
     );
 
     final gridLineColor = Theme.of(context).primaryColorLight.withOpacity(0.4);
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
 
     return Card(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: backgroundColor,
       elevation: 0,
       child: Center(
         child: SizedBox(
@@ -102,11 +104,11 @@ class _ChartCardState extends State<ChartCard> {
                       color: gridLineColor,
                     ),
                     axisLine: AxisLine(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: backgroundColor,
                       width: 1,
                     ),
                     majorTickLines: MajorTickLines(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: backgroundColor,
                     ),
                   ),
                   primaryYAxis: NumericAxis(
@@ -121,11 +123,11 @@ class _ChartCardState extends State<ChartCard> {
                       color: gridLineColor,
                     ),
                     axisLine: AxisLine(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: backgroundColor,
                       width: 1,
                     ),
                     majorTickLines: MajorTickLines(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: backgroundColor,
                     ),
                   ),
                   series: <SplineSeries<double, int>>[

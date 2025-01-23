@@ -9,9 +9,9 @@ class ChartCardColumn extends StatefulWidget {
 
   const ChartCardColumn({
     super.key,
-    this.widthFactor = 0.95, // Factor de ancho por defecto
-    this.heightFactor = 0.25, // Factor de altura por defecto
-    this.data = const [1, 2, 5, 4, 12, 3, 7], // Datos por defecto
+    this.widthFactor = 0.95,
+    this.heightFactor = 0.25,
+    this.data = const [1, 2, 5, 4, 12, 3, 7],
   });
 
   @override
@@ -21,27 +21,48 @@ class ChartCardColumn extends StatefulWidget {
 class _ChartCardColumnState extends State<ChartCardColumn> {
   late TrackballBehavior _trackballBehavior;
 
-  final List<String> daysOfWeek = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  final List<String> _daysOfWeek = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
   @override
   void initState() {
+    super.initState();
     _trackballBehavior = TrackballBehavior(
       enable: true,
       activationMode: ActivationMode.longPress,
       tooltipSettings:
           const InteractiveTooltip(enable: true, color: Colors.red),
     );
-
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // Configuración compartida para estilos de texto
+    final textStyle = GoogleFonts.wixMadeforText(
+      fontSize: 10,
+      letterSpacing: 2,
+      fontWeight: FontWeight.w200,
+      color: theme.primaryColor,
+    );
+
+    // Configuración compartida para las líneas del eje
+    final gridLines = MajorGridLines(
+      dashArray: const [5, 5],
+      color: theme.scaffoldBackgroundColor,
+    );
+
+    final axisLine = AxisLine(
+      color: theme.scaffoldBackgroundColor,
+      width: 1,
+    );
+
+    final majorTickLines = MajorTickLines(color: theme.scaffoldBackgroundColor);
+
     return Card(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: theme.scaffoldBackgroundColor,
       elevation: 0,
       child: Center(
         child: SizedBox(
@@ -56,66 +77,34 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                 fontSize: 15,
                 letterSpacing: 2,
                 fontWeight: FontWeight.w500,
-                color: Theme.of(context).primaryColor,
+                color: theme.primaryColor,
               ),
             ),
             primaryXAxis: CategoryAxis(
-              labelStyle: GoogleFonts.wixMadeforText(
-                fontSize: 10,
-                letterSpacing: 2,
-                fontWeight: FontWeight.w200,
-                color: Theme.of(context).primaryColor,
-              ),
-              title: AxisTitle(
-                text: 'Día',
-                textStyle: GoogleFonts.wixMadeforText(
-                  fontSize: 10,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w200,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              majorGridLines: MajorGridLines(
-                dashArray: const [5, 5],
-                color: Theme.of(context).scaffoldBackgroundColor,
-              ),
-              axisLine: AxisLine(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                width: 1,
-              ),
-              majorTickLines: MajorTickLines(
-                color: Theme.of(context).scaffoldBackgroundColor,
-              ),
+              labelStyle: textStyle,
+              title: AxisTitle(text: 'Día', textStyle: textStyle),
+              majorGridLines: gridLines,
+              axisLine: axisLine,
+              majorTickLines: majorTickLines,
             ),
             primaryYAxis: NumericAxis(
               minimum: 0,
               maximum: 50,
-              labelStyle: const TextStyle(
-                fontSize: 10,
-                color: Colors.black,
-              ),
-              majorGridLines: MajorGridLines(
-                dashArray: const [5, 5],
-                color: Theme.of(context).scaffoldBackgroundColor,
-              ),
-              axisLine: AxisLine(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                width: 1,
-              ),
-              majorTickLines: MajorTickLines(
-                color: Theme.of(context).scaffoldBackgroundColor,
-              ),
+              labelStyle: const TextStyle(fontSize: 10, color: Colors.black),
+              majorGridLines: gridLines,
+              axisLine: axisLine,
+              majorTickLines: majorTickLines,
             ),
             series: <ColumnSeries<double, String>>[
               ColumnSeries<double, String>(
                 animationDuration: 250,
                 dataSource: widget.data,
-                xValueMapper: (double value, int index) => daysOfWeek[index],
+                xValueMapper: (double value, int index) => _daysOfWeek[index],
                 yValueMapper: (double value, _) => value,
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).colorScheme.tertiary.withOpacity(0.8),
+                    theme.primaryColor,
+                    theme.colorScheme.tertiary.withOpacity(0.8),
                   ],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
@@ -125,7 +114,7 @@ class _ChartCardColumnState extends State<ChartCardColumn> {
                   textStyle: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.w300,
-                    color: Theme.of(context).primaryColorDark,
+                    color: theme.primaryColorDark,
                   ),
                   labelAlignment: ChartDataLabelAlignment.outer,
                 ),

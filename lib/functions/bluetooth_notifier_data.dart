@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// BlDataNotifier es un singleton que actúa como proveedor de datos centralizados.
+/// Permite la gestión de datos relacionados con biomedicina, como BPM, temperatura, acelerómetro, entre otros.
 class BlDataNotifier with ChangeNotifier {
+  // Singleton
   static final BlDataNotifier _instance = BlDataNotifier._internal();
   factory BlDataNotifier() => _instance;
   BlDataNotifier._internal();
 
-  // ignore: non_constant_identifier_names
-  String _user_id = '';
+  // Propiedades privadas
+  late String _userID;
   String _deviceName = '';
   String _bpmData = '0';
   String _timeData = '0.0';
@@ -23,8 +26,8 @@ class BlDataNotifier with ChangeNotifier {
   final List<double> _historicoTempCorp = [];
   final List<double> _historicoBPM = [];
 
-  // ignore: non_constant_identifier_names
-  String get user_id => _user_id;
+  // Getters: Proveen acceso de solo lectura a los datos.
+  String get userID => _userID;
   String get deviceName => _deviceName;
   String get bpmData => _bpmData;
   String get timeData => _timeData;
@@ -35,89 +38,57 @@ class BlDataNotifier with ChangeNotifier {
   String get accelerometerYData => _accelerometerYData;
   String get accelerometerZData => _accelerometerZData;
   String get dateTimeData => _dateTimeData;
-  List<double> get ecgData => _ecgData;
-  List<double> get ecgDataApp => _ecgDataApp;
-  List<double> get ecgDataIDApp => _ecgDataIDApp;
-  List<double> get historicoTempCorp => _historicoTempCorp;
-  List<double> get historicoBPM => _historicoBPM;
+  List<double> get ecgData => List.unmodifiable(_ecgData); // Copia inmutable
+  List<double> get ecgDataApp =>
+      List.unmodifiable(_ecgDataApp); // Copia inmutable
+  List<double> get ecgDataIDApp =>
+      List.unmodifiable(_ecgDataIDApp); // Copia inmutable
+  List<double> get historicoTempCorp => List.unmodifiable(_historicoTempCorp);
+  List<double> get historicoBPM => List.unmodifiable(_historicoBPM);
 
-  void updateUserID(String status) {
-    _user_id = status;
+  // Método genérico para actualizar datos simples
+  void updateData<T>(T value, void Function(T) updater) {
+    updater(value);
     notifyListeners();
   }
 
-  void updateDeviceName(String status) {
-    _deviceName = status;
+  // Métodos de actualización específicos
+  void updateUserID(String value) => updateData(value, (v) => _userID = v);
+  void updateDeviceName(String value) =>
+      updateData(value, (v) => _deviceName = v);
+  void updateBpmData(String value) => updateData(value, (v) => _bpmData = v);
+  void updateTimeData(String value) => updateData(value, (v) => _timeData = v);
+  void updateTemperatureAmbData(String value) =>
+      updateData(value, (v) => _temperatureAmbData = v);
+  void updateTemperatureCorporalData(String value) =>
+      updateData(value, (v) => _temperatureCorporalData = v);
+  void updateHumidityData(String value) =>
+      updateData(value, (v) => _humidityData = v);
+  void updateAccelerometerXData(String value) =>
+      updateData(value, (v) => _accelerometerXData = v);
+  void updateAccelerometerYData(String value) =>
+      updateData(value, (v) => _accelerometerYData = v);
+  void updateAccelerometerZData(String value) =>
+      updateData(value, (v) => _accelerometerZData = v);
+  void updateDateTimeData(String value) =>
+      updateData(value, (v) => _dateTimeData = v);
+
+  // Métodos para listas
+  void updateECGData(List<double> value) =>
+      updateData(value, (v) => _ecgData = v);
+  void updateECGDataApp(List<double> value) =>
+      updateData(value, (v) => _ecgDataApp = v);
+  void updateECGDataIDApp(List<double> value) =>
+      updateData(value, (v) => _ecgDataIDApp = v);
+
+  // Métodos para añadir al histórico
+  void addHistoricoTempCorp(double value) {
+    _historicoTempCorp.add(value);
     notifyListeners();
   }
 
-  void updatebpmData(String status) {
-    _bpmData = status;
-    notifyListeners();
-  }
-
-  void updatetimeData(String status) {
-    _timeData = status;
-    notifyListeners();
-  }
-
-  void updateTemperatureAmbData(String status) {
-    _temperatureAmbData = status;
-    notifyListeners();
-  }
-
-  void updateTemperatureCorporalData(String status) {
-    _temperatureCorporalData = status;
-    notifyListeners();
-  }
-
-  void updateHumidityData(String status) {
-    _humidityData = status;
-    notifyListeners();
-  }
-
-  void updateAccelerometerXData(String status) {
-    _accelerometerXData = status;
-    notifyListeners();
-  }
-
-  void updateAccelerometerYData(String status) {
-    _accelerometerYData = status;
-    notifyListeners();
-  }
-
-  void updateAccelerometerZData(String status) {
-    _accelerometerZData = status;
-    notifyListeners();
-  }
-
-  void updateECGData(List<double> status) {
-    _ecgData = status;
-    notifyListeners();
-  }
-
-  void updateECGDataApp(List<double> status) {
-    _ecgDataApp = status;
-    notifyListeners();
-  }
-
-  void updateECGDataIDApp(List<double> status) {
-    _ecgDataIDApp = status;
-    notifyListeners();
-  }
-
-  void updateDateTimeData(String status) {
-    _dateTimeData = status;
-    notifyListeners();
-  }
-
-  void updateHistoricoTempCorp(double status) {
-    _historicoTempCorp.add(status);
-    notifyListeners();
-  }
-
-  void updateHistoricoBPM(double status) {
-    _historicoBPM.add(status);
+  void addHistoricoBPM(double value) {
+    _historicoBPM.add(value);
     notifyListeners();
   }
 }

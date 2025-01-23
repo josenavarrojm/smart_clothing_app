@@ -205,47 +205,49 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                     ),
                     _buildNotificationBadge(context)
                   ],
-                  IconButton(
-                    icon: Icon(
-                      _selectedIndex != 1 ? Icons.logout : Icons.settings,
-                      size: 28,
+                  if (_selectedIndex != 1)
+                    IconButton(
+                      icon: const Icon(
+                        Icons.logout,
+                        // _selectedIndex != 1 ? Icons.logout : Icons.settings,
+                        size: 28,
+                      ),
+                      color: _selectedIndex == 1
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).primaryColor,
+                      // : Theme.of(context).colorScheme.tertiary,
+                      onPressed: () async {
+                        if (_selectedIndex != 1) {
+                          await DatabaseHandler.instance.deleteUser();
+                          saveLastPage('AuthSwitch');
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      const AuthSwitcher(),
+                              transitionsBuilder: (context, animation,
+                                  secondaryAnimation, child) {
+                                const begin = Offset(
+                                    -1.0, 0.0); // Comienza desde la izquierda
+                                const end = Offset.zero; // Termina en el centro
+                                const curve = Curves.easeInOut;
+
+                                var tween = Tween(begin: begin, end: end)
+                                    .chain(CurveTween(curve: curve));
+
+                                return SlideTransition(
+                                  position: animation.drive(tween),
+                                  child: child,
+                                );
+                              },
+                            ),
+                            (Route<dynamic> route) =>
+                                false, // Elimina todas las vistas anteriores
+                          );
+                        }
+                      },
                     ),
-                    color: _selectedIndex == 1
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).primaryColor,
-                    // : Theme.of(context).colorScheme.tertiary,
-                    onPressed: () async {
-                      if (_selectedIndex != 1) {
-                        await DatabaseHandler.instance.deleteUser();
-                        saveLastPage('AuthSwitch');
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) =>
-                                    const AuthSwitcher(),
-                            transitionsBuilder: (context, animation,
-                                secondaryAnimation, child) {
-                              const begin = Offset(
-                                  -1.0, 0.0); // Comienza desde la izquierda
-                              const end = Offset.zero; // Termina en el centro
-                              const curve = Curves.easeInOut;
-
-                              var tween = Tween(begin: begin, end: end)
-                                  .chain(CurveTween(curve: curve));
-
-                              return SlideTransition(
-                                position: animation.drive(tween),
-                                child: child,
-                              );
-                            },
-                          ),
-                          (Route<dynamic> route) =>
-                              false, // Elimina todas las vistas anteriores
-                        );
-                      }
-                    },
-                  ),
                 ],
               ),
             ),

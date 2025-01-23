@@ -1,39 +1,86 @@
+/// Clase que representa el modelo de usuario con todos sus datos relevantes.
 class UserModel {
+  /// Identificador único opcional del usuario (usado para bases de datos locales o remotas).
   final String? id;
-  // ignore: non_constant_identifier_names
+
+  /// Identificador único del usuario, requerido.
   final String user_id;
+
+  /// Nombre del usuario.
   final String name;
+
+  /// Apellido del usuario.
   final String surname;
+
+  /// Número de teléfono del usuario.
   final String phoneNumber;
+
+  /// Correo electrónico del usuario.
   final String email;
+
+  /// Género del usuario.
   final String gender;
+
+  /// Fecha de nacimiento del usuario en formato `YYYY-MM-DD`.
   final String birthDate;
+
+  /// Edad del usuario en años.
   final String age;
 
+  /// Número de cédula del usuario.
   final String cedula;
+
+  /// Fecha de expedición de la cédula.
   final String cedulaDate;
+
+  /// Departamento de expedición de la cédula.
   final String departamentoCedula;
+
+  /// Ciudad de expedición de la cédula.
   final String ciudadCedula;
 
+  /// Nivel de escolaridad del usuario.
   final String scholarityLevel;
+
+  /// Ocupación del usuario.
   final String occupation;
+
+  /// Estado civil del usuario.
   final String maritalStatus;
+
+  /// Número de hijos que tiene el usuario.
   final String numberOfChildren;
+
+  /// Número de personas que dependen económicamente del usuario.
   final String peopleEconomlyDepend;
 
+  /// Estado de residencia del usuario.
   final String stateOfResidence;
+
+  /// Ciudad de residencia del usuario.
   final String cityOfResidence;
+
+  /// Barrio de residencia del usuario.
   final String barrioOfResidence;
+
+  /// Dirección completa de residencia del usuario.
   final String addressOfResidence;
 
+  /// Tipo de sangre del usuario.
   final String bloodType;
+
+  /// EPS (Entidad Promotora de Salud) del usuario.
   final String eps;
+
+  /// ARL (Administradora de Riesgos Laborales) del usuario.
   final String arl;
+
+  /// Fondo de pensión al que pertenece el usuario.
   final String pensionFondo;
 
+  /// Constructor de la clase [UserModel].
   const UserModel({
     this.id,
-    // ignore: non_constant_identifier_names
     required this.user_id,
     required this.name,
     required this.surname,
@@ -61,6 +108,7 @@ class UserModel {
     required this.pensionFondo,
   });
 
+  /// Convierte la instancia del modelo a un mapa (`Map<String, dynamic>`).
   Map<String, dynamic> toJson() {
     return {
       "user_id": user_id,
@@ -91,6 +139,7 @@ class UserModel {
     };
   }
 
+  /// Crea una instancia de [UserModel] a partir de un mapa (`Map<String, dynamic>`).
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       user_id: json['user_id'] ?? '',
@@ -100,7 +149,7 @@ class UserModel {
       phoneNumber: json['PhoneNumber'] ?? '',
       gender: json['Gender'] ?? '',
       birthDate: json['BirthDate']?.toString() ?? '',
-      age: json['Age']?.toString() ?? '0', // Convertir null o número a String
+      age: json['Age']?.toString() ?? '0', // Convierte null o número a String
       cedula: json['Cedula'] ?? '',
       cedulaDate: json['DateCedula']?.toString() ?? '',
       departamentoCedula: json['DepartamentoCedula'] ?? '',
