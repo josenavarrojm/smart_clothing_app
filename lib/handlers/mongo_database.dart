@@ -100,13 +100,13 @@ class MongoService {
   }
 
   /// Elimina un documento por su ID en la colección especificada.
-  Future<void> deleteDocument(dynamic id, String collectionName) async {
+  Future<void> deleteDocument(dynamic userID, String collectionName) async {
     await _ensureConnected();
     _collection = _db.collection(collectionName);
 
     try {
-      await _collection.remove(where.eq('_id', id));
-      print("Documento eliminado con ID: $id");
+      await _collection.remove(where.eq('user_id', userID));
+      print("Documento eliminado con ID: $userID");
     } catch (e) {
       print("Error al eliminar documento: $e");
     }

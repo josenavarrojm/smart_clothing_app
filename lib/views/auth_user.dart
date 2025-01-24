@@ -22,6 +22,7 @@ bool typeUserLogin = true;
 String codeSession = '';
 String codeSessionAdmin = '';
 String password = '';
+String hashpwd = '';
 String name = '';
 String surname = '';
 String phoneNumber = '';
@@ -82,12 +83,6 @@ const durationAnimation = Duration(milliseconds: 250);
 
 FirebaseFirestore db = FirebaseFirestore.instance;
 
-// Creación y registro de usuarios en la base de datos
-String hashPassword(String password) {
-  final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-  return hashedPassword;
-}
-
 void saveDemographicProfileOnMongo(BuildContext context) async {
   final mongoService = Provider.of<MongoService>(context, listen: false);
   await mongoService.connect();
@@ -119,7 +114,10 @@ void saveDemographicProfileOnMongo(BuildContext context) async {
       arl: arl,
       pensionFondo: pensionFondus);
 
-  await mongoService.updateDocument(codeSession, newUser.toJson(), 'users');
+  Map<String, dynamic> updatedData = newUser.toJson();
+  updatedData['Hashpwd'] = hashpwd;
+
+  await mongoService.updateDocument(codeSession, updatedData, 'users');
 
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(
@@ -236,6 +234,7 @@ Future<void> signInUser(
     final user = users.first;
     user.remove('_id');
     if (verifyPassword(password, user["Hashpwd"])) {
+      hashpwd = user['Hashpwd'];
       user.remove("Hashpwd");
       await mongoService.disconnect();
       if (user.length <= 3) {
@@ -1125,8 +1124,8 @@ class _DemographicProfileWorkerState extends State<DemographicProfileWorker> {
     // double screenHeight = MediaQuery.of(context).size.height;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white,
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
           statusBarIconBrightness: Brightness.dark,
           statusBarColor: Colors.transparent));
     });
@@ -1220,7 +1219,7 @@ class _DemographicProfileWorkerState extends State<DemographicProfileWorker> {
         body: Center(
             child: Container(
           width: screenWidth > 720 ? screenWidth * 0.6 : screenWidth * 0.98,
-          color: Colors.white,
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: Column(
             children: [
               Expanded(
@@ -1654,7 +1653,8 @@ class _RegisterQuestions extends State<RegisterQuestions> {
                               DropdownButtonFormField<String>(
                                 icon: const Icon(
                                     Icons.keyboard_arrow_down_outlined),
-                                dropdownColor: Theme.of(context).primaryColor,
+                                dropdownColor:
+                                    Theme.of(context).scaffoldBackgroundColor,
                                 style: TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -1703,9 +1703,8 @@ class _RegisterQuestions extends State<RegisterQuestions> {
                                       value,
                                       style: TextStyle(
                                           fontSize: 14,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .secondary),
+                                          color:
+                                              Theme.of(context).primaryColor),
                                       overflow: TextOverflow
                                           .ellipsis, // Agrega puntos suspensivos si es muy largo
                                     ),
@@ -3112,7 +3111,7 @@ class _HealthQuestions extends State<HealthQuestions> {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
-        color: Colors.transparent,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: SingleChildScrollView(
           child: Column(children: [
             Padding(
@@ -3122,7 +3121,7 @@ class _HealthQuestions extends State<HealthQuestions> {
                 width: MediaQuery.of(context).size.width,
                 alignment: Alignment.center,
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                decoration: const BoxDecoration(color: Colors.white),
+                color: Theme.of(context).scaffoldBackgroundColor,
                 child: Form(
                   key: _formKey4,
                   child: Column(

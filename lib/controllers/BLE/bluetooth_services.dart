@@ -319,14 +319,10 @@ class BluetoothController {
             }
           }
         } else if ((decodedFragment.contains('Send'))) {
-          print('///////////////////////////////////////////');
-          print('AQUISIDAISDASIDSIADAS ${BlDataNotifier().ecgData.isNotEmpty}');
-          print('//////////////////////sdas/////////////////////');
           var parts = decodedFragment.split(':');
           if (readData != parts[0]) {
             readData = parts[0];
             dataReceived["_id"] = ObjectId();
-            print('sdkjasndnasdnas');
 
             // Convertir `ecgData` en String usando jsonEncode
             dataReceived["ecg"] = jsonEncode(BlDataNotifier().ecgData);
@@ -394,7 +390,10 @@ class BluetoothController {
                     await mongoService.insertDocument(dataReceived, "data");
 
                     // Leer datos de MongoDB
-                    dataMongoDB = await mongoService.getDocuments("data");
+                    final filter = {"user_id": dataReceived["user_id"]};
+
+                    dataMongoDB =
+                        await mongoService.getDocuments("data", filter: filter);
                     updateNotifiersSensorData(dataMongoDB.last);
                     // Activar alertas
                     activateTemperatureCorporalAlert();

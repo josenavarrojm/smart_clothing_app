@@ -1,4 +1,6 @@
 // import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -142,214 +144,224 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
 
     return Consumer<BlDataNotifier>(builder: (context, blDataNotifier, child) {
       return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(110),
-            child: AnimatedContainer(
-              height: _selectedIndex == 1 ? 95 : 90,
-              curve: Curves.ease,
-              duration: const Duration(milliseconds: 600),
-              child: AppBar(
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                // backgroundColor: Theme.of(context).primaryColor,
-                shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(bottom: Radius.circular(0.0))),
-                elevation: 0,
-                toolbarHeight: _selectedIndex == 1 ? 110 : 90,
-                centerTitle: _selectedIndex == 1,
-                title: Text(
-                    _selectedIndex != 1 ? "Smart Clothing" : "Mi Perfil",
-                    style: GoogleFonts.wixMadeforText(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: _selectedIndex != 1 ? 25 : 30,
-                        fontWeight: FontWeight.w700)),
-                actions: [
-                  if (_selectedIndex != 1) ...[
-                    Consumer<BleConnectionService>(
-                      builder: (context, connectionService, child) {
-                        return IconButton(
-                          icon: Icon(
-                            ((!connectionService.isConnected &&
-                                        connectionService.lostConnection &&
-                                        !isDialogVisible) ||
-                                    (!connectionService.isConnected))
-                                ? Icons.bluetooth_disabled
-                                : Icons.bluetooth_connected,
-                            size: 28,
-                          ),
-                          color: ((!connectionService.isConnected &&
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(110),
+          child: AnimatedContainer(
+            height: _selectedIndex == 1 ? 100 : 100,
+            curve: Curves.ease,
+            duration: const Duration(milliseconds: 600),
+            child: AppBar(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              // backgroundColor: Theme.of(context).primaryColor,
+              shape: const RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.vertical(bottom: Radius.circular(0.0))),
+              elevation: 0,
+              flexibleSpace: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
+              ),
+              toolbarHeight: _selectedIndex == 1 ? 110 : 100,
+              centerTitle: _selectedIndex == 1,
+              title: Text(_selectedIndex != 1 ? "Smart Clothing" : "Mi Perfil",
+                  style: GoogleFonts.wixMadeforText(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: _selectedIndex != 1 ? 25 : 30,
+                      fontWeight: FontWeight.w700)),
+              actions: [
+                if (_selectedIndex != 1) ...[
+                  Consumer<BleConnectionService>(
+                    builder: (context, connectionService, child) {
+                      return IconButton(
+                        icon: Icon(
+                          ((!connectionService.isConnected &&
                                       connectionService.lostConnection &&
                                       !isDialogVisible) ||
                                   (!connectionService.isConnected))
-                              // ? Theme.of(context).colorScheme.tertiary
-                              ? Colors.redAccent
-                              : Theme.of(context).primaryColor,
-                          onPressed: () async {
-                            if ((!connectionService.isConnected &&
+                              ? Icons.bluetooth_disabled
+                              : Icons.bluetooth_connected,
+                          size: 28,
+                        ),
+                        color: ((!connectionService.isConnected &&
                                     connectionService.lostConnection &&
                                     !isDialogVisible) ||
-                                (!connectionService.isConnected)) {
-                              isDialogVisible = true;
-                              // Llamar a showDialogIfNeeded solo cuando sea necesario
-                              Future.delayed(Duration.zero, () {
-                                showDialogIfNeeded(connectionService);
-                              });
-                            }
-                            setState(
-                                () {}); // Este setState ahora debería funcionar correctamente.
-                          },
-                        );
-                      },
-                    ),
-                    _buildNotificationBadge(context)
-                  ],
-                  if (_selectedIndex != 1)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.logout,
-                        // _selectedIndex != 1 ? Icons.logout : Icons.settings,
-                        size: 28,
-                      ),
-                      color: _selectedIndex == 1
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(context).primaryColor,
-                      // : Theme.of(context).colorScheme.tertiary,
-                      onPressed: () async {
-                        if (_selectedIndex != 1) {
-                          await DatabaseHandler.instance.deleteUser();
-                          saveLastPage('AuthSwitch');
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      const AuthSwitcher(),
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
-                                const begin = Offset(
-                                    -1.0, 0.0); // Comienza desde la izquierda
-                                const end = Offset.zero; // Termina en el centro
-                                const curve = Curves.easeInOut;
-
-                                var tween = Tween(begin: begin, end: end)
-                                    .chain(CurveTween(curve: curve));
-
-                                return SlideTransition(
-                                  position: animation.drive(tween),
-                                  child: child,
-                                );
-                              },
-                            ),
-                            (Route<dynamic> route) =>
-                                false, // Elimina todas las vistas anteriores
-                          );
-                        }
-                      },
-                    ),
+                                (!connectionService.isConnected))
+                            // ? Theme.of(context).colorScheme.tertiary
+                            ? Colors.redAccent
+                            : Theme.of(context).primaryColor,
+                        onPressed: () async {
+                          if ((!connectionService.isConnected &&
+                                  connectionService.lostConnection &&
+                                  !isDialogVisible) ||
+                              (!connectionService.isConnected)) {
+                            isDialogVisible = true;
+                            // Llamar a showDialogIfNeeded solo cuando sea necesario
+                            Future.delayed(Duration.zero, () {
+                              showDialogIfNeeded(connectionService);
+                            });
+                          }
+                          setState(
+                              () {}); // Este setState ahora debería funcionar correctamente.
+                        },
+                      );
+                    },
+                  ),
+                  _buildNotificationBadge(context)
                 ],
-              ),
+                if (_selectedIndex != 1)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.logout,
+                      // _selectedIndex != 1 ? Icons.logout : Icons.settings,
+                      size: 28,
+                    ),
+                    color: _selectedIndex == 1
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).primaryColor,
+                    // : Theme.of(context).colorScheme.tertiary,
+                    onPressed: () async {
+                      if (_selectedIndex != 1) {
+                        await DatabaseHandler.instance.deleteUser();
+                        await DatabaseHandler.instance.clearAlerts();
+                        await DatabaseHandler.instance.clearSensorData();
+                        saveLastPage('AuthSwitch');
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    const AuthSwitcher(),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              const begin = Offset(
+                                  -1.0, 0.0); // Comienza desde la izquierda
+                              const end = Offset.zero; // Termina en el centro
+                              const curve = Curves.easeInOut;
+
+                              var tween = Tween(begin: begin, end: end)
+                                  .chain(CurveTween(curve: curve));
+
+                              return SlideTransition(
+                                position: animation.drive(tween),
+                                child: child,
+                              );
+                            },
+                          ),
+                          (Route<dynamic> route) =>
+                              false, // Elimina todas las vistas anteriores
+                        );
+                      }
+                    },
+                  ),
+              ],
             ),
           ),
-          body: Consumer<BleConnectionService>(
-            builder: (context, connectionService, child) {
-              // Mostrar el dialog si la conexión se ha perdido
-              // if (!connectionService.isConnected &&
-              //     connectionService.lostConnection &&
-              //     !isDialogVisible) {
-              //   isDialogVisible = true;
-              //   // Llamar a showDialogIfNeeded solo cuando sea necesario
-              //   Future.delayed(Duration.zero, () {
-              //     showDialogIfNeeded(connectionService);
-              //   });
-              // }
-              if (BleConnectionService().isConnected &&
-                  BleConnectionService().isSuscripted) isDialogVisible = false;
+        ),
+        body: Consumer<BleConnectionService>(
+          builder: (context, connectionService, child) {
+            // Mostrar el dialog si la conexión se ha perdido
+            // if (!connectionService.isConnected &&
+            //     connectionService.lostConnection &&
+            //     !isDialogVisible) {
+            //   isDialogVisible = true;
+            //   // Llamar a showDialogIfNeeded solo cuando sea necesario
+            //   Future.delayed(Duration.zero, () {
+            //     showDialogIfNeeded(connectionService);
+            //   });
+            // }
+            if (BleConnectionService().isConnected &&
+                BleConnectionService().isSuscripted) isDialogVisible = false;
 
-              // Devolvemos un SizedBox vacío si no hay necesidad de mostrar nada visualmente
-              return PageView(
-                controller: _pageController,
-                allowImplicitScrolling: false,
-                children: [
-                  users.isNotEmpty
-                      ? HomeUserWorker(
-                          blDataNotifier: blDataNotifier,
-                        )
-                      : Center(
-                          child: LoadingAnimationWidget.waveDots(
+            // Devolvemos un SizedBox vacío si no hay necesidad de mostrar nada visualmente
+            return PageView(
+              controller: _pageController,
+              allowImplicitScrolling: false,
+              children: [
+                users.isNotEmpty
+                    ? HomeUserWorker(
+                        blDataNotifier: blDataNotifier,
+                      )
+                    : Center(
+                        child: LoadingAnimationWidget.waveDots(
+                        color: Colors.blueAccent,
+                        size: 50,
+                      )),
+                users.isNotEmpty
+                    ? ProfilePage(user: users[0])
+                    : Center(
+                        child: LoadingAnimationWidget.progressiveDots(
                           color: Colors.blueAccent,
                           size: 50,
-                        )),
-                  users.isNotEmpty
-                      ? ProfilePage(user: users[0])
-                      : Center(
-                          child: LoadingAnimationWidget.progressiveDots(
-                            color: Colors.blueAccent,
-                            size: 50,
-                          ),
                         ),
-                ],
-              );
-            },
-          ),
-          bottomNavigationBar: SafeArea(
-            child: Container(
-              height: 70,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).primaryColor, // Color de la sombra
-                    // spreadRadius: 0.1, // Cuánto se extiende la sombra
-                    // blurRadius: 2, // Qué tan difusa es la sombra
-                    offset: const Offset(0, 0), // Ángulo de la sombra (x, y)
-                  ),
-                ],
-              ),
-              child: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                elevation: 0,
-                // backgroundColor: Colors.transparent,
-                backgroundColor: Theme.of(context).primaryColor,
-                showSelectedLabels: true,
-                showUnselectedLabels: true,
-                selectedLabelStyle: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    fontSize: 12),
-                unselectedLabelStyle: TextStyle(
-                    foreground: Paint()
-                      ..color = Theme.of(context).primaryColorLight,
-                    fontWeight: FontWeight.w300,
-                    fontSize: 12),
-                items: <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: AnimatedIconContainer(
-                      isSelected: _selectedIndex == 0,
-                      icon: Icons.home,
-                      gradientColors: [
-                        Theme.of(context).colorScheme.secondary,
-                        Theme.of(context).colorScheme.secondary,
-                      ],
-                    ),
-                    label: 'Inicio',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: AnimatedIconContainer(
-                      isSelected: _selectedIndex == 1,
-                      icon: Icons.person_rounded,
-                      gradientColors: [
-                        Theme.of(context).colorScheme.secondary,
-                        Theme.of(context).colorScheme.secondary,
-                      ],
-                    ),
-                    label: 'Perfil',
-                  ),
-                ],
-                currentIndex: _selectedIndex,
-                onTap: _onItemTapped,
-              ),
+                      ),
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar: SafeArea(
+          child: Container(
+            height: 70,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).primaryColor, // Color de la sombra
+                  // spreadRadius: 0.1, // Cuánto se extiende la sombra
+                  // blurRadius: 2, // Qué tan difusa es la sombra
+                  offset: const Offset(0, 0), // Ángulo de la sombra (x, y)
+                ),
+              ],
             ),
-          ));
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              elevation: 0,
+              // backgroundColor: Colors.transparent,
+              backgroundColor: Theme.of(context).primaryColor,
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              selectedLabelStyle: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  fontSize: 12),
+              unselectedLabelStyle: TextStyle(
+                  foreground: Paint()
+                    ..color = Theme.of(context).primaryColorLight,
+                  fontWeight: FontWeight.w300,
+                  fontSize: 12),
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: AnimatedIconContainer(
+                    isSelected: _selectedIndex == 0,
+                    icon: Icons.home,
+                    gradientColors: [
+                      Theme.of(context).colorScheme.secondary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                  ),
+                  label: 'Inicio',
+                ),
+                BottomNavigationBarItem(
+                  icon: AnimatedIconContainer(
+                    isSelected: _selectedIndex == 1,
+                    icon: Icons.person_rounded,
+                    gradientColors: [
+                      Theme.of(context).colorScheme.secondary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                  ),
+                  label: 'Perfil',
+                ),
+              ],
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+            ),
+          ),
+        ),
+      );
     });
   }
 

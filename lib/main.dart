@@ -83,7 +83,8 @@ class MyApp extends StatelessWidget {
               primaryColorLight: const Color.fromARGB(255, 129, 164, 205),
               colorScheme: ColorScheme.fromSwatch().copyWith(
                   secondary: const Color.fromARGB(255, 62, 124, 177),
-                  tertiary: const Color.fromARGB(255, 241, 115, 0)),
+                  tertiary: const Color.fromARGB(255, 241, 115, 0),
+                  error: const Color.fromARGB(255, 255, 25, 25)),
             )
           : ThemeData(
               scaffoldBackgroundColor: const Color.fromARGB(255, 67, 67, 67),
