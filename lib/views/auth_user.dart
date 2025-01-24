@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,12 +11,16 @@ import 'package:smartclothingproject/functions/loader_logged.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/functions/show_toast.dart';
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
+import 'package:smartclothingproject/views/admin_page.dart';
 import 'package:smartclothingproject/views/logged_user_page.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 
+bool typeUserLogin = true;
+
 String codeSession = '';
+String codeSessionAdmin = '';
 String password = '';
 String name = '';
 String surname = '';
@@ -54,7 +57,7 @@ final _formKey00 = GlobalKey<FormState>();
 final _formKey0 = GlobalKey<FormState>();
 final _formKey = GlobalKey<FormState>();
 final _formKey1 = GlobalKey<FormState>();
-// final _formKey2 = GlobalKey<FormState>();
+final _formKey06 = GlobalKey<FormState>();
 final _formKey3 = GlobalKey<FormState>();
 final _formKey4 = GlobalKey<FormState>();
 
@@ -87,6 +90,7 @@ String hashPassword(String password) {
 
 void saveDemographicProfileOnMongo(BuildContext context) async {
   final mongoService = Provider.of<MongoService>(context, listen: false);
+  await mongoService.connect();
 
   UserModel newUser = UserModel(
       user_id: codeSession,
@@ -123,6 +127,8 @@ void saveDemographicProfileOnMongo(BuildContext context) async {
       duration: Duration(seconds: 2), // Duración de la notificación
     ),
   );
+  await mongoService.disconnect();
+
   // Guardar datos en SQLite
   await DatabaseHandler.instance.saveOrUpdateUser(newUser.toJson());
   // LoggedUser(context,);
@@ -156,55 +162,62 @@ void saveDemographicProfileOnMongo(BuildContext context) async {
   );
 }
 
-// Lectura para la verificación de la existencia de usuarios en la base de datos e inicio de sesión
-// Future<void> loginUser(
-//     BuildContext context, String email, String password) async {
-//   bool verifyPassword(String password, String hashedPassword) {
-//     return BCrypt.checkpw(password, hashedPassword);
-//   }
+Future<void> signInAdmin(BuildContext context, String codeSessionAdmin) async {
+  bool verifyAdminCode(String password, String hashedPassword) {
+    return BCrypt.checkpw(password, hashedPassword);
+  }
 
-//   // Buscar el usuario en Firestore
-//   final QuerySnapshot result =
-//       await db.collection("users").where("Email", isEqualTo: email).get();
+  final mongoService = Provider.of<MongoService>(context, listen: false);
+  await mongoService.connect();
 
-//   // Verificar si se encontró algún usuario
-//   if (result.docs.isNotEmpty) {
-//     // Usuario encontrado, comprobar la contraseña
-//     final userData = result.docs.first.data() as Map<String, dynamic>;
+  // Busca documentos en la colección "adminData"
+  final admins = await mongoService.getDocuments("adminData");
 
-//     // Comprobar si la contraseña coincide
-//     if (verifyPassword(password, userData["Hashpwd"])) {
-//       //Registrar los datos de usuario en la base de datos local
-//       await DatabaseHandler.instance.saveOrUpdateUser(userData);
-//       // Mostrar SnackBar de éxito
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(
-//           content: Text("Inicio de sesión exitoso."),
-//           duration: Duration(seconds: 2),
-//         ),
-//       );
-//       LoggedUser(context);
+  if (admins.isNotEmpty) {
+    // Verifica cada hash contra el código ingresado
+    for (final admin in admins) {
+      final hashedCode = admin['hashedCode'];
+      if (verifyAdminCode(codeSessionAdmin, hashedCode)) {
+        // showToast(message: 'El admin existe');
+        await mongoService.disconnect();
+        print(admin);
+        saveLastPage('AdminPage');
+        Navigator.pushAndRemoveUntil(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const AdminPage(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+              const endOffset = Offset.zero; // Termina en el centro
+              const curve = Curves.easeInOut;
 
-//       // Aquí puedes realizar la navegación o cualquier otra acción después del inicio de sesión
-//     } else {
-//       // Contraseña incorrecta
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(
-//           content: Text("Contraseña incorrecta."),
-//           duration: Duration(seconds: 2),
-//         ),
-//       );
-//     }
-//   } else {
-//     // No se encontró ningún usuario
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(
-//         content: Text("No existe un usuario con ese correo."),
-//         duration: Duration(seconds: 2),
-//       ),
-//     );
-//   }
-// }
+              var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                  .chain(CurveTween(curve: curve));
+              var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
+                  .chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(offsetTween),
+                child: FadeTransition(
+                  opacity: animation.drive(opacityTween),
+                  child: child,
+                ),
+              );
+            },
+          ),
+          (Route<dynamic> route) =>
+              false, // Elimina todas las vistas anteriores
+        );
+      } else {
+        showToast(message: 'Administrador no disponible');
+      }
+    }
+  } else {
+    print('La colección de administradores está vacía.');
+  }
+}
 
 Future<void> signInUser(
     BuildContext context, String codeSession, String password) async {
@@ -215,131 +228,85 @@ Future<void> signInUser(
   final filter = {"user_id": codeSession};
   final users = await mongoService.getDocuments("users", filter: filter);
 
+  bool verifyPassword(String password, String hashedPassword) {
+    return BCrypt.checkpw(password, hashedPassword);
+  }
+
   if (users.isNotEmpty) {
     final user = users.first;
     user.remove('_id');
-    await mongoService.disconnect();
-    if (user.length <= 3) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const DemographicProfileWorker(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
-            const endOffset = Offset.zero; // Termina en el centro
-            const curve = Curves.easeInOut;
+    if (verifyPassword(password, user["Hashpwd"])) {
+      user.remove("Hashpwd");
+      await mongoService.disconnect();
+      if (user.length <= 3) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const DemographicProfileWorker(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+              const endOffset = Offset.zero; // Termina en el centro
+              const curve = Curves.easeInOut;
 
-            var offsetTween = Tween(begin: beginOffset, end: endOffset)
-                .chain(CurveTween(curve: curve));
-            var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
-                .chain(CurveTween(curve: curve));
+              var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                  .chain(CurveTween(curve: curve));
+              var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
+                  .chain(CurveTween(curve: curve));
 
-            return SlideTransition(
-              position: animation.drive(offsetTween),
-              child: FadeTransition(
-                opacity: animation.drive(opacityTween),
-                child: child,
-              ),
-            );
-          },
-        ),
-        (Route<dynamic> route) => false, // Elimina todas las vistas anteriores
-      );
+              return SlideTransition(
+                position: animation.drive(offsetTween),
+                child: FadeTransition(
+                  opacity: animation.drive(opacityTween),
+                  child: child,
+                ),
+              );
+            },
+          ),
+          (Route<dynamic> route) =>
+              false, // Elimina todas las vistas anteriores
+        );
+      } else {
+        print(user);
+        await DatabaseHandler.instance.saveOrUpdateUser(user);
+        saveLastPage('userLoggedHome');
+        Navigator.pushAndRemoveUntil(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const LoggedUserPage(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+              const endOffset = Offset.zero; // Termina en el centro
+              const curve = Curves.easeInOut;
+
+              var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                  .chain(CurveTween(curve: curve));
+              var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
+                  .chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(offsetTween),
+                child: FadeTransition(
+                  opacity: animation.drive(opacityTween),
+                  child: child,
+                ),
+              );
+            },
+          ),
+          (Route<dynamic> route) =>
+              false, // Elimina todas las vistas anteriores
+        );
+      }
     } else {
-      print(user);
-      await DatabaseHandler.instance.saveOrUpdateUser(user);
-      saveLastPage('userLoggedHome');
-      Navigator.pushAndRemoveUntil(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const LoggedUserPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
-            const endOffset = Offset.zero; // Termina en el centro
-            const curve = Curves.easeInOut;
-
-            var offsetTween = Tween(begin: beginOffset, end: endOffset)
-                .chain(CurveTween(curve: curve));
-            var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
-                .chain(CurveTween(curve: curve));
-
-            return SlideTransition(
-              position: animation.drive(offsetTween),
-              child: FadeTransition(
-                opacity: animation.drive(opacityTween),
-                child: child,
-              ),
-            );
-          },
-        ),
-        (Route<dynamic> route) => false, // Elimina todas las vistas anteriores
-      );
+      showToast(message: 'Contraseña incorrecta');
     }
-
-    // if (user['password'] == password) {
-    //   // Lógica para iniciar sesión
-    //   print('Inicio de sesión exitoso para: ${user['name']}');
-    // } else {
-    //   print('Contraseña incorrecta');
-    // }
   } else {
+    showToast(message: 'Usuario no encontrado');
     print('Usuario no encontrado');
   }
-
-  // loginBtn = true;
-  // bool verifyPassword(String password, String hashedPassword) {
-  //   return BCrypt.checkpw(password, hashedPassword);
-  // }
-
-  // // Buscar el usuario en Firestore
-  // final QuerySnapshot result = await db
-  //     .collection("users")
-  //     .where("UserCode", isEqualTo: codeSession)
-  //     .get();
-
-  // // Verificar si se encontró algún usuario
-  // if (result.docs.isNotEmpty) {
-  //   // Usuario encontrado, comprobar la contraseña
-  //   final userData = result.docs.first.data() as Map<String, dynamic>;
-
-  //   // Comprobar si la contraseña coincide
-  //   if (verifyPassword(password, userData["Hashpwd"])) {
-  //     //Registrar los datos de usuario en la base de datos local
-  //     // await DatabaseHandler.instance.saveOrUpdateUser(userData);
-  //     // Mostrar SnackBar de éxito
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text("Inicio de sesión exitoso."),
-  //         duration: Duration(seconds: 2),
-  //       ),
-  //     );
-  //     loggedUser(context, userData["DataCompleted"]);
-
-  //     // Aquí puedes realizar la navegación o cualquier otra acción después del inicio de sesión
-  //   } else {
-  //     // Contraseña incorrecta
-  //     loginBtn = false;
-
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text("Contraseña incorrecta."),
-  //         duration: Duration(seconds: 2),
-  //       ),
-  //     );
-  //   }
-  // } else {
-  //   // No se encontró ningún usuario
-  //   loginBtn = false;
-
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     const SnackBar(
-  //       content: Text("Las credenciales de acceso no son válidas."),
-  //       duration: Duration(seconds: 2),
-  //     ),
-  //   );
-  // }
 }
 
 void registerPage(context) {
@@ -355,16 +322,6 @@ void registerPage(context) {
           builder: (context) =>
               const DemographicProfileWorker())); // Muestra el formulario de registro
 }
-
-// void loginPage(context) {
-//   email = '';
-//   password = '';
-//   Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(
-//           builder: (context) =>
-//               LoginForm())); // Muestra el formulario de inicio de sesión
-// }
 
 // ignore: non_constant_identifier_names
 void loggedUser(context, bool DataCompleted) {
@@ -668,7 +625,9 @@ class _LoginForm extends State<LoginForm> {
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
-                  'Inicio de Sesión',
+                  typeUserLogin
+                      ? 'Inicio de Sesión'
+                      : 'Ingresando como administrador',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.lexend(
                       fontSize: 30,
@@ -677,188 +636,335 @@ class _LoginForm extends State<LoginForm> {
                       color: Theme.of(context).scaffoldBackgroundColor),
                 ),
               ),
-              Form(
-                key: _formKey00,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 2, vertical: 5),
-                      child: TextFormField(
-                        controller: widget.controllerCodeSession,
-                        keyboardType:
-                            TextInputType.text, // Activa el teclado numérico
-                        decoration: InputDecoration(
-                          prefixIcon: Padding(
-                            padding:
-                                const EdgeInsetsDirectional.only(start: 12.0),
-                            child: Icon(
-                              Icons.vpn_key_outlined,
-                              color: Theme.of(context).scaffoldBackgroundColor,
-                            ), // myIcon is a 48px-wide widget.
-                          ),
-                          labelText: 'Código',
-                          labelStyle: TextStyle(
-                              color: Theme.of(context).scaffoldBackgroundColor),
-                          suffixStyle: TextStyle(
-                              color: Theme.of(context).scaffoldBackgroundColor),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
+              typeUserLogin
+                  ? Form(
+                      key: _formKey00,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 5),
+                            child: TextFormField(
+                              controller: widget.controllerCodeSession,
+                              keyboardType: TextInputType
+                                  .text, // Activa el teclado numérico
+                              decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(
+                                    Icons.vpn_key_outlined,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                  ), // myIcon is a 48px-wide widget.
+                                ),
+                                labelText: 'Código',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                                suffixStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        width: 2.2),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusFocus)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: (loginBtn && codeSession == '')
+                                            ? Colors.red
+                                            : Theme.of(context)
+                                                .scaffoldBackgroundColor,
+                                        width: 2.2),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal)),
+                              ),
+                              style: TextStyle(
                                   color:
                                       Theme.of(context).scaffoldBackgroundColor,
-                                  width: 2.2),
-                              borderRadius: BorderRadius.circular(radiusFocus)),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: (loginBtn && codeSession == '')
-                                      ? Colors.red
-                                      : Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                  width: 2.2),
-                              borderRadius:
-                                  BorderRadius.circular(radiusNormal)),
-                        ),
-                        style: TextStyle(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            fontSize: 20),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu código';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          codeSession = value;
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 2, vertical: 5),
-                      child: TextFormField(
-                        controller: widget.controllerPassword,
-                        decoration: InputDecoration(
-                          prefixIcon: Padding(
-                            padding:
-                                const EdgeInsetsDirectional.only(start: 12.0),
-                            child: Icon(Icons.password,
-                                color: Theme.of(context)
-                                    .scaffoldBackgroundColor), // myIcon is a 48px-wide widget.
-                          ),
-                          labelText: 'Contraseña',
-                          labelStyle: TextStyle(
-                              color: Theme.of(context).scaffoldBackgroundColor),
-                          suffixStyle: TextStyle(
-                              color: Theme.of(context).scaffoldBackgroundColor),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                  color: Colors.blue, width: 2.2),
-                              borderRadius: BorderRadius.circular(radiusFocus)),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: (loginBtn && email == '')
-                                      ? Colors.red
-                                      : Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                  width: 2.2),
-                              borderRadius:
-                                  BorderRadius.circular(radiusNormal)),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obsTextConfirm
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Theme.of(context).scaffoldBackgroundColor,
+                                  fontSize: 20),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingresa tu código';
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                codeSession = value;
+                                setState(() {});
+                              },
                             ),
-                            onPressed: () {
-                              setState(() {
-                                obsTextConfirm = !obsTextConfirm;
-                              });
-                            },
                           ),
-                        ),
-                        style: TextStyle(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            fontSize: 20),
-                        obscureText: !obsTextConfirm,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu contraseña';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          password = value;
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).scaffoldBackgroundColor,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 30.0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(radiusBtn))),
-                        onPressed: () {
-                          bool isConnected =
-                              Provider.of<InternetConnectionNotifier>(context,
-                                      listen: false)
-                                  .internetConnectionState;
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 5),
+                            child: TextFormField(
+                              controller: widget.controllerPassword,
+                              decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(Icons.password,
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor), // myIcon is a 48px-wide widget.
+                                ),
+                                labelText: 'Contraseña',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                                suffixStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.blue, width: 2.2),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusFocus)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: (loginBtn && email == '')
+                                            ? Colors.red
+                                            : Theme.of(context)
+                                                .scaffoldBackgroundColor,
+                                        width: 2.2),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal)),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    obsTextConfirm
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      obsTextConfirm = !obsTextConfirm;
+                                    });
+                                  },
+                                ),
+                              ),
+                              style: TextStyle(
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  fontSize: 20),
+                              obscureText: !obsTextConfirm,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingresa tu contraseña';
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                password = value;
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 30.0),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(radiusBtn))),
+                              onPressed: () {
+                                bool isConnected =
+                                    Provider.of<InternetConnectionNotifier>(
+                                            context,
+                                            listen: false)
+                                        .internetConnectionState;
 
-                          final authState =
-                              Provider.of<AuthState>(context, listen: false);
-                          try {
-                            if (isConnected) {
-                              authState.setLoginBtn(true); // Cambia el estado
-                              if (authState.loginBtn &&
-                                  codeSession != '' &&
-                                  password != '') {
-                                signInUser(context, codeSession, password);
-                                authState.setLoginBtn(false);
-                              }
-                              print(isConnected);
-                              print('estoy dentro');
-                            } else {
-                              showToast(
-                                  message: 'No tienes conexión a internet');
-                            }
-                          } catch (e) {
-                            print('Error: $e');
-                          }
-                        },
-                        child: Text(
-                          'Iniciar Sesión',
-                          style: GoogleFonts.lexend(
-                              fontSize: 25,
-                              letterSpacing: 2,
-                              fontWeight: FontWeight.w300,
-                              color: Theme.of(context).colorScheme.secondary),
+                                final authState = Provider.of<AuthState>(
+                                    context,
+                                    listen: false);
+                                try {
+                                  if (isConnected) {
+                                    authState
+                                        .setLoginBtn(true); // Cambia el estado
+                                    if (authState.loginBtn &&
+                                        codeSession != '' &&
+                                        password != '') {
+                                      signInUser(
+                                          context, codeSession, password);
+                                      authState.setLoginBtn(false);
+                                    }
+                                    print(isConnected);
+                                  } else {
+                                    showToast(
+                                        message:
+                                            'No tienes conexión a internet');
+                                  }
+                                } catch (e) {
+                                  print('Error: $e');
+                                }
+                              },
+                              child: Text(
+                                'Iniciar Sesión',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 25,
+                                    letterSpacing: 2,
+                                    fontWeight: FontWeight.w300,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Form(
+                      key: _formKey06,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 5),
+                            child: TextFormField(
+                              controller: widget.controllerCodeSession,
+                              keyboardType: TextInputType
+                                  .text, // Activa el teclado numérico
+                              decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 12.0),
+                                  child: Icon(
+                                    Icons.vpn_key_outlined,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                  ), // myIcon is a 48px-wide widget.
+                                ),
+                                labelText: 'Código de administrador',
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                                suffixStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        width: 2.2),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusFocus)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        width: 2.2),
+                                    borderRadius:
+                                        BorderRadius.circular(radiusNormal)),
+                              ),
+                              style: TextStyle(
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  fontSize: 20),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingresa tu código';
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                codeSessionAdmin = value;
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 30.0),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(radiusBtn))),
+                              onPressed: () {
+                                bool isConnected =
+                                    Provider.of<InternetConnectionNotifier>(
+                                            context,
+                                            listen: false)
+                                        .internetConnectionState;
+
+                                try {
+                                  if (isConnected) {
+                                    if (codeSessionAdmin != '') {
+                                      signInAdmin(context, codeSessionAdmin);
+                                    }
+                                    print(isConnected);
+                                  } else {
+                                    showToast(
+                                        message:
+                                            'No tienes conexión a internet');
+                                  }
+                                } catch (e) {
+                                  print('Error: $e');
+                                }
+                              },
+                              child: Text(
+                                'Ingresar',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 25,
+                                    letterSpacing: 2,
+                                    fontWeight: FontWeight.w300,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+              typeUserLogin
+                  ? TextButton(
+                      onPressed: () {
+                        setState(() {
+                          typeUserLogin = false;
+                        });
+                      },
+                      child: Text(
+                        'Ingresar como Administrador',
+                        style: GoogleFonts.roboto(
+                          fontSize: 19,
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: () {
+                        setState(() {
+                          typeUserLogin = true;
+                        });
+                      },
+                      child: Text(
+                        'Iniciar sesión como Empleado',
+                        style: GoogleFonts.roboto(
+                          fontSize: 19,
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  'Ingresar como Administrador',
-                  style: GoogleFonts.roboto(
-                    fontSize: 19,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -949,20 +1055,6 @@ List<Map<String, dynamic>> questionsForm = [
     'iconSection': Icons.school_outlined,
     'storedVar': selectedScholarityLevel
   },
-  // {
-  //   'question': '¿Cuál es su tipo de vivienda?',
-  //   'categoryValue': 'Tipo de vivienda',
-  //   'options': ['Propia', 'Alquilada', 'Familiar', 'Otra'],
-  //   'iconSection': Icons.home_outlined,
-  //   'storedVar': typeHome
-  // },
-  // {
-  //   'question': '¿Cuál es su estrato socioeconómico?',
-  //   'categoryValue': 'Estrato social',
-  //   'options': ['0', '1', '2', '3', '4', '5', '6', 'Rural', 'No sé'],
-  //   'iconSection': Icons.insert_chart_outlined_outlined,
-  //   'storedVar': statusResidence
-  // },
   {
     'question': '¿Cuál es su tipo de sangre?',
     'categoryValue': 'Tipo de sangre',
@@ -1040,9 +1132,6 @@ class _DemographicProfileWorkerState extends State<DemographicProfileWorker> {
     });
 
     return Scaffold(
-        // appBar: AppBar(
-        //   title: const Text('Perfil Demográfico'),
-        // ),
         floatingActionButton: FloatingActionButton(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50), // Esquinas redondeadas
@@ -1763,167 +1852,6 @@ class _PersonalQuestions extends State<PersonalQuestions> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Container(
-                      //   margin: marginCustom,
-                      //   child: Padding(
-                      //     padding: const EdgeInsets.all(8.0),
-                      //     child: Column(
-                      //       crossAxisAlignment: CrossAxisAlignment.start,
-                      //       children: [
-                      //         Text(
-                      //           '¿Cuál es su departamento de nacimiento?',
-                      //           style: TextStyle(
-                      //             fontSize: 16,
-                      //             color:
-                      //                 Theme.of(context).colorScheme.secondary,
-                      //           ),
-                      //         ),
-                      //         const SizedBox(height: 3),
-                      //         Autocomplete<String>(
-                      //           optionsBuilder:
-                      //               (TextEditingValue textEditingValue) {
-                      //             if (textEditingValue.text.isEmpty) {
-                      //               return const Iterable<String>.empty();
-                      //             }
-                      //             return departamentos
-                      //                 .where((String profession) {
-                      //               return profession.toLowerCase().contains(
-                      //                   textEditingValue.text.toLowerCase());
-                      //             });
-                      //           },
-                      //           onSelected: (String selection) {
-                      //             setState(() {
-                      //               selectedProfession = selection;
-                      //             });
-                      //           },
-                      //           fieldViewBuilder: (BuildContext context,
-                      //               TextEditingController textEditingController,
-                      //               FocusNode focusNode,
-                      //               VoidCallback onFieldSubmitted) {
-                      //             return TextFormField(
-                      //               controller: textEditingController,
-                      //               focusNode: focusNode,
-                      //               decoration: InputDecoration(
-                      //                 prefixIcon: Padding(
-                      //                   padding:
-                      //                       const EdgeInsetsDirectional.only(
-                      //                           start: 12.0),
-                      //                   child: Icon(
-                      //                     Icons.location_on_outlined,
-                      //                     color: Theme.of(context)
-                      //                         .colorScheme
-                      //                         .secondary,
-                      //                   ),
-                      //                 ),
-                      //                 labelText: 'Departamento de nacimiento',
-                      //                 labelStyle: TextStyle(
-                      //                     color: Theme.of(context)
-                      //                         .colorScheme
-                      //                         .secondary),
-                      //                 focusedBorder: OutlineInputBorder(
-                      //                   borderSide: const BorderSide(
-                      //                       color: Colors.blue, width: 1.5),
-                      //                   borderRadius:
-                      //                       BorderRadius.circular(radiusFocus),
-                      //                 ),
-                      //                 enabledBorder: OutlineInputBorder(
-                      //                   borderSide: BorderSide(
-                      //                     color: (nextPage &&
-                      //                             (occupation).isEmpty)
-                      //                         ? Colors.red
-                      //                         : Theme.of(context)
-                      //                             .colorScheme
-                      //                             .secondary,
-                      //                     width: 0.75,
-                      //                   ),
-                      //                   borderRadius:
-                      //                       BorderRadius.circular(radiusNormal),
-                      //                 ),
-                      //               ),
-                      //             );
-                      //           },
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      // Container(
-                      //     margin: marginCustom,
-                      //     child: Padding(
-                      //         padding: const EdgeInsets.all(8.0),
-                      //         child: Column(
-                      //           crossAxisAlignment: CrossAxisAlignment.start,
-                      //           children: [
-                      //             Text(
-                      //               '¿Cuál es su ciudad/municipio de nacimiento?',
-                      //               style: TextStyle(
-                      //                 fontSize: 16,
-                      //                 color: Theme.of(context)
-                      //                     .colorScheme
-                      //                     .secondary,
-                      //               ),
-                      //             ),
-                      //             spaceSizedBox,
-                      //             TextFormField(
-                      //               decoration: InputDecoration(
-                      //                 prefixIcon: Padding(
-                      //                   padding:
-                      //                       const EdgeInsetsDirectional.only(
-                      //                           start: 12.0),
-                      //                   child: Icon(
-                      //                     Icons.location_city_outlined,
-                      //                     color: Theme.of(context)
-                      //                         .colorScheme
-                      //                         .secondary,
-                      //                   ),
-                      //                 ),
-                      //                 counterStyle: TextStyle(
-                      //                     color: Theme.of(context)
-                      //                         .primaryColorDark),
-                      //                 labelText:
-                      //                     'Ciudad/municipio de nacimiento',
-                      //                 labelStyle: TextStyle(
-                      //                     color: Theme.of(context)
-                      //                         .colorScheme
-                      //                         .secondary),
-                      //                 focusedBorder: OutlineInputBorder(
-                      //                   borderSide: const BorderSide(
-                      //                       color: Colors.blue, width: 1.5),
-                      //                   borderRadius:
-                      //                       BorderRadius.circular(radiusFocus),
-                      //                 ),
-                      //                 enabledBorder: OutlineInputBorder(
-                      //                   borderSide: BorderSide(
-                      //                     color: (nextPage &&
-                      //                             (occupation).isEmpty)
-                      //                         ? Colors.red
-                      //                         : Theme.of(context)
-                      //                             .colorScheme
-                      //                             .secondary,
-                      //                     width: 0.75,
-                      //                   ),
-                      //                   borderRadius:
-                      //                       BorderRadius.circular(radiusNormal),
-                      //                 ),
-                      //               ),
-                      //               style: TextStyle(
-                      //                   color: Theme.of(context)
-                      //                       .colorScheme
-                      //                       .secondary),
-                      //               validator: (value) {
-                      //                 if (value == null || value.isEmpty) {
-                      //                   return 'Por favor ingresa tu ciudad de nacimiento';
-                      //                 }
-                      //                 return null;
-                      //               },
-                      //               onChanged: (value) {
-                      //                 setState(() {
-                      //                   occupation = value;
-                      //                 });
-                      //               },
-                      //             ),
-                      //           ],
-                      //         ))),
                       Container(
                         margin: marginCustom,
                         child: Padding(
@@ -2271,18 +2199,7 @@ class _PersonalQuestions2 extends State<PersonalQuestions2> {
                     width: MediaQuery.of(context).size.width,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    decoration: const BoxDecoration(color: Colors.transparent
-                        // gradient: LinearGradient(
-                        //   colors: [
-                        //     Colors.pink.withOpacity(0.25),
-                        //     Colors.purple.withOpacity(0.25),
-                        //     const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
-                        //     Colors.blue.withOpacity(0.25),
-                        //   ],
-                        //   begin: Alignment.topLeft,
-                        //   end: Alignment.bottomRight,
-                        // ),
-                        ),
+                    decoration: const BoxDecoration(color: Colors.transparent),
                     child: Form(
                       key: _formKey1,
                       child: Column(
@@ -2849,18 +2766,7 @@ class _ResidenceQuestions extends State<ResidenceQuestions> {
                   width: MediaQuery.of(context).size.width,
                   alignment: Alignment.center,
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  decoration: const BoxDecoration(color: Colors.transparent
-                      // gradient: LinearGradient(
-                      //   colors: [
-                      //     Colors.pink.withOpacity(0.25),
-                      //     Colors.purple.withOpacity(0.25),
-                      //     const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
-                      //     Colors.blue.withOpacity(0.25),
-                      //   ],
-                      //   begin: Alignment.topLeft,
-                      //   end: Alignment.bottomRight,
-                      // ),
-                      ),
+                  decoration: const BoxDecoration(color: Colors.transparent),
                   child: Form(
                     key: _formKey3,
                     child: Column(
@@ -3181,188 +3087,6 @@ class _ResidenceQuestions extends State<ResidenceQuestions> {
                                     ),
                                   ],
                                 ))),
-                        // ...[2, 3].expand((nc) {
-                        //   List<Widget> widgets = [];
-
-                        //   // Validar y configurar el valor inicial
-                        //   String? initialValue = questionsForm[nc]['storedVar'];
-                        //   if (!questionsForm[nc]['options']
-                        //       .contains(initialValue)) {
-                        //     initialValue =
-                        //         null; // Si el valor no es válido, inicializa con null
-                        //   }
-
-                        //   // Agregar el DropdownButtonFormField
-                        //   widgets.add(
-                        //     Container(
-                        //         margin: marginCustom,
-                        //         child: Padding(
-                        //           padding: const EdgeInsets.all(8.0),
-                        //           child: Column(
-                        //             crossAxisAlignment:
-                        //                 CrossAxisAlignment.start,
-                        //             children: [
-                        //               Text(
-                        //                 questionsForm[nc]['question'] ??
-                        //                     'Pregunta no disponible',
-                        //                 style: TextStyle(
-                        //                   fontSize: 16,
-                        //                   color: Theme.of(context)
-                        //                       .colorScheme
-                        //                       .secondary,
-                        //                 ),
-                        //               ),
-                        //               DropdownButtonFormField<String>(
-                        //                 icon: const Icon(
-                        //                     Icons.keyboard_arrow_down_outlined),
-                        //                 dropdownColor: Theme.of(context)
-                        //                     .scaffoldBackgroundColor,
-                        //                 decoration: InputDecoration(
-                        //                   prefixIcon: Padding(
-                        //                     padding: const EdgeInsetsDirectional
-                        //                         .only(start: 12.0),
-                        //                     child: Icon(
-                        //                       questionsForm[nc]['iconSection'],
-                        //                       color: Theme.of(context)
-                        //                           .colorScheme
-                        //                           .secondary,
-                        //                     ),
-                        //                   ),
-                        //                   labelText: questionsForm[nc]
-                        //                       ['categoryValue'],
-                        //                   labelStyle: TextStyle(
-                        //                       color: Theme.of(context)
-                        //                           .colorScheme
-                        //                           .secondary),
-                        //                   focusedBorder: OutlineInputBorder(
-                        //                     borderSide: const BorderSide(
-                        //                         color: Colors.blue, width: 1.5),
-                        //                     borderRadius: BorderRadius.circular(
-                        //                         radiusFocus),
-                        //                   ),
-                        //                   enabledBorder: OutlineInputBorder(
-                        //                     borderSide: BorderSide(
-                        //                       color: (nextPage &&
-                        //                               !questionsForm[nc]
-                        //                                       ['options']
-                        //                                   .contains(
-                        //                                       questionsForm[nc][
-                        //                                           'storedVar']))
-                        //                           ? Colors.red
-                        //                           : Theme.of(context)
-                        //                               .colorScheme
-                        //                               .secondary,
-                        //                       width: 0.75,
-                        //                     ),
-                        //                     borderRadius: BorderRadius.circular(
-                        //                         radiusNormal),
-                        //                   ),
-                        //                 ),
-                        //                 value: initialValue,
-                        //                 style: TextStyle(
-                        //                     color: Theme.of(context)
-                        //                         .colorScheme
-                        //                         .secondary),
-                        //                 items: questionsForm[nc]['options']
-                        //                     .map<DropdownMenuItem<String>>(
-                        //                       (String value) =>
-                        //                           DropdownMenuItem<String>(
-                        //                         value: value,
-                        //                         child: Text(
-                        //                           value,
-                        //                           style: TextStyle(
-                        //                               color: Theme.of(context)
-                        //                                   .colorScheme
-                        //                                   .secondary),
-                        //                         ),
-                        //                       ),
-                        //                     )
-                        //                     .toList(),
-                        //                 onChanged: (newValue) {
-                        //                   setState(() {
-                        //                     questionsForm[nc]['storedVar'] =
-                        //                         newValue!;
-                        //                   });
-                        //                 },
-                        //                 iconEnabledColor: Theme.of(context)
-                        //                     .colorScheme
-                        //                     .secondary,
-                        //                 validator: (value) => value == null
-                        //                     ? 'Por favor selecciona una opción'
-                        //                     : null,
-                        //               ),
-                        //             ],
-                        //           ),
-                        //         )),
-                        //   );
-                        //   // Agregar el TextFormField si es nc == 2
-                        //   if (nc == 1) {
-                        //     widgets.add(
-                        //       Container(
-                        //         margin: marginCustom,
-                        //         child: TextFormField(
-                        //           decoration: InputDecoration(
-                        //             prefixIcon: Padding(
-                        //               padding: const EdgeInsetsDirectional.only(
-                        //                   start: 12.0),
-                        //               child: Icon(
-                        //                 Icons.cases_outlined,
-                        //                 color: Theme.of(context)
-                        //                     .colorScheme
-                        //                     .secondary,
-                        //               ),
-                        //             ),
-                        //             counterStyle: TextStyle(
-                        //                 color:
-                        //                     Theme.of(context).primaryColorDark),
-                        //             labelText:
-                        //                 '¿Cuál es su ocupación o profesión?',
-                        //             labelStyle: TextStyle(
-                        //                 color: Theme.of(context)
-                        //                     .colorScheme
-                        //                     .secondary),
-                        //             focusedBorder: OutlineInputBorder(
-                        //               borderSide: const BorderSide(
-                        //                   color: Colors.blue, width: 1.5),
-                        //               borderRadius:
-                        //                   BorderRadius.circular(radiusFocus),
-                        //             ),
-                        //             enabledBorder: OutlineInputBorder(
-                        //               borderSide: BorderSide(
-                        //                 color: (nextPage &&
-                        //                         (occupation).isEmpty)
-                        //                     ? Colors.red
-                        //                     : Theme.of(context)
-                        //                         .colorScheme
-                        //                         .secondary,
-                        //                 width: 0.75,
-                        //               ),
-                        //               borderRadius:
-                        //                   BorderRadius.circular(radiusNormal),
-                        //             ),
-                        //           ),
-                        //           style: TextStyle(
-                        //               color: Theme.of(context)
-                        //                   .colorScheme
-                        //                   .secondary),
-                        //           validator: (value) {
-                        //             if (value == null || value.isEmpty) {
-                        //               return 'Por favor ingresa tu ocupación o profesión';
-                        //             }
-                        //             return null;
-                        //           },
-                        //           onChanged: (value) {
-                        //             setState(() {
-                        //               occupation = value;
-                        //             });
-                        //           },
-                        //         ),
-                        //       ),
-                        //     );
-                        //   }
-
-                        //   return widgets;
-                        // }),
                       ],
                     ),
                   ),
@@ -3398,18 +3122,7 @@ class _HealthQuestions extends State<HealthQuestions> {
                 width: MediaQuery.of(context).size.width,
                 alignment: Alignment.center,
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                decoration: const BoxDecoration(color: Colors.white
-                    // gradient: LinearGradient(
-                    //   colors: [
-                    //     Colors.pink.withOpacity(0.25),
-                    //     Colors.purple.withOpacity(0.25),
-                    //     const Color.fromARGB(255, 24, 241, 0).withOpacity(0.25),
-                    //     Colors.blue.withOpacity(0.25),
-                    //   ],wav
-                    //   begin: Alignment.topLeft,
-                    //   end: Alignment.bottomRight,
-                    // ),
-                    ),
+                decoration: const BoxDecoration(color: Colors.white),
                 child: Form(
                   key: _formKey4,
                   child: Column(

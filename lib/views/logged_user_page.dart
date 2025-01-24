@@ -44,7 +44,6 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
   }
 
   @override
-  @override
   void initState() {
     super.initState();
     loadUser();
