@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
@@ -80,8 +79,6 @@ const radiusFocus = 20.0;
 const radiusBtn = 50.0;
 
 const durationAnimation = Duration(milliseconds: 250);
-
-FirebaseFirestore db = FirebaseFirestore.instance;
 
 void saveDemographicProfileOnMongo(BuildContext context) async {
   final mongoService = Provider.of<MongoService>(context, listen: false);
