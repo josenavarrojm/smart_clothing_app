@@ -8,7 +8,7 @@ import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/functions/show_toast.dart';
 import 'package:smartclothingproject/functions/update_notifiers_sensor_data.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
-import 'package:smartclothingproject/views/admin_page.dart';
+import 'package:smartclothingproject/views/siso_page.dart';
 import 'package:smartclothingproject/views/home_user_worker.dart';
 
 class UserResumeView extends StatefulWidget {
@@ -106,7 +106,7 @@ class _UserResumeViewState extends State<UserResumeView> {
                                         PageRouteBuilder(
                                           pageBuilder: (context, animation,
                                                   secondaryAnimation) =>
-                                              const AdminPage(),
+                                              const SisoPage(),
                                           transitionsBuilder: (context,
                                               animation,
                                               secondaryAnimation,
@@ -221,14 +221,15 @@ class _UserResumeViewState extends State<UserResumeView> {
     await mongoService.connect();
 
     final filter = {"user_id": user['user_id']};
-
     List<Map<String, dynamic>> dataMongoDB =
         await mongoService.getDocuments("data", filter: filter);
 
-    Map<String, dynamic> allSensorData = dataMongoDB.last;
-
-    if (allSensorData.isNotEmpty) {
+    // Verificar si la lista no está vacía antes de acceder a .last
+    if (dataMongoDB.isNotEmpty) {
+      Map<String, dynamic> allSensorData = dataMongoDB.last;
       updateNotifiersSensorData(allSensorData);
+    } else {
+      print("No hay datos disponibles en MongoDB para este usuario.");
     }
 
     setState(() {});
@@ -290,19 +291,19 @@ class _UserResumeViewState extends State<UserResumeView> {
               color: Theme.of(context).primaryColor,
             ),
           ),
-          IconButton(
-            onPressed: () async {
-              showDeleteUserDialog(context);
-            },
-            icon: Icon(
-              Icons.delete_outline_outlined,
-              color: Theme.of(context)
-                  .colorScheme
-                  .tertiary
-                  .withBlue(100)
-                  .withGreen(100),
-            ),
-          ),
+          // IconButton(
+          //   onPressed: () async {
+          //     showDeleteUserDialog(context);
+          //   },
+          //   icon: Icon(
+          //     Icons.delete_outline_outlined,
+          //     color: Theme.of(context)
+          //         .colorScheme
+          //         .tertiary
+          //         .withBlue(100)
+          //         .withGreen(100),
+          //   ),
+          // ),
         ],
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(

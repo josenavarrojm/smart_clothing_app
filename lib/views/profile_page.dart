@@ -33,6 +33,7 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   bool isDialogVisible = false;
+  // ignore: non_constant_identifier_names
   void showDialogIfNeeded(BleConnectionService BleConnectionService) async {
     var bluetoothState = await FlutterBluePlus.adapterState.first;
 
@@ -728,7 +729,7 @@ class _ProfilePage extends State<ProfilePage> {
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 0),
                   child: Consumer<BleConnectionService>(
-                    builder: (context, BleConnectionService, child) {
+                    builder: (context, bleConnectionService, child) {
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -755,11 +756,11 @@ class _ProfilePage extends State<ProfilePage> {
                                   ],
                                 ),
                                 child: Icon(
-                                  ((!BleConnectionService.isConnected &&
-                                              BleConnectionService
+                                  ((!bleConnectionService.isConnected &&
+                                              bleConnectionService
                                                   .lostConnection &&
                                               !isDialogVisible) ||
-                                          (!BleConnectionService.isConnected))
+                                          (!bleConnectionService.isConnected))
                                       ? Icons.bluetooth_disabled
                                       : Icons.bluetooth_connected,
                                   color: Theme.of(context).primaryColor,
@@ -767,11 +768,11 @@ class _ProfilePage extends State<ProfilePage> {
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                ((!BleConnectionService.isConnected &&
-                                            BleConnectionService
+                                ((!bleConnectionService.isConnected &&
+                                            bleConnectionService
                                                 .lostConnection &&
                                             !isDialogVisible) ||
-                                        (!BleConnectionService.isConnected))
+                                        (!bleConnectionService.isConnected))
                                     ? 'Conectar dispositivo'
                                     : 'Desconectar dispositivo',
                                 style: TextStyle(
@@ -789,19 +790,19 @@ class _ProfilePage extends State<ProfilePage> {
                             activeTrackColor:
                                 const Color.fromRGBO(100, 140, 220, 1.0),
                             inactiveTrackColor: Colors.grey,
-                            value: !((!BleConnectionService.isConnected &&
-                                    BleConnectionService.lostConnection &&
+                            value: !((!bleConnectionService.isConnected &&
+                                    bleConnectionService.lostConnection &&
                                     !isDialogVisible) ||
-                                (!BleConnectionService.isConnected)),
+                                (!bleConnectionService.isConnected)),
                             onChanged: (value) async {
-                              if ((!BleConnectionService.isConnected &&
-                                      BleConnectionService.lostConnection &&
+                              if ((!bleConnectionService.isConnected &&
+                                      bleConnectionService.lostConnection &&
                                       !isDialogVisible) ||
-                                  (!BleConnectionService.isConnected)) {
+                                  (!bleConnectionService.isConnected)) {
                                 isDialogVisible = true;
                                 // Llamar a showDialogIfNeeded solo cuando sea necesario
                                 Future.delayed(Duration.zero, () {
-                                  showDialogIfNeeded(BleConnectionService);
+                                  showDialogIfNeeded(bleConnectionService);
                                 });
                               }
                               setState(() {});

@@ -9,7 +9,7 @@ import 'package:smartclothingproject/functions/loader_logged.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/models/conectivity_detector.dart';
 import 'package:smartclothingproject/models/local_notifications_service.dart';
-import 'package:smartclothingproject/views/admin_page.dart';
+import 'package:smartclothingproject/views/siso_page.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
 import 'functions/theme_notifier.dart';
 import 'functions/ble_connected_state_notifier.dart';
@@ -97,8 +97,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
-          : lastPage == 'AdminPage'
-              ? const AdminPage()
+          : lastPage == 'SisoPage'
+              ? const SisoPage()
               : const AuthSwitcher(),
     );
   }

@@ -1,16 +1,18 @@
 // ignore_for_file: use_build_context_synchronously
+import 'dart:ui';
+
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
+// import 'package:smartclothingproject/functions/hash_password.dart';
 import 'package:smartclothingproject/functions/internet_connection_state_notifier.dart';
 import 'package:smartclothingproject/functions/loader_logged.dart';
 import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/functions/show_toast.dart';
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
-import 'package:smartclothingproject/views/admin_page.dart';
+import 'package:smartclothingproject/views/siso_page.dart';
 import 'package:smartclothingproject/views/logged_user_page.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +29,7 @@ String surname = '';
 String phoneNumber = '';
 String email = '';
 String? selectedGender;
+String? selectedUserType;
 DateTime? selectedDate;
 int age = 0;
 final TextEditingController _dateController = TextEditingController();
@@ -57,7 +60,7 @@ final _formKey00 = GlobalKey<FormState>();
 final _formKey0 = GlobalKey<FormState>();
 final _formKey = GlobalKey<FormState>();
 final _formKey1 = GlobalKey<FormState>();
-final _formKey06 = GlobalKey<FormState>();
+// final _formKey06 = GlobalKey<FormState>();
 final _formKey3 = GlobalKey<FormState>();
 final _formKey4 = GlobalKey<FormState>();
 
@@ -157,89 +160,116 @@ void saveDemographicProfileOnMongo(BuildContext context) async {
   );
 }
 
-Future<void> signInAdmin(BuildContext context, String codeSessionAdmin) async {
-  bool verifyAdminCode(String password, String hashedPassword) {
-    return BCrypt.checkpw(password, hashedPassword);
-  }
-
+Future<void> signInUser(BuildContext context, String codeSession,
+    String password, String selectedUserType) async {
   final mongoService = Provider.of<MongoService>(context, listen: false);
   await mongoService.connect();
-
-  // Busca documentos en la colección "adminData"
-  final admins = await mongoService.getDocuments("adminData");
-
-  if (admins.isNotEmpty) {
-    // Verifica cada hash contra el código ingresado
-    for (final admin in admins) {
-      final hashedCode = admin['hashedCode'];
-      if (verifyAdminCode(codeSessionAdmin, hashedCode)) {
-        // showToast(message: 'El admin existe');
-        await mongoService.disconnect();
-        print(admin);
-        saveLastPage('AdminPage');
-        Navigator.pushAndRemoveUntil(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const AdminPage(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
-              const endOffset = Offset.zero; // Termina en el centro
-              const curve = Curves.easeInOut;
-
-              var offsetTween = Tween(begin: beginOffset, end: endOffset)
-                  .chain(CurveTween(curve: curve));
-              var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
-                  .chain(CurveTween(curve: curve));
-
-              return SlideTransition(
-                position: animation.drive(offsetTween),
-                child: FadeTransition(
-                  opacity: animation.drive(opacityTween),
-                  child: child,
-                ),
-              );
-            },
-          ),
-          (Route<dynamic> route) =>
-              false, // Elimina todas las vistas anteriores
-        );
-      } else {
-        showToast(message: 'Administrador no disponible');
-      }
-    }
-  } else {
-    print('La colección de administradores está vacía.');
-  }
-}
-
-Future<void> signInUser(
-    BuildContext context, String codeSession, String password) async {
-  final mongoService = Provider.of<MongoService>(context, listen: false);
-  await mongoService.connect();
-  // Filtro para buscar el usuario con el `user_id` especificado
-  BlDataNotifier().updateUserID(codeSession);
-  final filter = {"user_id": codeSession};
-  final users = await mongoService.getDocuments("users", filter: filter);
-
   bool verifyPassword(String password, String hashedPassword) {
     return BCrypt.checkpw(password, hashedPassword);
   }
 
-  if (users.isNotEmpty) {
-    final user = users.first;
-    user.remove('_id');
-    if (verifyPassword(password, user["Hashpwd"])) {
-      hashpwd = user['Hashpwd'];
-      user.remove("Hashpwd");
-      await mongoService.disconnect();
-      if (user.length <= 3) {
+  if (selectedUserType == 'Empleado') {
+    // Filtro para buscar el usuario con el `user_id` especificado
+    BlDataNotifier().updateUserID(codeSession);
+    final filter = {"user_id": codeSession};
+    final users = await mongoService.getDocuments("users", filter: filter);
+
+    if (users.isNotEmpty) {
+      final user = users.first;
+      user.remove('_id');
+      if (verifyPassword(password, user["Hashpwd"])) {
+        hashpwd = user['Hashpwd'];
+        user.remove("Hashpwd");
+        await mongoService.disconnect();
+        if (user.length <= 3) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const DemographicProfileWorker(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+                const endOffset = Offset.zero; // Termina en el centro
+                const curve = Curves.easeInOut;
+
+                var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                    .chain(CurveTween(curve: curve));
+                var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
+                    .chain(CurveTween(curve: curve));
+
+                return SlideTransition(
+                  position: animation.drive(offsetTween),
+                  child: FadeTransition(
+                    opacity: animation.drive(opacityTween),
+                    child: child,
+                  ),
+                );
+              },
+            ),
+            (Route<dynamic> route) =>
+                false, // Elimina todas las vistas anteriores
+          );
+        } else {
+          print(user);
+          await DatabaseHandler.instance.saveOrUpdateUser(user);
+          saveLastPage('userLoggedHome');
+          Navigator.pushAndRemoveUntil(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const LoggedUserPage(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
+                const endOffset = Offset.zero; // Termina en el centro
+                const curve = Curves.easeInOut;
+
+                var offsetTween = Tween(begin: beginOffset, end: endOffset)
+                    .chain(CurveTween(curve: curve));
+                var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
+                    .chain(CurveTween(curve: curve));
+
+                return SlideTransition(
+                  position: animation.drive(offsetTween),
+                  child: FadeTransition(
+                    opacity: animation.drive(opacityTween),
+                    child: child,
+                  ),
+                );
+              },
+            ),
+            (Route<dynamic> route) =>
+                false, // Elimina todas las vistas anteriores
+          );
+        }
+      } else {
+        showToast(message: 'Contraseña incorrecta');
+      }
+    } else {
+      showToast(message: 'Usuario no encontrado');
+      print('Usuario no encontrado');
+    }
+  } else if (selectedUserType == 'SISO') {
+    // Busca documentos en la colección "SISOData"
+    final filter = {"code": codeSession};
+    final sisoUsers =
+        await mongoService.getDocuments("siso-data", filter: filter);
+
+    if (sisoUsers.isNotEmpty) {
+      final sisoUser = sisoUsers.first;
+      sisoUser.remove('_id');
+      final hashedCode = sisoUser['hashPWD'];
+      if (verifyPassword(password, hashedCode)) {
+        // showToast(message: 'El admin existe');
+        await mongoService.disconnect();
+        print(sisoUser);
+        saveLastPage('SisoPage');
         Navigator.pushAndRemoveUntil(
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-                const DemographicProfileWorker(),
+                const SisoPage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
@@ -264,45 +294,12 @@ Future<void> signInUser(
               false, // Elimina todas las vistas anteriores
         );
       } else {
-        print(user);
-        await DatabaseHandler.instance.saveOrUpdateUser(user);
-        saveLastPage('userLoggedHome');
-        Navigator.pushAndRemoveUntil(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const LoggedUserPage(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              const beginOffset = Offset(0.0, 1.0); // Comienza desde abajo
-              const endOffset = Offset.zero; // Termina en el centro
-              const curve = Curves.easeInOut;
-
-              var offsetTween = Tween(begin: beginOffset, end: endOffset)
-                  .chain(CurveTween(curve: curve));
-              var opacityTween = Tween<double>(begin: 0.0, end: 1.0)
-                  .chain(CurveTween(curve: curve));
-
-              return SlideTransition(
-                position: animation.drive(offsetTween),
-                child: FadeTransition(
-                  opacity: animation.drive(opacityTween),
-                  child: child,
-                ),
-              );
-            },
-          ),
-          (Route<dynamic> route) =>
-              false, // Elimina todas las vistas anteriores
-        );
+        showToast(message: 'Usuario SISO no disponible');
       }
     } else {
-      showToast(message: 'Contraseña incorrecta');
+      print('La colección de SISO está vacía.');
     }
-  } else {
-    showToast(message: 'Usuario no encontrado');
-    print('Usuario no encontrado');
-  }
+  } else if (selectedUserType == 'Gerente') {}
 }
 
 void registerPage(context) {
@@ -410,6 +407,7 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -421,12 +419,13 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
     });
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(children: [
         AnimatedContainer(
           duration: durationAnimation,
-          alignment: _showCard ? Alignment.center : Alignment.center,
+          alignment: Alignment.center,
           padding: _showCard
-              ? const EdgeInsets.only(bottom: 250)
+              ? const EdgeInsets.only(bottom: 20)
               : const EdgeInsets.only(bottom: 0),
           height: screenHeight,
           decoration:
@@ -455,46 +454,55 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
                 children: [
                   AnimatedContainer(
                     duration: durationAnimation,
-                    width: _showCard ? screenWidth * 0.2 : screenWidth * 0.65,
+                    // width: _showCard ? screenWidth * 0.2 : screenWidth * 0.65,
                     height:
                         _showCard ? screenHeight * 0.02 : screenHeight * 0.085,
                     // margin: const EdgeInsets.only(bottom: 10),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _showCard =
-                              !_showCard; // Alterna la visibilidad del Card
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0.0,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(radiusBtn),
-                          side: const BorderSide(width: 0.0), // Borde negro
-                        ),
-                      ),
-                      child: Row(children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              'Ingresar',
-                              style: GoogleFonts.lexend(
-                                  fontSize: 25,
-                                  letterSpacing: 2,
-                                  fontWeight: FontWeight.w300,
-                                  color: Theme.of(context)
-                                      .scaffoldBackgroundColor),
-                            ),
+                    child: SizedBox(
+                      width: screenWidth > 720 ? 350 : screenWidth * 0.8,
+                      height: screenHeight * 0.2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // print(screenHeight);
+                          // print(screenWidth);
+                          // String sisohash = hashPassword('siso');
+                          // print(sisohash);
+                          setState(() {
+                            _showCard =
+                                !_showCard; // Alterna la visibilidad del Card
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0.0,
+                          backgroundColor: Theme.of(context).primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(radiusBtn),
+                            side: const BorderSide(width: 0.0), // Borde negro
                           ),
                         ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Icon(Icons.login,
-                              color: Theme.of(context).scaffoldBackgroundColor),
-                        ),
-                      ]),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Ingresar',
+                                style: GoogleFonts.lexend(
+                                    fontSize: 25,
+                                    letterSpacing: 2,
+                                    fontWeight: FontWeight.w300,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Icon(Icons.login,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor),
+                          ),
+                        ]),
+                      ),
                     ),
                   ),
                 ],
@@ -502,86 +510,100 @@ class _AuthSwitcherState extends State<AuthSwitcher> {
             ],
           ),
         ),
-        AnimatedPositioned(
-            duration: durationAnimation,
-            curve: Curves.easeInOut,
-            bottom: _showCard ? 0 : -screenHeight * 0.9, // Animación
-            left: 0,
-            right: 0,
-            child: Card(
-                margin: const EdgeInsets.all(0),
-                elevation: 0.0,
-                // color: Colors.transparent,
-                color: Theme.of(context).primaryColor,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+        Stack(
+          children: [
+            // Fondo desenfocado cuando _showCard es true
+            if (_showCard)
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                      sigmaX: 5.0, sigmaY: 5.0), // Intensidad del blur
+                  child: Container(
+                    color: Colors.white
+                        .withOpacity(0.3), // Opacidad para efecto de difuminado
                   ),
                 ),
+              ),
+
+            // Tarjeta animada
+            AnimatedPositioned(
+              height: screenWidth > 720 ? 600 : 550,
+              width: screenWidth > 720 ? 480 : null,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              bottom: screenWidth > 720
+                  ? _showCard
+                      ? 60
+                      : -screenHeight * 5
+                  : _showCard
+                      ? keyboardHeight > 0
+                          ? keyboardHeight / 2
+                          : 80
+                      : -screenHeight * 0.90,
+              left: screenWidth > 720
+                  ? (screenWidth -
+                          (screenWidth > 720 ? 480 : screenWidth * 0.8)) /
+                      2
+                  : 0,
+              // left: screenWidth > 720 ? 450 : 0,
+              right: screenWidth > 720 ? null : 0,
+              child: Card(
+                margin: const EdgeInsets.all(10),
+                elevation: 0.0,
+                color: Theme.of(context).primaryColor,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
                 child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 25),
-                    // decoration: BoxDecoration(
-                    //   color: Theme.of(context).colorScheme.secondary,
-                    //   borderRadius: BorderRadius.circular(40),
-                    // ),
-                    child: Consumer<AuthState>(
-                        builder: (context, authState, child) {
-                      return authState.loginBtn
-                          ? Center(
-                              child: Container(
-                                height: screenHeight * 0.474,
-                                decoration: BoxDecoration(
-                                  // color: Colors.pink,
-                                  borderRadius: BorderRadius.circular(50),
-                                ), // Altura del Card
-                                child: Center(
-                                  child: LoadingAnimationWidget.waveDots(
-                                    color: Theme.of(context).primaryColor,
-                                    size: 50,
-                                  ),
-                                ), // Tu formulario
+                  padding: const EdgeInsets.symmetric(vertical: 25),
+                  child: Consumer<AuthState>(
+                    builder: (context, authState, child) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Center(
+                              child: LoginForm(
+                                controllerCodeSession: _codeSessionController,
+                                controllerPassword: _controllerPassword,
                               ),
-                            )
-                          : Column(children: [
-                              Container(
-                                height: screenHeight * 0.5,
-                                decoration: BoxDecoration(
-                                  // color: Colors.pink,
-                                  borderRadius: BorderRadius.circular(50),
-                                ), // Altura del Card
-                                child: Center(
-                                    child: LoginForm(
-                                  controllerCodeSession: _codeSessionController,
-                                  controllerPassword: _controllerPassword,
-                                )), // Tu formulario
-                              ),
-                              FloatingActionButton(
-                                elevation: 0.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      radiusBtn), // Esquinas redondeadas
-                                ),
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.tertiary,
-                                onPressed: () {
-                                  codeSession = '';
-                                  password = '';
-                                  setState(() {
-                                    _showCard = !_showCard;
-                                    FocusScope.of(context).unfocus();
-                                    _controllerPassword.clear();
-                                    _codeSessionController.clear();
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.arrow_downward_outlined,
-                                  color: Theme.of(context).primaryColor,
-                                  size: 40,
-                                ),
-                              )
-                            ]);
-                    })))),
+                            ),
+                          ),
+                          FloatingActionButton(
+                            elevation: 0.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(radiusBtn),
+                            ),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.tertiary,
+                            onPressed: () {
+                              codeSession = '';
+                              password = '';
+                              setState(() {
+                                _showCard = !_showCard;
+                                FocusScope.of(context).unfocus();
+                                _controllerPassword.clear();
+                                _codeSessionController.clear();
+                              });
+                            },
+                            child: Icon(
+                              Icons.arrow_downward_outlined,
+                              color: Theme.of(context).primaryColor,
+                              size: 40,
+                            ),
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ]),
     );
   }
@@ -619,7 +641,7 @@ class _LoginForm extends State<LoginForm> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
+                margin: const EdgeInsets.symmetric(vertical: 20),
                 child: Text(
                   typeUserLogin
                       ? 'Inicio de Sesión'
@@ -632,335 +654,283 @@ class _LoginForm extends State<LoginForm> {
                       color: Theme.of(context).scaffoldBackgroundColor),
                 ),
               ),
-              typeUserLogin
-                  ? Form(
-                      key: _formKey00,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 2, vertical: 5),
-                            child: TextFormField(
-                              controller: widget.controllerCodeSession,
-                              keyboardType: TextInputType
-                                  .text, // Activa el teclado numérico
-                              decoration: InputDecoration(
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsetsDirectional.only(
-                                      start: 12.0),
-                                  child: Icon(
-                                    Icons.vpn_key_outlined,
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                  ), // myIcon is a 48px-wide widget.
-                                ),
-                                labelText: 'Código',
-                                labelStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor),
-                                suffixStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        width: 2.2),
-                                    borderRadius:
-                                        BorderRadius.circular(radiusFocus)),
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: (loginBtn && codeSession == '')
-                                            ? Colors.red
-                                            : Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                        width: 2.2),
-                                    borderRadius:
-                                        BorderRadius.circular(radiusNormal)),
-                              ),
-                              style: TextStyle(
+              Form(
+                key: _formKey00,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 5),
+                      child: DropdownButtonFormField<String>(
+                        icon: const Icon(Icons.keyboard_arrow_down_outlined),
+                        elevation: 0,
+                        focusColor: Theme.of(context).primaryColor,
+                        dropdownColor:
+                            Theme.of(context).scaffoldBackgroundColor,
+                        // borderRadius: BorderRadius.circular(40),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 21.5, horizontal: 12),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                                start: 12.0, end: 10),
+                            child: Icon(
+                              Icons.recent_actors_outlined,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              size: 22,
+                            ), // myIcon is a 48px-wide widget.
+                          ),
+                          labelText: 'Tipo de usuario',
+                          labelStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          suffixStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
                                   color:
                                       Theme.of(context).scaffoldBackgroundColor,
-                                  fontSize: 20),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingresa tu código';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                codeSession = value;
-                                setState(() {});
-                              },
-                            ),
+                                  width: 2.2),
+                              borderRadius: BorderRadius.circular(radiusFocus)),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: (loginBtn &&
+                                        !['Empleado', 'SISO', 'Gerente']
+                                            .contains(selectedUserType))
+                                    ? Colors.red
+                                    : Theme.of(context).scaffoldBackgroundColor,
+                                width: 2.2),
+                            borderRadius: BorderRadius.circular(radiusNormal),
                           ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 2, vertical: 5),
-                            child: TextFormField(
-                              controller: widget.controllerPassword,
-                              decoration: InputDecoration(
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsetsDirectional.only(
-                                      start: 12.0),
-                                  child: Icon(Icons.password,
-                                      color: Theme.of(context)
-                                          .scaffoldBackgroundColor), // myIcon is a 48px-wide widget.
-                                ),
-                                labelText: 'Contraseña',
-                                labelStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor),
-                                suffixStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                        color: Colors.blue, width: 2.2),
-                                    borderRadius:
-                                        BorderRadius.circular(radiusFocus)),
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: (loginBtn && email == '')
-                                            ? Colors.red
-                                            : Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                        width: 2.2),
-                                    borderRadius:
-                                        BorderRadius.circular(radiusNormal)),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    obsTextConfirm
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      obsTextConfirm = !obsTextConfirm;
-                                    });
-                                  },
-                                ),
-                              ),
+                        ),
+                        iconEnabledColor:
+                            Theme.of(context).scaffoldBackgroundColor,
+                        style: TextStyle(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          fontSize: 18,
+                        ),
+                        selectedItemBuilder: (BuildContext context) {
+                          return ['Empleado', 'SISO', 'Gerente']
+                              .map((String value) {
+                            return Text(
+                              value,
                               style: TextStyle(
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  fontSize: 20),
-                              obscureText: !obsTextConfirm,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingresa tu contraseña';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                password = value;
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0, horizontal: 30.0),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(radiusBtn))),
-                              onPressed: () {
-                                bool isConnected =
-                                    Provider.of<InternetConnectionNotifier>(
-                                            context,
-                                            listen: false)
-                                        .internetConnectionState;
-
-                                final authState = Provider.of<AuthState>(
-                                    context,
-                                    listen: false);
-                                try {
-                                  if (isConnected) {
-                                    authState
-                                        .setLoginBtn(true); // Cambia el estado
-                                    if (authState.loginBtn &&
-                                        codeSession != '' &&
-                                        password != '') {
-                                      signInUser(
-                                          context, codeSession, password);
-                                      authState.setLoginBtn(false);
-                                    }
-                                    print(isConnected);
-                                  } else {
-                                    showToast(
-                                        message:
-                                            'No tienes conexión a internet');
-                                  }
-                                } catch (e) {
-                                  print('Error: $e');
-                                }
-                              },
-                              child: Text(
-                                'Iniciar Sesión',
-                                style: GoogleFonts.lexend(
-                                    fontSize: 25,
-                                    letterSpacing: 2,
-                                    fontWeight: FontWeight.w300,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondary),
+                                fontSize: 18,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Form(
-                      key: _formKey06,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 2, vertical: 5),
-                            child: TextFormField(
-                              controller: widget.controllerCodeSession,
-                              keyboardType: TextInputType
-                                  .text, // Activa el teclado numérico
-                              decoration: InputDecoration(
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsetsDirectional.only(
-                                      start: 12.0),
-                                  child: Icon(
-                                    Icons.vpn_key_outlined,
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                  ), // myIcon is a 48px-wide widget.
-                                ),
-                                labelText: 'Código de administrador',
-                                labelStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor),
-                                suffixStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        width: 2.2),
-                                    borderRadius:
-                                        BorderRadius.circular(radiusFocus)),
-                                enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        width: 2.2),
-                                    borderRadius:
-                                        BorderRadius.circular(radiusNormal)),
-                              ),
+                            );
+                          }).toList();
+                        },
+                        value: selectedUserType,
+                        items: <String>['Empleado', 'SISO', 'Gerente']
+                            .map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            onTap: () {
+                              setState(() {});
+                            },
+                            child: Text(
+                              value,
                               style: TextStyle(
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  fontSize: 20),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor ingresa tu código';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                codeSessionAdmin = value;
-                                setState(() {});
-                              },
+                                  fontSize: 16,
+                                  color: Theme.of(context).primaryColor),
+                              overflow: TextOverflow
+                                  .ellipsis, // Agrega puntos suspensivos si es muy largo
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0, horizontal: 30.0),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(radiusBtn))),
-                              onPressed: () {
-                                bool isConnected =
-                                    Provider.of<InternetConnectionNotifier>(
-                                            context,
-                                            listen: false)
-                                        .internetConnectionState;
-
-                                try {
-                                  if (isConnected) {
-                                    if (codeSessionAdmin != '') {
-                                      signInAdmin(context, codeSessionAdmin);
-                                    }
-                                    print(isConnected);
-                                  } else {
-                                    showToast(
-                                        message:
-                                            'No tienes conexión a internet');
-                                  }
-                                } catch (e) {
-                                  print('Error: $e');
-                                }
-                              },
-                              child: Text(
-                                'Ingresar',
-                                style: GoogleFonts.lexend(
-                                    fontSize: 25,
-                                    letterSpacing: 2,
-                                    fontWeight: FontWeight.w300,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondary),
-                              ),
-                            ),
-                          ),
-                        ],
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedUserType = newValue!;
+                          });
+                        },
+                        validator: (value) => value == null
+                            ? 'Por favor selecciona una opción'
+                            : null,
                       ),
                     ),
-              typeUserLogin
-                  ? TextButton(
-                      onPressed: () {
-                        setState(() {
-                          typeUserLogin = false;
-                        });
-                      },
-                      child: Text(
-                        'Ingresar como Administrador',
-                        style: GoogleFonts.roboto(
-                          fontSize: 19,
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).scaffoldBackgroundColor,
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 5),
+                      child: TextFormField(
+                        controller: widget.controllerCodeSession,
+                        keyboardType:
+                            TextInputType.text, // Activa el teclado numérico
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 18, horizontal: 12),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                                start: 12.0, end: 10),
+                            child: Icon(
+                              Icons.vpn_key_outlined,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                            ),
+                          ),
+                          labelText: 'Código',
+                          labelStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          suffixStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  width: 2.2),
+                              borderRadius: BorderRadius.circular(radiusFocus)),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: (loginBtn && codeSession == '')
+                                      ? Colors.red
+                                      : Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                  width: 2.2),
+                              borderRadius:
+                                  BorderRadius.circular(radiusNormal)),
                         ),
-                      ),
-                    )
-                  : TextButton(
-                      onPressed: () {
-                        setState(() {
-                          typeUserLogin = true;
-                        });
-                      },
-                      child: Text(
-                        'Iniciar sesión como Empleado',
-                        style: GoogleFonts.roboto(
-                          fontSize: 19,
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.w600,
+
+                        style: TextStyle(
                           color: Theme.of(context).scaffoldBackgroundColor,
+                          fontSize: 20,
+                        ),
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor ingresa tu código';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          codeSession = value;
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 5),
+                      child: TextFormField(
+                        controller: widget.controllerPassword,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 18, horizontal: 12),
+                          prefixIcon: Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                                start: 12.0, end: 10),
+                            child: Icon(Icons.password,
+                                color: Theme.of(context)
+                                    .scaffoldBackgroundColor), // myIcon is a 48px-wide widget.
+                          ),
+                          labelText: 'Contraseña',
+                          labelStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          suffixStyle: TextStyle(
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.white, width: 2.2),
+                              borderRadius: BorderRadius.circular(radiusFocus)),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: (loginBtn && email == '')
+                                      ? Colors.red
+                                      : Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                  width: 2.2),
+                              borderRadius:
+                                  BorderRadius.circular(radiusNormal)),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obsTextConfirm
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                obsTextConfirm = !obsTextConfirm;
+                              });
+                            },
+                          ),
+                        ),
+                        style: TextStyle(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            fontSize: 20),
+                        obscureText: !obsTextConfirm,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor ingresa tu contraseña';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          password = value;
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            elevation: 5,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 15.0, horizontal: 35.0),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(radiusBtn))),
+                        onPressed: () {
+                          if (!checkPlatform() &&
+                              selectedUserType == 'Empleado') {
+                            showWindowsToast(context,
+                                'Tipo de usuario permitido solo en Android y IOS');
+                          } else {
+                            bool isConnected =
+                                Provider.of<InternetConnectionNotifier>(context,
+                                        listen: false)
+                                    .internetConnectionState;
+
+                            final authState =
+                                Provider.of<AuthState>(context, listen: false);
+                            try {
+                              if (isConnected) {
+                                authState.setLoginBtn(true); // Cambia el estado
+                                if (authState.loginBtn &&
+                                    codeSession != '' &&
+                                    password != '') {
+                                  signInUser(context, codeSession, password,
+                                      selectedUserType!);
+                                  authState.setLoginBtn(false);
+                                }
+                                print(isConnected);
+                              } else {
+                                showToast(
+                                    message: 'No tienes conexión a internet');
+                              }
+                            } catch (e) {
+                              print('Error: $e');
+                            }
+                          }
+                        },
+                        child: Text(
+                          'Iniciar Sesión',
+                          style: GoogleFonts.lexend(
+                              fontSize: 25,
+                              letterSpacing: 2,
+                              fontWeight: FontWeight.w300,
+                              color: Theme.of(context).colorScheme.secondary),
                         ),
                       ),
                     ),
+                  ],
+                ),
+              )
             ],
           ),
         ),
@@ -1638,14 +1608,6 @@ class _RegisterQuestions extends State<RegisterQuestions> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Ingrese su sexo',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
-                                ),
-                              ),
                               spaceSizedBox,
                               DropdownButtonFormField<String>(
                                 icon: const Icon(
@@ -2963,8 +2925,7 @@ class _ResidenceQuestions extends State<ResidenceQuestions> {
                                         counterStyle: TextStyle(
                                             color: Theme.of(context)
                                                 .primaryColorDark),
-                                        labelText:
-                                            'Barrio/localidad de residencia',
+                                        labelText: 'Barrio/|idad de residencia',
                                         labelStyle: TextStyle(
                                             color: Theme.of(context)
                                                 .colorScheme

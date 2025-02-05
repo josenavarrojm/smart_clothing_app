@@ -1,4 +1,6 @@
 /// Clase que representa el modelo de usuario con todos sus datos relevantes.
+// ignore_for_file: non_constant_identifier_names
+
 class UserModel {
   /// Identificador único opcional del usuario (usado para bases de datos locales o remotas).
   final String? id;

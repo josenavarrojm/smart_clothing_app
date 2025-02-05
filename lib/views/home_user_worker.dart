@@ -293,13 +293,13 @@ class DataCard extends StatelessWidget {
   final Color? iconColor; // Color del ícono opcional
 
   const DataCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.textColor,
     this.icon, // Icono opcional
     this.iconColor, // Color del ícono opcional
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

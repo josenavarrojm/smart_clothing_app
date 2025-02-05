@@ -8,16 +8,16 @@ import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/functions/show_toast.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/views/auth_user.dart';
-import 'package:smartclothingproject/views/user_resume_view.dart';
+import 'package:smartclothingproject/views/user_resume_view_siso.dart';
 
-class AdminPage extends StatefulWidget {
-  const AdminPage({super.key});
+class SisoPage extends StatefulWidget {
+  const SisoPage({super.key});
 
   @override
-  _AdminPageState createState() => _AdminPageState();
+  _SisoPageState createState() => _SisoPageState();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class _SisoPageState extends State<SisoPage> {
   List<Map<String, dynamic>> users = [];
   List<Map<String, dynamic>> userListUpdatedReload = [];
   bool userListUpdate = false;
@@ -76,19 +76,6 @@ class _AdminPageState extends State<AdminPage> {
             ),
           ),
           actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.person_add_outlined,
-                size: 28,
-              ),
-              color: Theme.of(context).primaryColor,
-              // : Theme.of(context).colorScheme.tertiary,
-              onPressed: () async {
-                setState(() {
-                  showAddUserDialog(context);
-                });
-              },
-            ),
             IconButton(
               icon: const Icon(
                 Icons.replay_outlined,
@@ -179,115 +166,131 @@ class _AdminPageState extends State<AdminPage> {
 
                         return Container(
                           height: screenHeight * 0.13,
-                          width: screenWidth * 95,
                           margin: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 0),
+                              horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                              color: Theme.of(context).scaffoldBackgroundColor),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                           child: Card(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30)),
                             elevation: 0,
                             child: Center(
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  child: hasCompleteProfile
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .cardColor, // Fondo según el tema
+                                  borderRadius: BorderRadius.circular(
+                                      0), // Bordes redondeados
+                                ),
+                                child: ListTile(
+                                  hoverColor: Colors.transparent,
+                                  splashColor: Colors.transparent,
+                                  leading: CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.secondary,
+                                    child: hasCompleteProfile
+                                        ? Text(
+                                            user['Name']
+                                                [0], // Primera letra del nombre
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          )
+                                        : const Icon(Icons.person,
+                                            color: Colors.white),
+                                  ),
+                                  title: Text(
+                                    hasCompleteProfile
+                                        ? '${user['Name']} ${user['Surname']}'
+                                        : 'Usuario incompleto',
+                                    style: GoogleFonts.lexend(fontSize: 18),
+                                  ),
+                                  subtitle: hasCompleteProfile
                                       ? Text(
-                                          user['Name']
-                                              [0], // Primera letra del nombre
-                                          style: const TextStyle(
-                                              color: Colors.white),
+                                          'Correo: ${user['Email']}',
+                                          style:
+                                              GoogleFonts.lexend(fontSize: 14),
+                                          softWrap:
+                                              false, // Evita el salto de línea
+                                          overflow: TextOverflow
+                                              .ellipsis, // Muestra los puntos suspensivos
+                                          maxLines: 1,
                                         )
-                                      : const Icon(Icons.person,
-                                          color: Colors.white),
-                                ),
-                                title: Text(
-                                  hasCompleteProfile
-                                      ? '${user['Name']} ${user['Surname']}'
-                                      : 'Usuario incompleto',
-                                  style: GoogleFonts.lexend(fontSize: 18),
-                                ),
-                                subtitle: hasCompleteProfile
-                                    ? Text(
-                                        'Correo: ${user['Email']}',
-                                        style: GoogleFonts.lexend(fontSize: 14),
-                                        softWrap:
-                                            false, // Evita el salto de línea
-                                        overflow: TextOverflow
-                                            .ellipsis, // Muestra los puntos suspensivos
-                                        maxLines: 1,
-                                      )
-                                    : Text(
-                                        'Perfil incompleto. El usuario no ha terminado su registro.',
-                                        style: GoogleFonts.lexend(
-                                          fontSize: 14,
+                                      : Text(
+                                          'Perfil incompleto. El usuario no ha terminado su registro.',
+                                          style: GoogleFonts.lexend(
+                                            fontSize: 14,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .error,
+                                          ),
+                                        ),
+                                  trailing: hasCompleteProfile
+                                      ? Icon(
+                                          Icons.arrow_forward_ios,
+                                          color: Theme.of(context)
+                                              .primaryColorLight,
+                                        )
+                                      : Icon(
+                                          Icons.warning,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .error,
                                         ),
-                                      ),
-                                trailing: hasCompleteProfile
-                                    ? Icon(
-                                        Icons.arrow_forward_ios,
-                                        color:
-                                            Theme.of(context).primaryColorLight,
-                                      )
-                                    : Icon(
-                                        Icons.warning,
-                                        color:
-                                            Theme.of(context).colorScheme.error,
-                                      ),
-                                onTap: hasCompleteProfile
-                                    ? () {
-                                        Navigator.push(
-                                          context,
-                                          PageRouteBuilder(
-                                            pageBuilder: (context, animation,
-                                                    secondaryAnimation) =>
-                                                UserResumeView(
-                                              user: user,
+                                  onTap: hasCompleteProfile
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            PageRouteBuilder(
+                                              pageBuilder: (context, animation,
+                                                      secondaryAnimation) =>
+                                                  UserResumeView(
+                                                user: user,
+                                              ),
+                                              transitionsBuilder: (context,
+                                                  animation,
+                                                  secondaryAnimation,
+                                                  child) {
+                                                const beginOffset = Offset(1.0,
+                                                    0.0); // Desde arriba hacia abajo
+                                                const endOffset = Offset
+                                                    .zero; // Termina en el centro
+                                                const curve = Curves.easeOut;
+
+                                                var offsetTween = Tween(
+                                                        begin: beginOffset,
+                                                        end: endOffset)
+                                                    .chain(CurveTween(
+                                                        curve: curve));
+                                                var opacityTween =
+                                                    Tween<double>(
+                                                            begin: 0.8,
+                                                            end: 1.0)
+                                                        .chain(CurveTween(
+                                                            curve: curve));
+
+                                                return SlideTransition(
+                                                  position: animation
+                                                      .drive(offsetTween),
+                                                  child: FadeTransition(
+                                                    opacity: animation
+                                                        .drive(opacityTween),
+                                                    child: child,
+                                                  ),
+                                                );
+                                              },
+                                              transitionDuration:
+                                                  const Duration(
+                                                      milliseconds: 250),
+                                              reverseTransitionDuration:
+                                                  const Duration(
+                                                      milliseconds: 250),
                                             ),
-                                            transitionsBuilder: (context,
-                                                animation,
-                                                secondaryAnimation,
-                                                child) {
-                                              const beginOffset = Offset(1.0,
-                                                  0.0); // Desde arriba hacia abajo
-                                              const endOffset = Offset
-                                                  .zero; // Termina en el centro
-                                              const curve = Curves.easeOut;
-
-                                              var offsetTween = Tween(
-                                                      begin: beginOffset,
-                                                      end: endOffset)
-                                                  .chain(
-                                                      CurveTween(curve: curve));
-                                              var opacityTween = Tween<double>(
-                                                      begin: 0.8, end: 1.0)
-                                                  .chain(
-                                                      CurveTween(curve: curve));
-
-                                              return SlideTransition(
-                                                position: animation
-                                                    .drive(offsetTween),
-                                                child: FadeTransition(
-                                                  opacity: animation
-                                                      .drive(opacityTween),
-                                                  child: child,
-                                                ),
-                                              );
-                                            },
-                                            transitionDuration: const Duration(
-                                                milliseconds: 250),
-                                            reverseTransitionDuration:
-                                                const Duration(
-                                                    milliseconds: 250),
-                                          ),
-                                        );
-                                      }
-                                    : null, // No hacer nada si el perfil está incompleto
+                                          );
+                                        }
+                                      : null, // No hacer nada si el perfil está incompleto
+                                ),
                               ),
                             ),
                           ),

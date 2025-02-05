@@ -1,5 +1,7 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:windows_toast/windows_toast.dart';
 
 /// Muestra un toast con un mensaje personalizado.
 ///
@@ -31,4 +33,13 @@ void showToast({
         1, 10), // Limita la duración entre 1 y 10 segundos.
     fontSize: fontSize,
   );
+}
+
+bool checkPlatform() {
+  return (Platform.isAndroid || Platform.isIOS);
+}
+
+void showWindowsToast(BuildContext context, String toastMessage) {
+  WindowsToast.show(toastMessage, context, 30,
+      toastColor: Colors.white, textPadding: EdgeInsets.all(10), duration: 3);
 }
