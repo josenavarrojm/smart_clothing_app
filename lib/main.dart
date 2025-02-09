@@ -95,6 +95,7 @@ class MyApp extends StatelessWidget {
                   tertiary: const Color.fromARGB(255, 241, 115, 0)),
             ),
       debugShowCheckedModeBanner: false,
+      // home: VisualData(),
       home: lastPage == 'userLoggedHome'
           ? const LoggedUserPage()
           : lastPage == 'SisoPage'

@@ -11,10 +11,11 @@ import 'package:smartclothingproject/functions/alerts_notifier.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/functions/update_notifiers_sensor_data.dart';
-import 'package:smartclothingproject/views/auth_user.dart';
+import 'package:smartclothingproject/handlers/loggout_handler.dart';
 import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
 import 'package:smartclothingproject/views/notification_panel.dart';
 import 'package:smartclothingproject/views/profile_page.dart';
+import 'package:smartclothingproject/views/visual_data_single.dart';
 import '../handlers/data_base_handler.dart';
 import '../models/user_model.dart';
 
@@ -225,37 +226,9 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                         : Theme.of(context).primaryColor,
                     // : Theme.of(context).colorScheme.tertiary,
                     onPressed: () async {
-                      if (_selectedIndex != 1) {
-                        await DatabaseHandler.instance.deleteUser();
-                        await DatabaseHandler.instance.clearAlerts();
-                        await DatabaseHandler.instance.clearSensorData();
-                        saveLastPage('AuthSwitch');
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) =>
-                                    const AuthSwitcher(),
-                            transitionsBuilder: (context, animation,
-                                secondaryAnimation, child) {
-                              const begin = Offset(
-                                  -1.0, 0.0); // Comienza desde la izquierda
-                              const end = Offset.zero; // Termina en el centro
-                              const curve = Curves.easeInOut;
-
-                              var tween = Tween(begin: begin, end: end)
-                                  .chain(CurveTween(curve: curve));
-
-                              return SlideTransition(
-                                position: animation.drive(tween),
-                                child: child,
-                              );
-                            },
-                          ),
-                          (Route<dynamic> route) =>
-                              false, // Elimina todas las vistas anteriores
-                        );
-                      }
+                      print('//////////////////////////////7');
+                      logoutHandler(context, _selectedIndex);
+                      print('//////////////////////////////');
                     },
                   ),
               ],
@@ -299,6 +272,7 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                           size: 50,
                         ),
                       ),
+                const VisualData(),
               ],
             );
           },
@@ -354,6 +328,17 @@ class _LoggedUserPageState extends State<LoggedUserPage> {
                     ],
                   ),
                   label: 'Perfil',
+                ),
+                BottomNavigationBarItem(
+                  icon: AnimatedIconContainer(
+                    isSelected: _selectedIndex == 2,
+                    icon: Icons.list_alt,
+                    gradientColors: [
+                      Theme.of(context).colorScheme.secondary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                  ),
+                  label: 'Resume',
                 ),
               ],
               currentIndex: _selectedIndex,

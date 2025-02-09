@@ -249,8 +249,8 @@ class _UserResumeViewState extends State<UserResumeView> {
         double.tryParse(BlDataNotifier().temperatureCorporalData) ?? 0.0;
     final double tempAmbValue =
         double.tryParse(BlDataNotifier().temperatureAmbData) ?? 0.0;
-    final double humidityValue =
-        double.tryParse(BlDataNotifier().humidityData) ?? 0.0;
+    // final double humidityValue =
+    //     double.tryParse(BlDataNotifier().humidityData) ?? 0.0;
     final int bpmData = int.tryParse(BlDataNotifier().bpmData) ?? 0;
     final double anglePosition =
         double.tryParse(BlDataNotifier().accelerometerXData) ?? 0.0;
@@ -455,10 +455,10 @@ class _UserResumeViewState extends State<UserResumeView> {
                               title: 'Temperatura Ambiental',
                               value: '${(tempAmbValue * 10).ceil() / 10}°C',
                               textColor: Theme.of(context).primaryColor),
-                          DataCard(
-                              title: 'Humedad',
-                              value: '${(humidityValue * 10).ceil() / 10}%',
-                              textColor: Theme.of(context).primaryColor),
+                          // DataCard(
+                          //     title: 'Humedad',
+                          //     value: '${(humidityValue * 10).ceil() / 10}%',
+                          //     textColor: Theme.of(context).primaryColor),
                         ],
                       ),
                     ),

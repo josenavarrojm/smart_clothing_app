@@ -65,7 +65,7 @@ class MongoService {
 
     try {
       await _collection.insert(data);
-      print("Documento insertado: $data");
+      // print("Documento insertado: $data");
     } catch (e) {
       print("Error al insertar documento: $e");
     }

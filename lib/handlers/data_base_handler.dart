@@ -78,7 +78,7 @@ class DatabaseHandler {
         bpm INTEGER,
         tempAmb REAL,
         tempCorp REAL,
-        hum REAL,
+        // hum REAL,-
         acelX REAL,
         acelY REAL,
         acelZ REAL,
@@ -105,8 +105,40 @@ class DatabaseHandler {
 
   /// Actualiza la base de datos al cambiar de versión.
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 11) {
-      await db.execute('ALTER TABLE sensor_data ADD COLUMN user_id TEXT');
+    if (oldVersion < 12) {
+      // Asegúrate de incrementar la versión a 12
+      await db.execute('''
+      CREATE TABLE sensor_data_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        _id TEXT,
+        user_id TEXT,
+        bpm INTEGER,
+        tempAmb REAL,
+        tempCorp REAL,
+        acelX REAL,
+        acelY REAL,
+        acelZ REAL,
+        time INTEGER,
+        ecg TEXT,
+        created_at TEXT,
+        onMongoDB BOOLEAN
+      )
+    ''');
+
+      // Copiar los datos de la tabla antigua a la nueva
+      await db.execute('''
+      INSERT INTO sensor_data_new (
+        id, _id, user_id, bpm, tempAmb, tempCorp, acelX, acelY, acelZ, time, ecg, created_at, onMongoDB
+      ) SELECT
+        id, _id, user_id, bpm, tempAmb, tempCorp, acelX, acelY, acelZ, time, ecg, created_at, onMongoDB
+      FROM sensor_data
+    ''');
+
+      // Eliminar la tabla antigua
+      await db.execute('DROP TABLE sensor_data');
+
+      // Renombrar la nueva tabla con el nombre correcto
+      await db.execute('ALTER TABLE sensor_data_new RENAME TO sensor_data');
     }
   }
 

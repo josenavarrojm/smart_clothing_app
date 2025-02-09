@@ -22,24 +22,12 @@ void updateNotifiersSensorData(Map<String, dynamic> data) {
   updateNotifier(notifier.updateBpmData, "bpm");
   updateNotifier(notifier.updateTemperatureAmbData, "tempAmb");
   updateNotifier(notifier.updateTemperatureCorporalData, "tempCorp");
-  updateNotifier(notifier.updateHumidityData, "hum");
+  // updateNotifier(notifier.updateHumidityData, "hum");
   updateNotifier(notifier.updateAccelerometerXData, "acelX");
   updateNotifier(notifier.updateAccelerometerYData, "acelY");
   updateNotifier(notifier.updateAccelerometerZData, "acelZ");
   updateNotifier(notifier.updateTimeData, "time");
   updateNotifier(notifier.updateDateTimeData, "created_at");
-
-  // Actualización de datos históricos
-  void updateHistorico(String key, void Function(double) updateFunction) {
-    final value = data[key]?.toString();
-    final parsedValue = double.tryParse(value ?? "");
-    if (parsedValue != null) {
-      updateFunction(parsedValue);
-    }
-  }
-
-  updateHistorico("tempCorp", notifier.addHistoricoTempCorp);
-  updateHistorico("bpm", notifier.addHistoricoBPM);
 
   // Decodificación de ECG
   if (data["ecg"] != null) {

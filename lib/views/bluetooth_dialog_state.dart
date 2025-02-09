@@ -65,6 +65,7 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
 
     requestPermissions();
     startScanningDevices();
+    setState(() {});
     bleController = BluetoothController(context, widget.user);
     // Escuchar el estado del escáner
     _subscription = bleController.bleScanner.state.listen((state) {
@@ -88,9 +89,6 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
             }
             BleConnectionService().updateScanned(
                 state.scanIsInProgress); // Actualiza el estado del escaneo
-          } else if (!BleConnectionService().isConnected &&
-              BleConnectionService().isSuscripted) {
-            bleController.disconnectFromDevice(deviceId);
           }
         });
       }
@@ -266,7 +264,8 @@ class _BluetoothDialogState extends State<BluetoothDialog> {
                   ),
                 ],
               )
-            else if (BleConnectionService().bleStatus &&
+            else if (!BleConnectionService().scanned &&
+                BleConnectionService().bleStatus &&
                 !BleConnectionService().deviceFound &&
                 BleConnectionService().isConnected &&
                 BleConnectionService().isSuscripted)

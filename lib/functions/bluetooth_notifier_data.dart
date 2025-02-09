@@ -15,7 +15,7 @@ class BlDataNotifier with ChangeNotifier {
   String _timeData = '0.0';
   String _temperatureAmbData = '0.0';
   String _temperatureCorporalData = '0.0';
-  String _humidityData = '0.0';
+  // String _humidityData = '0.0';
   String _accelerometerXData = '0.0';
   String _accelerometerYData = '0.0';
   String _accelerometerZData = '0.0';
@@ -23,8 +23,8 @@ class BlDataNotifier with ChangeNotifier {
   List<double> _ecgData = [];
   List<double> _ecgDataApp = [];
   List<double> _ecgDataIDApp = [];
-  final List<double> _historicoTempCorp = [];
-  final List<double> _historicoBPM = [];
+  List<double> _historicoTempCorp = [];
+  List<double> _historicoBPM = [];
 
   // Getters: Proveen acceso de solo lectura a los datos.
   String get userID => _userID;
@@ -33,7 +33,7 @@ class BlDataNotifier with ChangeNotifier {
   String get timeData => _timeData;
   String get temperatureAmbData => _temperatureAmbData;
   String get temperatureCorporalData => _temperatureCorporalData;
-  String get humidityData => _humidityData;
+  // String get humidityData => _humidityData;
   String get accelerometerXData => _accelerometerXData;
   String get accelerometerYData => _accelerometerYData;
   String get accelerometerZData => _accelerometerZData;
@@ -62,8 +62,8 @@ class BlDataNotifier with ChangeNotifier {
       updateData(value, (v) => _temperatureAmbData = v);
   void updateTemperatureCorporalData(String value) =>
       updateData(value, (v) => _temperatureCorporalData = v);
-  void updateHumidityData(String value) =>
-      updateData(value, (v) => _humidityData = v);
+  // void updateHumidityData(String value) =>
+  //     updateData(value, (v) => _humidityData = v);
   void updateAccelerometerXData(String value) =>
       updateData(value, (v) => _accelerometerXData = v);
   void updateAccelerometerYData(String value) =>
@@ -80,6 +80,12 @@ class BlDataNotifier with ChangeNotifier {
       updateData(value, (v) => _ecgDataApp = v);
   void updateECGDataIDApp(List<double> value) =>
       updateData(value, (v) => _ecgDataIDApp = v);
+
+  void updateHistoricoTempCorp(List<double> value) =>
+      updateData(value, (v) => _historicoTempCorp = v);
+
+  void updateHistoricoBPM(List<double> value) =>
+      updateData(value, (v) => _historicoBPM = v);
 
   // Métodos para añadir al histórico
   void addHistoricoTempCorp(double value) {

@@ -34,8 +34,8 @@ class _HomeUserWorker extends State<HomeUserWorker> {
         double.tryParse(widget.blDataNotifier.temperatureCorporalData) ?? 0.0;
     final double tempAmbValue =
         double.tryParse(widget.blDataNotifier.temperatureAmbData) ?? 0.0;
-    final double humidityValue =
-        double.tryParse(widget.blDataNotifier.humidityData) ?? 0.0;
+    // final double humidityValue =
+    //     double.tryParse(widget.blDataNotifier.humidityData) ?? 0.0;
     final double timeData =
         double.tryParse(widget.blDataNotifier.timeData) ?? 0.0;
     final int bpmData = int.tryParse(widget.blDataNotifier.bpmData) ?? 0;
@@ -115,7 +115,7 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               const SizedBox(
                 height: 15,
               ),
-              const SectionHeader(title: 'Variables Ambientales'),
+              const SectionHeader(title: 'Variables de monitoreo'),
               const SizedBox(
                 height: 10,
               ),
@@ -129,25 +129,25 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                         value: '${(tempAmbValue * 10).ceil() / 10}°C',
                         textColor: Theme.of(context).primaryColor),
                     DataCard(
-                        title: 'Humedad',
-                        value: '${(humidityValue * 10).ceil() / 10}%',
+                        title: 'Temperatura  Corporal',
+                        value: '${(tempCorpValue * 10).ceil() / 10}°C',
                         textColor: Theme.of(context).primaryColor),
+                    // DataCard(
+                    //     title: 'Humedad',
+                    //     value: '${(humidityValue * 10).ceil() / 10}%',
+                    //     textColor: Theme.of(context).primaryColor),
                   ],
                 ),
               ),
               const SizedBox(
                 height: 20,
               ),
-              const SectionHeader(title: 'Variables Corporales'),
+              // const SectionHeader(title: 'Variables Corporales'),
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    DataCard(
-                        title: 'Temperatura  Corporal',
-                        value: '${(tempCorpValue * 10).ceil() / 10}°C',
-                        textColor: Theme.of(context).primaryColor),
                     DataCard(
                       title: 'BPM',
                       value: '$bpmData',
@@ -155,15 +155,15 @@ class _HomeUserWorker extends State<HomeUserWorker> {
                       icon: (Icons.favorite_rounded),
                       iconColor: Colors.red,
                     ),
+                    DataCard(
+                      title: 'Inclinación',
+                      value: '${(anglePosition * 10).ceil() / 10}°',
+                      textColor: Theme.of(context).primaryColor,
+                      icon: (Icons.personal_injury_outlined),
+                      iconColor: Theme.of(context).primaryColor,
+                    ),
                   ],
                 ),
-              ),
-              DataCard(
-                title: 'Inclinación',
-                value: '${(anglePosition * 10).ceil() / 10}°',
-                textColor: Theme.of(context).primaryColor,
-                icon: (Icons.personal_injury_outlined),
-                iconColor: Theme.of(context).primaryColor,
               ),
               const SizedBox(
                 height: 20,
@@ -174,8 +174,8 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               ),
               HistoricChartCard(
                 titleChart: 'Temperatura Corporal',
-                minY: 20,
-                maxY: 40,
+                minY: -100,
+                maxY: 500,
                 unitChart: 'Grados °C',
                 time: 3,
                 heightFactor: 0.35,
@@ -188,8 +188,8 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               HistoricChartCard(
                 titleChart: 'BPM',
                 unitChart: 'Pulsaciones por minuto',
-                minY: 40,
-                maxY: 150,
+                minY: -300,
+                maxY: 1400,
                 // time: timeData,
                 heightFactor: 0.35,
                 data: (widget.blDataNotifier.historicoBPM.isNotEmpty)
@@ -200,8 +200,8 @@ class _HomeUserWorker extends State<HomeUserWorker> {
               ),
               ChartCard(
                 titleChart: 'ECG',
-                minY: -3,
-                maxY: 3,
+                minY: -2,
+                maxY: 2,
                 time: timeData,
                 heightFactor: 0.35,
                 data: (widget.blDataNotifier.ecgDataApp.isNotEmpty)
@@ -321,7 +321,7 @@ class DataCard extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: GoogleFonts.lexend(
-                fontSize: MediaQuery.of(context).size.width * 0.046,
+                fontSize: MediaQuery.of(context).size.width * 0.037,
                 fontWeight: FontWeight.w300,
                 color: textColor,
               ),

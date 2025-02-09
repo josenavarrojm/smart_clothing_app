@@ -5,9 +5,10 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:provider/provider.dart';
+import 'package:smartclothingproject/controllers/BLE/ble_device_connector.dart';
+import 'package:smartclothingproject/controllers/BLE/ble_scanner.dart';
 import 'package:smartclothingproject/functions/bluetooth_notifier_data.dart';
 import 'package:smartclothingproject/functions/ble_connected_state_notifier.dart';
 import 'package:smartclothingproject/functions/internet_connection_state_notifier.dart';
@@ -15,8 +16,6 @@ import 'package:smartclothingproject/functions/update_notifiers_sensor_data.dart
 import 'package:smartclothingproject/handlers/data_base_handler.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
 import 'package:smartclothingproject/models/user_model.dart';
-import 'package:smartclothingproject/views/bluetooth_dialog_state.dart';
-import 'reactive_state.dart';
 import 'dart:convert';
 
 final flutterReactiveBle = FlutterReactiveBle();
@@ -31,15 +30,15 @@ class BluetoothController {
   int timeData = 0;
   double temperatureAmbData = 0.0;
   double temperatureCorporalData = 0.0;
-  double humidityData = 0.0;
+  // double humidityData = 0.0;
   double accelerometerXData = 0.0;
   double accelerometerYData = 0.0;
   double accelerometerZData = 0.0;
   List<double> ecgDataReceived = [];
   List<double> ecgDataIDReceived = [];
+  int timestamp = 0;
   String readData = '';
   List<Map<String, dynamic>> dataMongoDB = [];
-
   StreamSubscription<List<int>>? subscription;
 
   Map<String, dynamic> dataReceived = {
@@ -47,13 +46,13 @@ class BluetoothController {
     "bpm": 0,
     "tempAmb": 0,
     "tempCorp": 0,
-    "hum": 0,
+    // "hum": 0,
     "acelX": 0,
     "acelY": 0,
     "acelZ": 0,
     "time": 0,
     "ecg": <double>[],
-    "created_at": "",
+    "timestamp": "",
   };
 
   List<Map<String, dynamic>> parseEcgData(List<String> ecgDataReceived) {
@@ -103,6 +102,7 @@ class BluetoothController {
   Future<void> requestBluetoothActivation() async {
     var bluetoothState = await FlutterBluePlus.adapterState.first;
     if (bluetoothState == BluetoothAdapterState.on) {
+      print('ENCENDIDOOOOOOOOOOOOOOOOOOOOOOO');
       BleConnectionService().updateBleStatus(true);
     }
 
@@ -112,7 +112,34 @@ class BluetoothController {
     }
   }
 
-  void startScanning(List<Uuid> serviceIds) {
+  void startScanning(List<Uuid> serviceIds) async {
+    // String? deviceId =
+    //     await getDeivceId(); // Obtiene ID del último dispositivo conectado
+    // print(deviceId);
+    // if (deviceId != null) {
+    //   BleConnectionService().updateScanned(true);
+    //   await connectToDevice(deviceId); // Intenta conectar
+    //   bool isConnected = BleConnectionService().isConnected;
+    //   print('VOY POR ACÁAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+
+    //   if (isConnected) {
+    //     print('ESTOY CONECTADDASKJDASHKFKJASHFHAKJSFHKJASKJFH');
+    //     BleConnectionService().updateScanned(false);
+    //     BleConnectionService().updateDeviceStatus(false);
+    //     BleConnectionService().updateConnectionStatus(true);
+    //     BleConnectionService().updateSuscriptionStatus(true);
+    //     BleConnectionService().updateBleStatus(true);
+    //   } else if (!isConnected) {
+    //     print('NO HA FUNCIONADOOOOOOOOOO');
+    //     // Si la conexión falla, inicia el escaneo
+    //     _bleScanner.startScan(serviceIds);
+    //   }
+    // } else {
+    //   print('NO HAY DEVICE IDDDDDDDDDDDDDDDDD');
+    //   // Si no hay un dispositivo guardado, inicia el escaneo directamente
+    //   BleConnectionService().updateScanned(true);
+    //   _bleScanner.startScan(serviceIds);
+    // }
     BleConnectionService().updateScanned(true);
     _bleScanner.startScan(serviceIds);
   }
@@ -124,13 +151,6 @@ class BluetoothController {
   Future<void> connectToDevice(String deviceId) async {
     await _deviceConnector.connect(deviceId, subscription);
   }
-
-  Future<void> disconnectFromDevice(String deviceId) async {
-    await _deviceConnector.disconnect(deviceId);
-  }
-
-  // Método de suscripción a una característica
-  // StringBuffer _receivedDataBuffer = StringBuffer();
 
   StreamSubscription<List<int>>? subscribeToCharacteristic({
     required String deviceId,
@@ -157,7 +177,7 @@ class BluetoothController {
         // Convertir el fragmento de datos recibido en texto
         final decodedFragment = String.fromCharCodes(data);
         // print(decodedFragment);
-        // // Verificar si el fragmento contiene la palabra 'temperature'
+        // Verificar si el fragmento contiene la palabra 'temperature'
         if (decodedFragment.contains('time')) {
           // Separar la cadena por el delimitador ":"
           if (!BleConnectionService().isSuscripted) {}
@@ -222,21 +242,21 @@ class BluetoothController {
                   "Temperatura corporal: ${BlDataNotifier().temperatureCorporalData}");
             }
           }
-        } else if (decodedFragment.contains('hum')) {
-          // Separar la cadena por el delimitador ":"
-          if (!BleConnectionService().isSuscripted) {}
-          var parts = decodedFragment.split(':');
+          // } else if (decodedFragment.contains('hum')) {
+          //   // Separar la cadena por el delimitador ":"
+          //   if (!BleConnectionService().isSuscripted) {}
+          //   var parts = decodedFragment.split(':');
 
-          // Asegurarnos de que hay al menos dos partes (la variable y el valor)
-          if (parts.length > 1) {
-            // Extraer el valor de temperatura y limpiarlo
-            String valueReceived =
-                parts[1].trim(); // .trim() elimina espacios extra
-            humidityData = double.parse(valueReceived);
+          //   // Asegurarnos de que hay al menos dos partes (la variable y el valor)
+          //   if (parts.length > 1) {
+          //     // Extraer el valor de temperatura y limpiarlo
+          //     String valueReceived =
+          //         parts[1].trim(); // .trim() elimina espacios extra
+          //     humidityData = double.parse(valueReceived);
 
-            dataReceived["hum"] = humidityData;
-            // print("Humedad: ${BlDataNotifier().humidityData}");
-          }
+          //     dataReceived["hum"] = humidityData;
+          //     // print("Humedad: ${BlDataNotifier().humidityData}");
+          //   }
         } else if ((decodedFragment.contains('acelX1'))) {
           // Separar la cadena por el delimitador ":"
           var parts = decodedFragment.split(':');
@@ -328,9 +348,14 @@ class BluetoothController {
             dataReceived["ecg"] = jsonEncode(BlDataNotifier().ecgData);
 
             await initializeDateFormatting('es_ES', null);
-            Intl.defaultLocale = 'es_ES';
-            dataReceived["created_at"] =
-                DateFormat('EEE, MMM d, yyyy - hh:mm a').format(DateTime.now());
+            timestamp = DateTime.now().millisecondsSinceEpoch.toInt();
+            dataReceived["timestamp"] = timestamp;
+            // DateTime fecha = DateTime.fromMillisecondsSinceEpoch(timestamp);
+            // dataReceived["created_at"] =
+            //     DateFormat('EEE, MMM d, yyyy - hh:mm a').format(fecha);
+            // Intl.defaultLocale = 'es_ES';
+            // dataReceived["created_at"] =
+            //     DateFormat('EEE, MMM d, yyyy - hh:mm a').format(DateTime.now());
 
             if (BlDataNotifier().ecgData.isNotEmpty) {
               print('=====================');
@@ -394,13 +419,42 @@ class BluetoothController {
 
                     dataMongoDB =
                         await mongoService.getDocuments("data", filter: filter);
+
+                    List<double> bpmList = [];
+                    List<double> tempCorpList = [];
+
+                    for (var doc in dataMongoDB) {
+                      if (doc.containsKey('bpm') && doc['bpm'] != null) {
+                        bpmList.add((doc['bpm'] as num).toDouble());
+                      }
+                      if (doc.containsKey('tempCorp') &&
+                          doc['tempCorp'] != null) {
+                        tempCorpList.add((doc['tempCorp'] as num).toDouble());
+                      }
+                    }
+
+                    dataMongoDB.last["timestamp"] =
+                        dataMongoDB.last["timestamp"].toInt();
+
+                    DateTime fecha = DateTime.fromMillisecondsSinceEpoch(
+                        (dataMongoDB.last["timestamp"]));
+
+                    dataMongoDB.last.remove('timestamp');
+                    dataMongoDB.last["created_at"] =
+                        DateFormat('EEE, MMM d, yyyy - hh:mm a').format(fecha);
+
                     updateNotifiersSensorData(dataMongoDB.last);
+                    BlDataNotifier().updateHistoricoBPM(bpmList);
+                    BlDataNotifier().updateHistoricoTempCorp(tempCorpList);
                     // Activar alertas
                     activateTemperatureCorporalAlert();
                     activateBPMAlert();
                     activatePositionAlert();
 
                     // Marcar dato como sincronizado (convertir bool a int) y guardar en SQLite
+                    dataReceived.remove('timestamp');
+                    dataReceived['created_at'] =
+                        DateFormat('EEE, MMM d, yyyy - hh:mm a').format(fecha);
                     dataReceived['onMongoDB'] = 1; // 1 para true
                     dataReceived['_id'] = dataReceived['_id'].toString();
                     await dbHandler.saveSensorData(dataReceived);
@@ -464,177 +518,5 @@ class BluetoothController {
     await stopScanning();
     await _deviceConnector.dispose();
     await _bleScanner.dispose();
-  }
-}
-
-class BleScanner implements ReactiveState<BleScannerState> {
-  BleScanner({
-    required FlutterReactiveBle ble,
-    required void Function(String message) logMessage,
-  })  : _ble = ble,
-        _logMessage = logMessage;
-
-  final FlutterReactiveBle _ble;
-  final void Function(String message) _logMessage;
-  final StreamController<BleScannerState> _stateStreamController =
-      StreamController<BleScannerState>.broadcast();
-
-  final List<DiscoveredDevice> _devices = [];
-  StreamSubscription<DiscoveredDevice>? _subscription;
-
-  @override
-  Stream<BleScannerState> get state => _stateStreamController.stream;
-
-  void startScan(List<Uuid> serviceIds) {
-    _logMessage('Start BLE discovery');
-    _devices.clear();
-    _subscription?.cancel();
-    _subscription = _ble.scanForDevices(withServices: serviceIds).listen(
-      (device) {
-        final knownDeviceIndex = _devices.indexWhere((d) => d.id == device.id);
-        if (knownDeviceIndex >= 0) {
-          _devices[knownDeviceIndex] = device;
-        } else {
-          _devices.add(device);
-        }
-        _pushState();
-      },
-      onError: (Object e) => _logMessage('Device scan failed with error: $e'),
-    );
-    _pushState();
-  }
-
-  void _pushState() {
-    _stateStreamController.add(
-      BleScannerState(
-        discoveredDevices: _devices,
-        scanIsInProgress: _subscription != null,
-      ),
-    );
-  }
-
-  Future<void> stopScan() async {
-    _logMessage('Stop BLE discovery');
-
-    await _subscription?.cancel();
-    _subscription = null;
-    _pushState();
-  }
-
-  Future<void> dispose() async {
-    await _stateStreamController.close();
-  }
-}
-
-@immutable
-class BleScannerState {
-  const BleScannerState({
-    required this.discoveredDevices,
-    required this.scanIsInProgress,
-  });
-
-  final List<DiscoveredDevice> discoveredDevices;
-  final bool scanIsInProgress;
-}
-
-class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
-  BleDeviceConnector({
-    required FlutterReactiveBle ble,
-    required void Function(String message) logMessage,
-  })  : _ble = ble,
-        _logMessage = logMessage;
-
-  bool? connectionStateDevice;
-  final FlutterReactiveBle _ble;
-  final void Function(String message) _logMessage;
-
-  @override
-  Stream<ConnectionStateUpdate> get state => _deviceConnectionController.stream;
-
-  final _deviceConnectionController = StreamController<ConnectionStateUpdate>();
-
-  late StreamSubscription<ConnectionStateUpdate> _connection;
-  bool connected = false;
-
-  Future<void> connect(
-      String deviceId, StreamSubscription<List<int>>? subscription) async {
-    final completer = Completer<void>();
-
-    _logMessage('Start connecting to $deviceId');
-
-    _connection = _ble.connectToDevice(id: deviceId).listen(
-      (update) async {
-        _logMessage(
-            'ConnectionState for device $deviceId : ${update.connectionState}');
-        _deviceConnectionController.add(update);
-
-        if (update.connectionState == DeviceConnectionState.connected) {
-          try {
-            // Negociar el MTU después de establecer la conexión
-            final mtu = await _ble.requestMtu(deviceId: deviceId, mtu: 247);
-            _logMessage('MTU negociado: $mtu');
-          } catch (e) {
-            _logMessage('Error al negociar el MTU: $e');
-          }
-
-          BleConnectionService().updateConnectionStatus(true);
-          BleConnectionService().updateLostConnection(false);
-          connected = true;
-          completer.complete(); // Completa la conexión cuando está conectado.
-        }
-
-        if (update.connectionState == DeviceConnectionState.disconnected &&
-            connected) {
-          connected = false;
-          BleConnectionService().updateConnectionStatus(false);
-          BleConnectionService().updateSuscriptionStatus(false);
-          BleConnectionService().updateLostConnection(true);
-          await _cancelSubscription(subscription);
-        }
-      },
-      onError: (Object e) {
-        _logMessage('Connecting to device $deviceId resulted in error $e');
-        if (!completer.isCompleted) {
-          completer.completeError(e); // Completa con error si ocurre.
-        }
-      },
-    );
-
-    // Espera a que se complete la conexión o ocurra un error.
-    await completer.future;
-  }
-
-  Future<void> _cancelSubscription(
-      StreamSubscription<List<int>>? subscription) async {
-    if (subscription != null) {
-      await subscription.cancel();
-      subscription = null;
-      _logMessage('Suscripción cancelada');
-    }
-  }
-
-  Future<void> disconnect(String deviceId) async {
-    try {
-      _logMessage('Disconnecting from device: $deviceId');
-      await _connection.cancel();
-    } on Exception catch (e, _) {
-      _logMessage("Error disconnecting from device: $e");
-    } finally {
-      _deviceConnectionController.add(
-        ConnectionStateUpdate(
-          deviceId: deviceId,
-          connectionState: DeviceConnectionState.disconnected,
-          failure: null,
-        ),
-      );
-      connected = false;
-      if (connected) showCustomToast('Dispositivo desconectado');
-      BleConnectionService().updateSuscriptionStatus(false);
-      BleConnectionService().updateConnectionStatus(false);
-    }
-  }
-
-  Future<void> dispose() async {
-    await _deviceConnectionController.close();
   }
 }

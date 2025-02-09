@@ -40,6 +40,16 @@ class _ChartCardState extends State<ChartCard> {
     super.initState();
   }
 
+  final ZoomPanBehavior _zoomPanBehavior = ZoomPanBehavior(
+    enablePinching: true, // Habilita el zoom con gestos de pellizco
+    enablePanning: true, // Permite desplazamiento horizontal/vertical
+    enableSelectionZooming: true,
+    enableMouseWheelZooming: true,
+    selectionRectColor:
+        Colors.blue.withOpacity(0.2), // Habilita zoom en ambos ejes
+    zoomMode: ZoomMode.xy,
+  );
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -79,6 +89,7 @@ class _ChartCardState extends State<ChartCard> {
                   ),
                 )
               : SfCartesianChart(
+                  zoomPanBehavior: _zoomPanBehavior,
                   trackballBehavior: _trackballBehavior,
                   tooltipBehavior: TooltipBehavior(enable: true),
                   title: ChartTitle(
@@ -88,9 +99,11 @@ class _ChartCardState extends State<ChartCard> {
                   primaryXAxis: NumericAxis(
                     minimum: 0,
                     maximum: widget.time,
+                    interval:
+                        widget.time / 10, // Ajusta el intervalo dinámicamente
                     axisLabelFormatter: (details) {
                       return ChartAxisLabel(
-                        '${(details.value / 1000).toStringAsFixed(0)}s',
+                        '${(details.value / 1000).toStringAsFixed(1)}s', // Muestra con 1 decimal
                         axisLabelTextStyle,
                       );
                     },
@@ -112,8 +125,10 @@ class _ChartCardState extends State<ChartCard> {
                     ),
                   ),
                   primaryYAxis: NumericAxis(
-                    minimum: widget.minY,
                     maximum: widget.maxY,
+                    minimum: widget.minY,
+                    // minimum: widget.minY,
+                    // maximum: widget.maxY,
                     labelStyle: const TextStyle(
                       fontSize: 0,
                       color: Colors.transparent,

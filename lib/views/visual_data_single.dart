@@ -2,44 +2,42 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:smartclothingproject/functions/hash_password.dart';
-import 'package:smartclothingproject/functions/persistance_data.dart';
 import 'package:smartclothingproject/functions/show_toast.dart';
 import 'package:smartclothingproject/handlers/mongo_database.dart';
-import 'package:smartclothingproject/views/auth_user.dart';
-import 'package:smartclothingproject/views/user_resume_view_siso.dart';
+import 'package:smartclothingproject/views/register_resume_view_siso.dart';
 
-class SisoPage extends StatefulWidget {
-  const SisoPage({super.key});
+class VisualData extends StatefulWidget {
+  const VisualData({super.key});
 
   @override
-  _SisoPageState createState() => _SisoPageState();
+  _VisualDataState createState() => _VisualDataState();
 }
 
-class _SisoPageState extends State<SisoPage> {
-  List<Map<String, dynamic>> users = [];
+class _VisualDataState extends State<VisualData> {
   List<Map<String, dynamic>> userListUpdatedReload = [];
-  bool userListUpdate = false;
-  bool userAdded = false;
+  bool registerListUpdate = false;
 
   @override
   void initState() {
     super.initState();
-    loadUsers();
+    loadRegisters();
   }
 
-  Future<void> loadUsers() async {
+  List<Map<String, dynamic>> registers = [];
+  Future<void> loadRegisters() async {
     try {
       final mongoService = Provider.of<MongoService>(context, listen: false);
       await mongoService.connect();
-      final fetchedUsers = await mongoService.getDocuments("users");
+      final fetchedUsers = await mongoService.getDocuments("data");
+
       setState(() {
-        users = fetchedUsers;
+        registers = fetchedUsers;
       });
     } catch (e) {
       print("Error al cargar usuarios: $e");
-      // Muestra un mensaje de error en la UI si es necesario
     }
   }
 
@@ -50,9 +48,6 @@ class _SisoPageState extends State<SisoPage> {
         systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
       ));
     });
-
-    // final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +64,7 @@ class _SisoPageState extends State<SisoPage> {
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
-          'Empleados',
+          'Registros',
           style: GoogleFonts.lexend(
             color: Theme.of(context).primaryColor,
             fontSize: 35,
@@ -85,58 +80,21 @@ class _SisoPageState extends State<SisoPage> {
             // : Theme.of(context).colorScheme.tertiary,
             onPressed: () async {
               setState(() {
-                userListUpdate =
+                registerListUpdate =
                     true; // Notifica a la UI que debe mostrar el indicador
               });
 
               final mongoService =
                   Provider.of<MongoService>(context, listen: false);
               await mongoService.connect();
-              final userListUpdated = await mongoService.getDocuments("users");
+              final userListUpdated = await mongoService.getDocuments("data");
               userListUpdatedReload = userListUpdated;
 
               setState(() {
-                users = userListUpdatedReload;
-                userListUpdate = false; // Detén el indicador cuando termine
+                registers = userListUpdatedReload;
+                registerListUpdate = false; // Detén el indicador cuando termine
                 showToast(message: 'Lista Actualizada');
               });
-            },
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.logout,
-              // _selectedIndex != 1 ? Icons.logout : Icons.settings,
-              size: 28,
-            ),
-            color: Theme.of(context).primaryColor,
-            // : Theme.of(context).colorScheme.tertiary,
-            onPressed: () async {
-              // await DatabaseHandler.instance.deleteUser();
-              saveLastPage('AuthSwitch');
-              Navigator.pushAndRemoveUntil(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const AuthSwitcher(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    const begin =
-                        Offset(-1.0, 0.0); // Comienza desde la izquierda
-                    const end = Offset.zero; // Termina en el centro
-                    const curve = Curves.easeInOut;
-
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
-                ),
-                (Route<dynamic> route) =>
-                    false, // Elimina todas las vistas anteriores
-              );
             },
           ),
         ],
@@ -145,148 +103,94 @@ class _SisoPageState extends State<SisoPage> {
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
-        child: userListUpdate
+        child: registerListUpdate
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : users.isEmpty
+            : registers.isEmpty
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : ListView.builder(
-                    itemCount: users.length,
+                    itemCount: registers.length,
                     itemBuilder: (context, index) {
-                      final user = users[index];
+                      final item = registers[index];
 
-                      // Verifica si el usuario tiene información básica completa
-                      final hasCompleteProfile = user.containsKey('Name') &&
-                          user.containsKey('Surname') &&
-                          user.containsKey('Email');
+                      // Convertir timestamp en fecha legible
+                      String formattedDate = "Fecha no disponible";
+                      if (item["timestamp"] != null) {
+                        try {
+                          int timestamp = item["timestamp"] is int
+                              ? item["timestamp"]
+                              : int.tryParse(item["timestamp"].toString()) ?? 0;
+                          formattedDate =
+                              DateFormat('EEE, MMM d, yyyy - hh:mm a').format(
+                            DateTime.fromMillisecondsSinceEpoch(timestamp),
+                          );
+                        } catch (e) {
+                          print("Error al convertir timestamp: $e");
+                        }
+                      }
 
-                      return Container(
-                        height: screenHeight * 0.13,
+                      return Card(
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          elevation: 0,
-                          child: Center(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .cardColor, // Fondo según el tema
-                                borderRadius: BorderRadius.circular(
-                                    0), // Bordes redondeados
-                              ),
-                              child: ListTile(
-                                hoverColor: Colors.transparent,
-                                splashColor: Colors.transparent,
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                  child: hasCompleteProfile
-                                      ? Text(
-                                          user['Name']
-                                              [0], // Primera letra del nombre
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        )
-                                      : const Icon(Icons.person,
-                                          color: Colors.white),
-                                ),
-                                title: Text(
-                                  hasCompleteProfile
-                                      ? '${user['Name']} ${user['Surname']}'
-                                      : 'Usuario incompleto',
-                                  style: GoogleFonts.lexend(fontSize: 18),
-                                ),
-                                subtitle: hasCompleteProfile
-                                    ? Text(
-                                        'Correo: ${user['Email']}',
-                                        style: GoogleFonts.lexend(fontSize: 14),
-                                        softWrap:
-                                            false, // Evita el salto de línea
-                                        overflow: TextOverflow
-                                            .ellipsis, // Muestra los puntos suspensivos
-                                        maxLines: 1,
-                                      )
-                                    : Text(
-                                        'Perfil incompleto. El usuario no ha terminado su registro.',
-                                        style: GoogleFonts.lexend(
-                                          fontSize: 14,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .error,
-                                        ),
-                                      ),
-                                trailing: hasCompleteProfile
-                                    ? Icon(
-                                        Icons.arrow_forward_ios,
-                                        color:
-                                            Theme.of(context).primaryColorLight,
-                                      )
-                                    : Icon(
-                                        Icons.warning,
-                                        color:
-                                            Theme.of(context).colorScheme.error,
-                                      ),
-                                onTap: hasCompleteProfile
-                                    ? () {
-                                        Navigator.push(
-                                          context,
-                                          PageRouteBuilder(
-                                            pageBuilder: (context, animation,
-                                                    secondaryAnimation) =>
-                                                UserResumeView(
-                                              user: user,
-                                            ),
-                                            transitionsBuilder: (context,
-                                                animation,
-                                                secondaryAnimation,
-                                                child) {
-                                              const beginOffset = Offset(1.0,
-                                                  0.0); // Desde arriba hacia abajo
-                                              const endOffset = Offset
-                                                  .zero; // Termina en el centro
-                                              const curve = Curves.easeOut;
-
-                                              var offsetTween = Tween(
-                                                      begin: beginOffset,
-                                                      end: endOffset)
-                                                  .chain(
-                                                      CurveTween(curve: curve));
-                                              var opacityTween = Tween<double>(
-                                                      begin: 0.8, end: 1.0)
-                                                  .chain(
-                                                      CurveTween(curve: curve));
-
-                                              return SlideTransition(
-                                                position: animation
-                                                    .drive(offsetTween),
-                                                child: FadeTransition(
-                                                  opacity: animation
-                                                      .drive(opacityTween),
-                                                  child: child,
-                                                ),
-                                              );
-                                            },
-                                            transitionDuration: const Duration(
-                                                milliseconds: 250),
-                                            reverseTransitionDuration:
-                                                const Duration(
-                                                    milliseconds: 250),
-                                          ),
-                                        );
-                                      }
-                                    : null, // No hacer nada si el perfil está incompleto
-                              ),
-                            ),
+                        child: ListTile(
+                          title: Text(
+                            "Usuario: ${item["user_id"] ?? "Desconocido"}",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("BPM: ${item["bpm"] ?? "N/A"}"),
+                              Text(
+                                  "Temperatura Corporal: ${item["tempCorp"] ?? "N/A"}°C"),
+                              Text(
+                                  "Temperatura Ambiente: ${item["tempAmb"] ?? "N/A"}°C"),
+                              Text("Humedad: ${item["hum"] ?? "N/A"}%"),
+                              Text("Fecha: $formattedDate"),
+                            ],
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        RegisterResumeView(
+                                  register: item,
+                                ),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  const beginOffset = Offset(
+                                      1.0, 0.0); // Desde arriba hacia abajo
+                                  const endOffset =
+                                      Offset.zero; // Termina en el centro
+                                  const curve = Curves.easeOut;
+
+                                  var offsetTween =
+                                      Tween(begin: beginOffset, end: endOffset)
+                                          .chain(CurveTween(curve: curve));
+                                  var opacityTween =
+                                      Tween<double>(begin: 0.8, end: 1.0)
+                                          .chain(CurveTween(curve: curve));
+
+                                  return SlideTransition(
+                                    position: animation.drive(offsetTween),
+                                    child: FadeTransition(
+                                      opacity: animation.drive(opacityTween),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 250),
+                                reverseTransitionDuration:
+                                    const Duration(milliseconds: 250),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },

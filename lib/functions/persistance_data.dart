@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Claves constantes para las preferencias compartidas.
 const String _lastPageKey = 'last_page';
 const String _alertsKey = 'alerts';
+const String _deviceId = '';
 
 /// Guarda el nombre de la última página visitada.
 Future<void> saveLastPage(String pageName) async {
@@ -22,6 +24,16 @@ Future<void> saveAlerts(String alerts) async {
 /// Obtiene las alertas guardadas.
 Future<String?> getAlerts() async {
   return _getString(_alertsKey);
+}
+
+/// Guarda el deviceId.
+Future<void> saveDeviceId(String deviceId) async {
+  await _saveString(_deviceId, deviceId);
+}
+
+/// Obtiene el deviceId guardado.
+Future<String?> getDeivceId() async {
+  return _getString(_deviceId);
 }
 
 /// Guarda una cadena de texto en las preferencias compartidas.
